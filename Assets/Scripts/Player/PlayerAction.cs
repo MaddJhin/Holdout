@@ -39,7 +39,7 @@ public class PlayerAction : MonoBehaviour {
 	AudioSource gunAudio;                           // Reference to the audio source.
 	Light gunLight;                                 // Reference to the light component.
 
-    Renderer rendCache;                             // Used to set default alpha
+    Renderer[] rendCache;                             // Used to set default alpha
     Color colorCache;
 	
 	void Awake ()
@@ -52,16 +52,22 @@ public class PlayerAction : MonoBehaviour {
 		gunLine = GetComponentInChildren <LineRenderer> ();
 		gunAudio = GetComponent<AudioSource> ();
 		gunLight = GetComponentInChildren<Light> ();
-        rendCache = GetComponentInChildren<Renderer>();
+        rendCache = GetComponentsInChildren<Renderer>();
 	}
 
     void Start()
     {
         // Set default alpha for outline
         Debug.Log(rendCache);
-        //colorCache = rendCache.material.GetColor("_OutlineColor");
-        //colorCache.a = (10F / 255F);
-        //rendCache.material.SetColor("_OutlineColor", colorCache);
+        foreach (var renderer in rendCache)
+        {
+            if (renderer.material.HasProperty("_OutlineColor"))
+            {
+                colorCache = renderer.material.GetColor("_OutlineColor");
+                colorCache.a = (10F / 255F);
+                renderer.material.SetColor("_OutlineColor", colorCache);
+            }
+        }
     }
 	
 	public void DisableEffects ()

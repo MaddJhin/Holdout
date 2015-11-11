@@ -21,7 +21,8 @@ public class InputManager : MonoBehaviour {
 	private Button rearWaypointButton;
     private float startTime;
 
-    private Renderer rendCache;                 // Used to cache the selected unit's renderer
+    private Renderer[] rendCache;                 // Used to cache the selected unit's renderer
+    private Renderer targetRend;
     private Color colorCache;                   // Used to cache the outline color of selected unit
     private Color newColorCache;                // Used to cache the new outline color
 
@@ -133,23 +134,39 @@ public class InputManager : MonoBehaviour {
         Debug.Log("Target set to: " + player);
 
         // Reset previous target's outline color before setting new target
-        if (rendCache != null)
-            rendCache.material.SetColor("_OutlineColor", colorCache);
+        if (targetRend != null && player != setTargetOn)
+            targetRend.material.SetColor("_OutlineColor", colorCache);
 
         // Set new target and cache their renderer for future color changes
 		setTargetOn = player;
-        rendCache = player.gameObject.GetComponentInChildren<Renderer>();
-
-        Debug.Log("Cached renderer " + rendCache);
+        rendCache = player.gameObject.GetComponentsInChildren<Renderer>();
 
         // Create new color from cache, change alpha, and apply
         if (rendCache != null)
         {
-            colorCache = rendCache.material.GetColor("_OutlineColor");
-            newColorCache = colorCache;
-            newColorCache.a = (255F);
-            rendCache.material.SetColor("_OutlineColor", newColorCache);
+            foreach (var renderer in rendCache)
+            {
+                if (renderer.material.HasProperty("_OutlineColor"))
+                {
+                    targetRend = renderer;
+
+                    if (colorCache != renderer.material.GetColor("_OutlineColor"))
+                    {
+                        colorCache = renderer.material.GetColor("_OutlineColor");
+                        newColorCache = colorCache;
+                        newColorCache.a = (255F);
+                    }
+                    
+                    renderer.material.SetColor("_OutlineColor", newColorCache);
+                }
+
+                else
+                    Debug.Log("Cannot change alpha - Incorrect renderer");
+            }
         }
+
+        else
+            Debug.Log("Could not change alpha - No Renderer found");
 	}
 
 	public void Move (BarricadeWaypoint target){
