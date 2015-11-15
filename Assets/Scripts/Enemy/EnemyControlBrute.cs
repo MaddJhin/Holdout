@@ -91,6 +91,11 @@ public class EnemyControlBrute : MonoBehaviour
         gm.AddObjective();
     }
 
+    void OnDisable()
+    {
+        gm.RemoveObjective();
+    }
+
     void Update()
     {
         // Update target location

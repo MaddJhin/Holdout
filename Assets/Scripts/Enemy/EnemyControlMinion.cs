@@ -94,6 +94,11 @@ public class EnemyControlMinion : MonoBehaviour
         gm.AddObjective();
     }
 
+    void OnDisable()
+    {
+        gm.RemoveObjective();
+    }
+
 	void Update()
     {
         UpdateMovementAnimator(agent.desiredVelocity);

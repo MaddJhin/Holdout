@@ -84,6 +84,11 @@ public class EnemyControlBob : MonoBehaviour
         gm.AddObjective();
     }
 
+    void OnDisable()
+    {
+        gm.RemoveObjective();
+    }
+
     void Update()
     {
 		if (vision.actionTarget != null)
