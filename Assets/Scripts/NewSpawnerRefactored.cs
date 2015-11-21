@@ -23,6 +23,7 @@ public class SpawnerWave
         public GameObject objectToSpawn;
         public int objectCount;
         public float spawnDelay;
+        public string defaultTarget;
     }
 
     [Tooltip("Dictates whether the wave will repeat, and how many times")]
@@ -205,6 +206,10 @@ public class NewSpawnerRefactored : MonoBehaviour
 
                 else
                 {
+                    UnitSight tempSight;
+                    if (tempSight = obj.GetComponent<UnitSight>())
+                        tempSight.defaultTarget = spawnSet.defaultTarget;
+
                     obj.transform.position = transform.position;
                     obj.transform.rotation = transform.rotation;
                     obj.SetActive(true);
