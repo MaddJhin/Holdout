@@ -53,7 +53,7 @@ public class UnitStats : MonoBehaviour
         if (currentHealth <= 0)
         {
             Debug.Log("Killing Unit");
-            //KillUnit();
+            KillUnit();
         }
 
         if (currentHealth > maxHealth)
