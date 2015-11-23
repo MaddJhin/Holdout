@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 4b8575b03aa484f26bfd94c0c8851bdd
-timeCreated: 1448218621
+guid: d4cfe61a5cfd04203b7307b63e6d4499
+timeCreated: 1448298003
 licenseType: Free
 ModelImporter:
   serializedVersion: 18
@@ -37,20 +37,20 @@ ModelImporter:
     100058: foot.R
     100060: forearm.L
     100062: forearm.R
-    100064: //RootNode
-    100066: hand.L
-    100068: hand.R
-    100070: head
-    100072: head_end
-    100074: heel.02.L
-    100076: heel.02.L_end
-    100078: heel.02.R
-    100080: heel.02.R_end
-    100082: heel.L
-    100084: heel.R
-    100086: hips
-    100088: Lamp
-    100090: Lamp.001
+    100064: hand.L
+    100066: hand.R
+    100068: head
+    100070: head_end
+    100072: heel.02.L
+    100074: heel.02.L_end
+    100076: heel.02.R
+    100078: heel.02.R_end
+    100080: heel.L
+    100082: heel.R
+    100084: hips
+    100086: Lamp
+    100088: Lamp.001
+    100090: //RootNode
     100092: metarig
     100094: neck
     100096: palm.01.L
@@ -112,20 +112,20 @@ ModelImporter:
     400058: foot.R
     400060: forearm.L
     400062: forearm.R
-    400064: //RootNode
-    400066: hand.L
-    400068: hand.R
-    400070: head
-    400072: head_end
-    400074: heel.02.L
-    400076: heel.02.L_end
-    400078: heel.02.R
-    400080: heel.02.R_end
-    400082: heel.L
-    400084: heel.R
-    400086: hips
-    400088: Lamp
-    400090: Lamp.001
+    400064: hand.L
+    400066: hand.R
+    400068: head
+    400070: head_end
+    400072: heel.02.L
+    400074: heel.02.L_end
+    400076: heel.02.R
+    400078: heel.02.R_end
+    400080: heel.L
+    400082: heel.R
+    400084: hips
+    400086: Lamp
+    400088: Lamp.001
+    400090: //RootNode
     400092: metarig
     400094: neck
     400096: palm.01.L
