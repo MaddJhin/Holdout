@@ -4,13 +4,19 @@ using System.Collections.Generic;
 
 public class Barricade : MonoBehaviour 
 {
+    public float maxHealth = 100;
+
     public List<BarricadeWaypoint> frontWaypoints;
     public List<BarricadeWaypoint> backWaypoints;
+
+    UnitStats stats;
 
 	// Use this for initialization
 	void Start () 
     {
+        stats = GetComponent<UnitStats>();
         BarricadeWaypoint[] temp = GetComponentsInChildren<BarricadeWaypoint>();
+        stats.maxHealth = maxHealth;
 
         foreach(var curr in temp)
         {
@@ -21,6 +27,11 @@ public class Barricade : MonoBehaviour
                 backWaypoints.Add(curr);
         }
 	}
+
+    void Awake()
+    {
+
+    }
 
     public void AssignFrontWaypoint(GameObject unit)
     {
