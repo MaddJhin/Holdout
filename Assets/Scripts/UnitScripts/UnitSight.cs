@@ -23,6 +23,9 @@ using System.Collections.Generic;
 
 public class UnitSight : MonoBehaviour
 {
+    [Tooltip("Determines what layer the unit checks when looking for targets")]
+    public string sightMask;
+
     [HideInInspector]
     public bool targetInRange;
 
@@ -51,7 +54,7 @@ public class UnitSight : MonoBehaviour
 
     void Awake()
     {
-        playerMask = LayerMask.GetMask("Player");
+        playerMask = LayerMask.GetMask(sightMask);
     }
 
 	void Start(){
