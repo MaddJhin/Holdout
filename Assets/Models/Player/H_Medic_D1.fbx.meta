@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 62350be1c24b09842afe018cfe825aff
-timeCreated: 1442497026
+guid: b3a3e371f5acb41e7b22e00d5ad715a3
+timeCreated: 1448558123
 licenseType: Free
 ModelImporter:
   serializedVersion: 18
@@ -117,8 +117,12 @@ ModelImporter:
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
-    optimizeGameObjects: 0
+    optimizeGameObjects: 1
     motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
     animationCompression: 3
     animationRotationError: .5
     animationPositionError: .5
@@ -193,6 +197,14 @@ ModelImporter:
         value: {x: 0, y: 0, z: 0}
         length: 0
         modified: 0
+    - boneName: Bone.005
+      humanName: Head
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
     - boneName: Bone.007
       humanName: LeftShoulder
       limit:
@@ -201,32 +213,16 @@ ModelImporter:
         value: {x: 0, y: 0, z: 0}
         length: 0
         modified: 0
-    - boneName: Bone.016
-      humanName: LeftUpperArm
-      limit:
-        min: {x: 0, y: 0, z: 0}
-        max: {x: 0, y: 0, z: 0}
-        value: {x: 0, y: 0, z: 0}
-        length: 0
-        modified: 0
-    - boneName: Bone.017
-      humanName: LeftLowerArm
-      limit:
-        min: {x: 0, y: 0, z: 0}
-        max: {x: 0, y: 0, z: 0}
-        value: {x: 0, y: 0, z: 0}
-        length: 0
-        modified: 0
-    - boneName: Bone.018
-      humanName: LeftHand
-      limit:
-        min: {x: 0, y: 0, z: 0}
-        max: {x: 0, y: 0, z: 0}
-        value: {x: 0, y: 0, z: 0}
-        length: 0
-        modified: 0
     - boneName: Bone.006
       humanName: RightShoulder
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Bone.016
+      humanName: LeftUpperArm
       limit:
         min: {x: 0, y: 0, z: 0}
         max: {x: 0, y: 0, z: 0}
@@ -257,6 +253,22 @@ ModelImporter:
         value: {x: 0, y: 0, z: 0}
         length: 0
         modified: 0
+    - boneName: Bone.017
+      humanName: LeftLowerArm
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
+    - boneName: Bone.018
+      humanName: LeftHand
+      limit:
+        min: {x: 0, y: 0, z: 0}
+        max: {x: 0, y: 0, z: 0}
+        value: {x: 0, y: 0, z: 0}
+        length: 0
+        modified: 0
     - boneName: Bone.026
       humanName: LeftUpperLeg
       limit:
@@ -275,14 +287,6 @@ ModelImporter:
         modified: 0
     - boneName: Bone.030
       humanName: LeftFoot
-      limit:
-        min: {x: 0, y: 0, z: 0}
-        max: {x: 0, y: 0, z: 0}
-        value: {x: 0, y: 0, z: 0}
-        length: 0
-        modified: 0
-    - boneName: Bone.005
-      humanName: Head
       limit:
         min: {x: 0, y: 0, z: 0}
         max: {x: 0, y: 0, z: 0}
@@ -347,7 +351,7 @@ ModelImporter:
       transformModified: 1
     - name: Bone.010
       position: {x: 2.54168769e-10, y: .00333173666, z: -1.41456499e-11}
-      rotation: {x: .607532144, y: .136873037, z: .0917258561, w: .777017951}
+      rotation: {x: .607532084, y: .136873022, z: .0917258486, w: .777017891}
       scale: {x: 1, y: 1, z: .999999881}
       transformModified: 1
     - name: Bone.011
@@ -407,7 +411,7 @@ ModelImporter:
       transformModified: 1
     - name: Bone.018
       position: {x: -1.07032683e-09, y: .0032849249, z: -5.50393498e-12}
-      rotation: {x: .389845222, y: .439256012, z: .260342866, w: .766352713}
+      rotation: {x: .389845252, y: .439256132, z: .260342836, w: .766352654}
       scale: {x: .999999881, y: .99999994, z: .999999881}
       transformModified: 1
     - name: Bone.019
@@ -553,8 +557,10 @@ ModelImporter:
     legStretch: .0500000007
     feetSpacing: 0
     rootMotionBoneName: 
+    hasTranslationDoF: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 3
+  humanoidOversampling: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
