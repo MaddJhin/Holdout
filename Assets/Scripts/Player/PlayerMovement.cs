@@ -89,6 +89,11 @@ public class PlayerMovement : MonoBehaviour {
 			SetDestination(targetBarricade);
 		}
 
+        if (actionTarget == null)
+        {
+            SetDestination(targetBarricade);
+        }
+
 		// If the player issues a move command, the playerUnit shoudl continue until destination
 		if (playerMove)
 		{
