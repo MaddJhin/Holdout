@@ -83,7 +83,7 @@ public class PlayerMovement : MonoBehaviour {
 			Debug.Log(actionTarget);
 		}
 
-		if ( Vector3.Distance (targetBarricade.position, transform.position) > maxBarricadeDistance)
+		if ( Vector3.Distance (targetBarricade.position, transform.position) >= maxBarricadeDistance)
 		{
 			Debug.Log("Tether reached. Returning to barricade");
 			SetDestination(targetBarricade);
