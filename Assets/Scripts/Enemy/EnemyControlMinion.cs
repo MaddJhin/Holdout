@@ -31,7 +31,7 @@ using System.Collections.Generic;
 public class EnemyControlMinion : MonoBehaviour 
 {
     [Header ("Unit Attributes")]
-	public float maxHealth = 100.0f;
+	public float maxHealth;
     public float sightDistance = 10f;
 
     [Tooltip("The target object the unit moves to by default")]
