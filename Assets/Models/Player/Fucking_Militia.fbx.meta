@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 99bd6ce69153f43859fa12d8c64d34c2
-timeCreated: 1449971253
+timeCreated: 1450026911
 licenseType: Free
 ModelImporter:
   serializedVersion: 18
@@ -632,7 +632,7 @@ ModelImporter:
       transformModified: 1
     - name: upper_arm.L
       position: {x: -6.8905676e-05, y: .00238876068, z: -3.53823198e-05}
-      rotation: {x: .186719045, y: -.728969157, z: .100053251, w: .650944889}
+      rotation: {x: .18671906, y: -.728969216, z: .100053258, w: .650944948}
       scale: {x: .999999762, y: 1, z: .999999642}
       transformModified: 1
     - name: forearm.L
@@ -647,7 +647,7 @@ ModelImporter:
       transformModified: 1
     - name: palm.01.L
       position: {x: .000236641237, y: .000496258261, z: -.000215187742}
-      rotation: {x: -.0871229246, y: .0451188795, z: -.016462056, w: .995039105}
+      rotation: {x: -.0871229321, y: .0451188833, z: -.0164620578, w: .995039165}
       scale: {x: .999999702, y: .999999642, z: .999999762}
       transformModified: 1
     - name: f_index.01.L
@@ -667,7 +667,7 @@ ModelImporter:
       transformModified: 1
     - name: thumb.01.L
       position: {x: .000255396619, y: .000121832025, z: .000373610615}
-      rotation: {x: -.125841051, y: -.559833288, z: -.307890892, w: .758916378}
+      rotation: {x: -.125841036, y: -.559833229, z: -.307890862, w: .758916259}
       scale: {x: 1, y: .999999881, z: 1.00000012}
       transformModified: 1
     - name: thumb.02.L
@@ -687,7 +687,7 @@ ModelImporter:
       transformModified: 1
     - name: palm.02.L
       position: {x: 6.60250153e-05, y: .000551057747, z: -.000216073444}
-      rotation: {x: -.0952180773, y: .0273615383, z: .0271504037, w: .994709969}
+      rotation: {x: -.0952180624, y: .0273615345, z: .0271504, w: .994709849}
       scale: {x: .999999821, y: .99999994, z: .999999881}
       transformModified: 1
     - name: f_middle.01.L
@@ -797,7 +797,7 @@ ModelImporter:
       transformModified: 1
     - name: thumb.03.R
       position: {x: -2.0588049e-09, y: .000292549375, z: 1.86264504e-10}
-      rotation: {x: .0370648056, y: .0151139796, z: -.0413341038, w: .998343229}
+      rotation: {x: .0370648094, y: .0151139805, z: -.0413341075, w: .998343289}
       scale: {x: .999999881, y: 1.00000012, z: .999999821}
       transformModified: 1
     - name: thumb.03.R_end
@@ -812,7 +812,7 @@ ModelImporter:
       transformModified: 1
     - name: f_middle.01.R
       position: {x: 3.22470439e-10, y: .000788705016, z: 4.19604462e-10}
-      rotation: {x: .0219339896, y: .0409047343, z: -.00861507095, w: .998885095}
+      rotation: {x: .0219339915, y: .040904738, z: -.00861507189, w: .998885155}
       scale: {x: .999999762, y: .999999702, z: .999999881}
       transformModified: 1
     - name: f_middle.02.R
@@ -837,7 +837,7 @@ ModelImporter:
       transformModified: 1
     - name: f_ring.02.R
       position: {x: 3.72529022e-11, y: .000360794249, z: -2.39815556e-10}
-      rotation: {x: .0366080217, y: .0040854197, z: -.00391596369, w: .999313653}
+      rotation: {x: .0366080254, y: .00408542017, z: -.00391596416, w: .999313712}
       scale: {x: .999999583, y: .999999523, z: 1.00000012}
       transformModified: 1
     - name: f_ring.02.R_end
@@ -877,7 +877,7 @@ ModelImporter:
       transformModified: 1
     - name: foot.L
       position: {x: 1.86701071e-10, y: .00676584151, z: -2.53203326e-11}
-      rotation: {x: -.467841297, y: -.00707278727, z: .0102729527, w: .883724451}
+      rotation: {x: -.467841327, y: -.00707278773, z: .0102729537, w: .883724511}
       scale: {x: .999999762, y: .999999583, z: .999999523}
       transformModified: 1
     - name: toe.L
@@ -937,7 +937,7 @@ ModelImporter:
       transformModified: 1
     - name: heel.02.R
       position: {x: .000518603658, y: .000988970394, z: .000922890787}
-      rotation: {x: -.621397972, y: .621395648, z: -.337438226, w: -.337442547}
+      rotation: {x: -.621398032, y: .621395707, z: -.337438256, w: -.337442577}
       scale: {x: .999999404, y: 1, z: 1.00000072}
       transformModified: 1
     - name: heel.02.R_end
