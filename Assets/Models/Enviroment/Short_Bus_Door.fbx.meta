@@ -1,28 +1,29 @@
 fileFormatVersion: 2
-guid: 2b931fd6173864f6b89f3017145d9697
-timeCreated: 1448854870
+guid: 1c4365ac97c9446c896ca4728d909615
+timeCreated: 1450390457
 licenseType: Free
 ModelImporter:
   serializedVersion: 18
   fileIDToRecycleName:
-    100000: pCube1
-    100002: pCube2
-    100004: pCube3
-    100006: //RootNode
-    400000: pCube1
-    400002: pCube2
-    400004: pCube3
-    400006: //RootNode
-    2300000: pCube1
-    2300002: pCube2
-    2300004: pCube3
-    3300000: pCube1
-    3300002: pCube2
-    3300004: pCube3
-    4300000: pCube1
-    4300002: pCube2
-    4300004: pCube3
-    9500000: //RootNode
+    100000: Camera
+    100002: Camera.001
+    100004: Camera.002
+    100006: Cube
+    100008: Lamp
+    100010: Lamp.001
+    100012: Lamp.002
+    100014: //RootNode
+    400000: Camera
+    400002: Camera.001
+    400004: Camera.002
+    400006: Cube
+    400008: Lamp
+    400010: Lamp.001
+    400012: Lamp.002
+    400014: //RootNode
+    2300000: Cube
+    3300000: Cube
+    4300000: Cube
   materials:
     importMaterials: 1
     materialName: 0
@@ -81,7 +82,7 @@ ModelImporter:
     rootMotionBoneName: 
     hasTranslationDoF: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 
