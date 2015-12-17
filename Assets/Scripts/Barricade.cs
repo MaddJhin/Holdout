@@ -20,6 +20,8 @@ public class Barricade : MonoBehaviour
 
         foreach(var curr in temp)
         {
+            //curr.waypointOwner = this;
+
             if (curr.tag == "Front Waypoint")
                 frontWaypoints.Add(curr);
 
