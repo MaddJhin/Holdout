@@ -142,7 +142,8 @@ public class PlayerMovement : MonoBehaviour {
 		playerMove = true;
 	}
 
-	void SetTarget (){
+	void SetTarget ()
+    {
 		float curDistance = sightDistance;
 		// Grab all available targets around character
 		Collider[] possibleTargets = Physics.OverlapSphere (transform.position, sightDistance, enemyMask);

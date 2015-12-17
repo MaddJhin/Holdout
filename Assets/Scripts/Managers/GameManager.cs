@@ -125,26 +125,25 @@ public class GameManager : MonoBehaviour
         Application.LoadLevel(sceneName);
     }
 
-public void AddObjective()
+    public void AddObjective()
     {
         objectiveCounter++;
-        Debug.Log("Objective Count: " + objectiveCounter);
     }
 
     public void RemoveObjective()
     {
+        /*
         objectiveCounter--;
-        Debug.Log("Objective Count: " + objectiveCounter);
+
 
         if (inactiveSpawns == spawnList.Count && objectiveCounter <= 0)
         {
             Debug.Log("Level Complete");
-        }
+        }*/
     }
 
     public void IsSpawnInactive()
     {
-        Debug.Log("Checking for inactive Spawners");
 
         // Check each spawner in the scene to see if it's active and still spawned
         foreach (var spawn in spawnList)
@@ -212,16 +211,16 @@ public void AddObjective()
     public void AssignLoadoutUI()
     {
         Button[] b = UI_playerPanel.GetComponentsInChildren<Button>();                                       // Gets each button in the canvas
-        Debug.Log("Game Manager button refs: ");
+        //Debug.Log("Game Manager button refs: ");
         int i;
 
         for (i = 0; i < playerLoadout.Length; i++)
         {
             Debug.Log(b[i]);
 
-            Debug.Log("Adding Listener for: " + playerLoadout[i] + " at position " + i);
+            //Debug.Log("Adding Listener for: " + playerLoadout[i] + " at position " + i);
 
-			PlayerMovement param = playerLoadout[i].GetComponent<PlayerMovement>();     // Cache the character controller to be added
+			PlayerUnitControl param = playerLoadout[i].GetComponent<PlayerUnitControl>();     // Cache the character controller to be added
             GameObject playerChar = playerLoadout[i];
 
             b[i].onClick.RemoveAllListeners();                                                          // Remove all previous listeners

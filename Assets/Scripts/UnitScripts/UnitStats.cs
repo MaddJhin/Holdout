@@ -31,21 +31,17 @@ public class UnitStats : MonoBehaviour
     [HideInInspector]
     public bool stunImmunity;
 
+    [HideInInspector]
+    public float healthPercentage;
+
     public enum statusEffects { stun };
 
     private GameManager gm;
-    private PlayerControlMedic[] availableMedics;
 
     void Awake()
     {
         currentHealth = maxHealth;
         gm = GameObject.FindObjectOfType<GameManager>();
-        
-    }
-
-    void Start()
-    {
-        availableMedics = FindObjectsOfType<PlayerControlMedic>();
     }
 
 	void Update () 
@@ -58,25 +54,6 @@ public class UnitStats : MonoBehaviour
 
         if (currentHealth > maxHealth)
             currentHealth = maxHealth;
-        
-        if (currentHealth < maxHealth)
-        {
-            Debug.Log("Healing Required");
-
-            foreach (var medic in availableMedics)
-            {
-                Debug.Log("Checking for Medics");
-                Debug.Log(availableMedics);
-                if (Vector3.Distance(transform.position, medic.transform.position) < medic.healRange && medic.m_Healing == false)
-                {
-                    medic.healTarget = this;
-                    medic.m_Healing = true;
-                    medic.StartCoroutine("Heal");
-                    Debug.Log("Polling Medic");
-                    break;
-                }
-            }
-        }
 	}
 
     public void TakeDamage(float damageTaken)

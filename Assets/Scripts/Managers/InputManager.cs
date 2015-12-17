@@ -8,7 +8,7 @@ public class InputManager : MonoBehaviour {
 
 	public Camera thirdPersonCam; 				// Holds the main camera used in third person view
 	public Camera tacticalCam;					// Hold the secondary ortographic camera for tactical view
-	public PlayerMovement setTargetOn;
+	public PlayerUnitControl setTargetOn;
     public float lerpSpeed = 1;
 
 	private MenuManager menuManager;
@@ -106,7 +106,7 @@ public class InputManager : MonoBehaviour {
 			{
 				if (hit.collider.tag == "Barricade" && setTargetOn != null)
 				{
-					Barricade barricade = hit.collider.gameObject.GetComponent<Barricade>();
+					RefactoredBarricade barricade = hit.collider.gameObject.GetComponent<RefactoredBarricade>();
 					SetWaypointButtons(barricade);
 					
 					menuManager.ShowMenu(menuManager.waypointMenu);
@@ -129,16 +129,17 @@ public class InputManager : MonoBehaviour {
 		}
 	}
 
-	public void SetTarget (PlayerMovement player)
+	public void SetTarget (PlayerUnitControl player)
     {
         Debug.Log("Target set to: " + player);
 
         // Reset previous target's outline color before setting new target
-        if (targetRend != null && player != setTargetOn)
-            targetRend.material.SetColor("_OutlineColor", colorCache);
+        //if (targetRend != null && player != setTargetOn)
+          //  targetRend.material.SetColor("_OutlineColor", colorCache);
 
         // Set new target and cache their renderer for future color changes
 		setTargetOn = player;
+        /*
         rendCache = player.gameObject.GetComponentsInChildren<Renderer>();
 
         // Create new color from cache, change alpha, and apply
@@ -167,16 +168,25 @@ public class InputManager : MonoBehaviour {
 
         else
             Debug.Log("Could not change alpha - No Renderer found");
+         * */
 	}
 
-	public void Move (BarricadeWaypoint target){
-		if (setTargetOn.targetWaypoint != null)
+	public void Move (BarricadeWaypoint target, RefactoredBarricade barricade){
+		if (setTargetOn.currentWaypoint != null)
 		{
-			setTargetOn.targetWaypoint.occupied = false;
+			setTargetOn.currentWaypoint.occupied = false;
+            setTargetOn.currentBarricade.residentList.Remove(setTargetOn);
 		}
-		setTargetOn.targetWaypoint = target;
+		setTargetOn.currentWaypoint = target;
+        setTargetOn.currentBarricade = barricade;
 		target.occupied = true;
-		setTargetOn.SetDestination(target.transform);
+        barricade.residentList.Add(setTargetOn);
+
+        if (setTargetOn.agent.enabled)
+        {
+            setTargetOn.agent.ResetPath();
+            setTargetOn.agent.SetDestination(target.transform.position);
+        }
 	}
 
 	public void ChangePerspective (){
@@ -193,14 +203,14 @@ public class InputManager : MonoBehaviour {
 		}
 	}
 
-	void SetWaypointButtons (Barricade barricade){		
+	void SetWaypointButtons (RefactoredBarricade barricade){		
 		for (int f = 0; f < barricade.frontWaypoints.Count; f++)
 		{
 			if (barricade.frontWaypoints[f].occupied == false)
 			{
 				EnableButton(frontWaypointButton);
 				
-				AddListeners(frontWaypointButton,barricade.frontWaypoints[f]);
+				AddListeners(frontWaypointButton,barricade.frontWaypoints[f], barricade);
 				break;
 			}
 			
@@ -214,7 +224,7 @@ public class InputManager : MonoBehaviour {
 			{
 				EnableButton(rearWaypointButton);
 				
-				AddListeners(rearWaypointButton, barricade.backWaypoints[b]);
+				AddListeners(rearWaypointButton, barricade.backWaypoints[b], barricade);
 				break;
 			}
 			
@@ -223,9 +233,9 @@ public class InputManager : MonoBehaviour {
 		}
 	}
 
-	void AddListeners (Button b, BarricadeWaypoint parameter){
+	void AddListeners (Button b, BarricadeWaypoint parameter, RefactoredBarricade barricade){
 		b.onClick.RemoveAllListeners();
-		b.onClick.AddListener(delegate { Move(parameter); });
+		b.onClick.AddListener(delegate { Move(parameter, barricade); });
 	}
 
 	void EnableButton(Button b){
