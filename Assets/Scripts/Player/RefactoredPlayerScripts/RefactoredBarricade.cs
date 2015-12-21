@@ -140,7 +140,6 @@ public class RefactoredBarricade : MonoBehaviour
         GameObject targetToAssign = targetQueue[0];
         targetToAssign.name = targetToAssign.name.Replace("(Clone)", "");
 
-        //targetQueue[0].name = targetQueue[0].name.Replace("(Clone)", "");
         // Loop to iterate through each level of priority
         for (int i = 0; i < 4; i++)
         {
@@ -154,9 +153,10 @@ public class RefactoredBarricade : MonoBehaviour
                 // Or if the unit is the same as the previous unit which failed: skip it
                 if (unit.unitType == UnitTypes.Medic ||
                     unit.unitType == UnitTypes.Mechanic ||
-                    (unit.actionTarget != null && unit.actionTarget.name == unit.priorityList[0]) 
-                    || unit.actionTarget == targetToAssign
-                    || unit == unitCache)
+                    (unit.actionTarget != null && unit.actionTarget.name == unit.priorityList[0]) ||
+                    unit.actionTarget == targetToAssign ||
+                    unit == unitCache ||
+                    (unit.actionTarget != null && unit.priorityList.IndexOf(targetToAssign.name) > unit.priorityList.IndexOf(unit.actionTarget.name)))
                 {
                     Debug.Log(unit + " cannot be assigned a target");
                     continue;
@@ -168,7 +168,7 @@ public class RefactoredBarricade : MonoBehaviour
                     Debug.Log("Assigning target to " + unit);
                     unit.actionTarget = targetToAssign;
                     targetQueue.Remove(targetToAssign);
-                    return;
+                    break;
                 }
 
                 // If nothing is assigned, cache the current unit and move current target to back of the queue
