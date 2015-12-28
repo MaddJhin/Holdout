@@ -116,7 +116,7 @@ public class EnemyControlMinion : MonoBehaviour
             agent.enabled = false;
             obstacle.enabled = true;
 
-            if (stats.attackSpeed < elapsedTime)
+            if (stats.attackSpeed < elapsedTime && gameObject.tag != "Player")
             {
                 elapsedTime = 0f;
                 attacking = true;
