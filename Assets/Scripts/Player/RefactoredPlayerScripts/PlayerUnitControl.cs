@@ -19,8 +19,8 @@ public class PlayerUnitControl : MonoBehaviour
     public bool stunImmunity = false;
     public UnitTypes unitType;
 
-    [Tooltip("How far the unit can go before returning to it's waypoint")]
-    public float barricadeMaxThether = 10f;
+    //[Tooltip("How far the unit can go before returning to it's waypoint")]
+    //public float barricadeMaxThether;
 
     [Tooltip("List of units to target. Most important at the start of the list")]
     public List<string> priorityList = new List<string>();	// Stores action target priorty (highest first).
@@ -63,7 +63,9 @@ public class PlayerUnitControl : MonoBehaviour
     NavMeshObstacle obstacle;						// Used to indicate other units to avoid this one
     Animator m_Animator;
     ParticleSystem[] m_ParticleSystem;
+    Rigidbody m_RigidBody;
     bool performingAction;
+    string selectedAction;
 
     #endregion
 
@@ -83,6 +85,7 @@ public class PlayerUnitControl : MonoBehaviour
         stats = GetComponent<UnitStats>();
         obstacle = GetComponent<NavMeshObstacle>();
         m_Animator = GetComponentInChildren<Animator>();
+        m_RigidBody = GetComponent<Rigidbody>();
 
         // Determine which action should be repeated
         switch(unitType)
@@ -90,18 +93,26 @@ public class PlayerUnitControl : MonoBehaviour
             case UnitTypes.Medic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
                 InvokeRepeating("CheckForHeal", 2, 0.5f);
+                selectedAction = "Heal";
                 break;
 
             case UnitTypes.Mechanic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
                 InvokeRepeating("CheckForRepair", 2, 0.5f);
+                selectedAction = "Heal";
                 break;
             
             case UnitTypes.Trooper:
                 InvokeRepeating("TetherCheck", 1, 0.5f);
+                selectedAction = "Slash";
+                break;
+
+            case UnitTypes.Marksman:
+                selectedAction = "Shoot";
                 break;
 
             default:
+                selectedAction = null;
                 break;
         }
     }
@@ -118,41 +129,19 @@ public class PlayerUnitControl : MonoBehaviour
         playerAction.healPerHit = healPerTick;
         stats.maxHealth = maxHealth;
         stats.currentHealth = maxHealth;
+        
 	}
 	
 	// Update is called once per frame
 	void Update () 
     {
+
         // If the unit has a target, select the appropriate action
-        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction)
+        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
         {
             performingAction = true;
-            Debug.Log("Target found. Choosing attack method");
-            switch (unitType)
-            {
-                case UnitTypes.Marksman:
-                    Debug.Log("Choosing Shoot");
-                    StartCoroutine(Shoot());
-                    break;
-
-                case UnitTypes.Mechanic:
-                    Debug.Log("Choosing Repair");
-                    StartCoroutine(Repair());
-                    break;
-
-                case UnitTypes.Medic:
-                    Debug.Log("Choosing Heal");
-                    StartCoroutine(Heal());
-                    break;
-
-                case UnitTypes.Trooper:
-                    Debug.Log("Choosing Slash");
-                    StartCoroutine(Slash());
-                    break;
-
-                default:
-                    break;
-            }
+            Debug.Log("Unit is acting");
+            StartCoroutine(selectedAction);
         }
 
         else if (actionTarget != null && !actionTarget.activeInHierarchy)
@@ -231,11 +220,6 @@ public class PlayerUnitControl : MonoBehaviour
         yield return new WaitForSeconds(timeBetweenHeals);
         performingAction = false;
     }
-
-    IEnumerator Repair()
-    {
-        yield return new WaitForSeconds(timeBetweenHeals);
-    }
     #endregion
 
     #region Movement Functionality
@@ -252,14 +236,10 @@ public class PlayerUnitControl : MonoBehaviour
 
     void Stop()
     {
-        targetInRange = true;
-
         if (agent.enabled)
         {
             agent.Stop();
         }
-        agent.enabled = false;
-        obstacle.enabled = true;
     }
 
     #endregion
@@ -271,7 +251,7 @@ public class PlayerUnitControl : MonoBehaviour
      */
     private void TetherCheck()
     {
-        if (Vector3.Distance(gameObject.transform.position, currentBarricade.transform.position) >= barricadeMaxThether &&
+        if (Vector3.Distance(gameObject.transform.position, currentBarricade.transform.position) >= currentBarricade.sightRadius &&
             currentBarricade != null)
             agent.SetDestination(currentWaypoint.transform.position);
 

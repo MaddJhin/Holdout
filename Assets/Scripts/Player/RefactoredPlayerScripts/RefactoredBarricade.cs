@@ -6,10 +6,14 @@ public class RefactoredBarricade : MonoBehaviour
 {
     public float maxHealth = 100;
     public float sightCheckDelay = .5f;
-    [Header("Begins checking for enemies X seconds after spawning")]
+
+    [Tooltip("Begins checking for enemies, assigning & retreating X seconds after spawning")]
     public float checkAfter = 5f;
     public float sightRadius = 20f;
-    public float assignTargetDelay = .1f;
+    public float assignTargetDelay = .5f;
+
+    [Tooltip("Barricade that units will retreat to")]
+    public GameObject retreatBarricade;
 
     public List<BarricadeWaypoint> frontWaypoints;
     public List<BarricadeWaypoint> backWaypoints;
@@ -18,8 +22,15 @@ public class RefactoredBarricade : MonoBehaviour
     UnitStats stats;
     public List<GameObject> targetQueue = new List<GameObject>();
     LayerMask enemyMask;
+    PlayerUnitControl unit;
 
+    #region Caches
+
+    RefactoredBarricade retreatBarricadeCache;
+    List<BarricadeWaypoint> retreatWaypointsCache;
     PlayerUnitControl unitCache;            // Used to skip searches on subsequent identical units
+
+    #endregion
 
     // Use this for initialization
     void Start()
@@ -43,26 +54,69 @@ public class RefactoredBarricade : MonoBehaviour
     void Awake()
     {
         InvokeRepeating("CheckForEnemies", checkAfter, sightCheckDelay);
+        InvokeRepeating("AssignTarget", checkAfter, assignTargetDelay);
+        InvokeRepeating("FindRetreatPoints", checkAfter, 0.5f);
+        InvokeRepeating("CheckForRetreat", checkAfter, 0.35f);
     }
 
-    void Update()
+    // Search for open waypoints and along retreat line and send units to them
+    void FindRetreatPoints()
     {
-        if (residentList.Count > 0 && targetQueue.Count > 0)
+        if (retreatBarricadeCache = retreatBarricade.GetComponent<RefactoredBarricade>())
         {
-            Debug.Log("Assigning Targets");
-            AssignTarget();
-        }
+            if (retreatBarricadeCache != null && retreatBarricadeCache.residentList.Count < 5)
+            {
+                retreatWaypointsCache = new List<BarricadeWaypoint>();
 
-        else
+                // Compile list of open waypoints
+                // Add open front waypoints
+                for (int i = 0; i < retreatBarricadeCache.frontWaypoints.Count; i++)
+                {
+                    // If the waypoint is not occupied, or marked for retreat, mark it
+                    if (!retreatBarricadeCache.frontWaypoints[i].occupied ||
+                        retreatWaypointsCache.Contains(retreatBarricadeCache.frontWaypoints[i]))
+                    {
+                        retreatWaypointsCache.Add(retreatBarricadeCache.frontWaypoints[i]);
+                    }
+                }
+
+                // Add open back waypoints
+                for (int i = 0; i < retreatBarricadeCache.backWaypoints.Count; i++)
+                {
+                    // If the waypoint is not occupied, or marked for retreat, mark it
+                    if (!retreatBarricadeCache.backWaypoints[i].occupied ||
+                        retreatWaypointsCache.Contains(retreatBarricadeCache.frontWaypoints[i]))
+                    {
+                        retreatWaypointsCache.Add(retreatBarricadeCache.backWaypoints[i]);
+                    }
+                }
+            }
+        }
+    }
+
+    void CheckForRetreat()
+    {
+        if (stats.currentHealth <= 0 && residentList.Count > 0)
         {
-            Debug.Log("Cannot assign target");
-            return;
+            RetreatFrom(this);
+        }
+    }
+
+    void RetreatFrom(RefactoredBarricade retreatFromBarricade)
+    {
+        // If there are places to retreat to from this Barricade, retreat
+        for (int i = 0; i < residentList.Count; i++)
+        {
+            residentList[i].currentBarricade = retreatFromBarricade.retreatBarricadeCache;
+            residentList[i].currentWaypoint = retreatFromBarricade.retreatWaypointsCache[0];
+            retreatFromBarricade.retreatWaypointsCache.Remove(residentList[i].currentWaypoint);
+            residentList[i].agent.SetDestination(residentList[i].currentWaypoint.transform.position);
         }
     }
 
     #region Assign Waypoints
 
-    public void AssignFrontWaypoint(GameObject unit)
+    public bool AssignFrontWaypoint(GameObject unit)
     {
         PlayerUnitControl barricadeCache;
 
@@ -83,34 +137,41 @@ public class RefactoredBarricade : MonoBehaviour
                     waypoint.occupied = true;
                     waypoint.resident = unit;
                     residentList.Add(unit.GetComponent<PlayerUnitControl>());
+                    return true;
                 }
             }
         }
+
+        return false;
     }
 
-    public void AssignRearWaypoint(GameObject unit)
+    public bool AssignRearWaypoint(GameObject unit)
     {
-        PlayerMovement barricadeCache;
+        PlayerUnitControl barricadeCache;
 
-        if (barricadeCache = unit.GetComponent<PlayerMovement>())
+        if (barricadeCache = unit.GetComponent<PlayerUnitControl>())
         {
             foreach (var waypoint in backWaypoints)
             {
                 if (waypoint.occupied == false)
                 {
-                    if (barricadeCache.targetWaypoint != null)
+                    if (barricadeCache.currentWaypoint != null)
                     {
-                        barricadeCache.targetWaypoint.occupied = false;
-                        barricadeCache.targetWaypoint.resident = null;
+                        barricadeCache.currentWaypoint.occupied = false;
+                        barricadeCache.currentWaypoint.resident = null;
+                        barricadeCache.currentBarricade.residentList.Remove(barricadeCache);
                     }
 
-                    barricadeCache.targetWaypoint = waypoint;
+                    barricadeCache.currentWaypoint = waypoint;
                     waypoint.occupied = true;
                     waypoint.resident = unit;
                     residentList.Add(unit.GetComponent<PlayerUnitControl>());
+                    return true;
                 }
             }
         }
+
+        return false;
     }
 
     #endregion
@@ -137,52 +198,61 @@ public class RefactoredBarricade : MonoBehaviour
 
     void AssignTarget()
     {
-        GameObject targetToAssign = targetQueue[0];
-        targetToAssign.name = targetToAssign.name.Replace("(Clone)", "");
-
-        // Loop to iterate through each level of priority
-        for (int i = 0; i < 4; i++)
+        if (residentList.Count > 0 && targetQueue.Count > 0)
         {
-            Debug.Log("Checking Level " + i + " of priority");
-            // Loop through each unit at the barricade, and check it at level N of priority
-            foreach (var unit in residentList)
+            Debug.Log("Assigning Targets");
+            GameObject targetToAssign = targetQueue[0];
+            targetToAssign.name = targetToAssign.name.Replace("(Clone)", "");
+
+            // Loop to iterate through each level of priority
+            for (int i = 0; i < 4; i++)
             {
-                Debug.Log("CHECKING PRIORITY OF " + targetQueue[0].name + " FOR " + unit);
-
-                // If the unit has a target at the top level of priority,
-                // Or if the unit is the same as the previous unit which failed: skip it
-                if (unit.unitType == UnitTypes.Medic ||
-                    unit.unitType == UnitTypes.Mechanic ||
-                    (unit.actionTarget != null && unit.actionTarget.name == unit.priorityList[0]) ||
-                    unit.actionTarget == targetToAssign ||
-                    unit == unitCache ||
-                    (unit.actionTarget != null && unit.priorityList.IndexOf(targetToAssign.name) > unit.priorityList.IndexOf(unit.actionTarget.name)))
+                Debug.Log("Checking Level " + i + " of priority");
+                // Loop through each unit at the barricade, and check it at level N of priority
+                for (int j = 0; i < residentList.Count; i++)
                 {
-                    Debug.Log(unit + " cannot be assigned a target");
-                    continue;
+                    unit = residentList[j];
+
+                    Debug.Log("CHECKING PRIORITY OF " + targetQueue[0].name + " FOR " + unit);
+
+                    // If the unit has a target at the top level of priority,
+                    // Or if the unit is the same as the previous unit which failed: skip it
+                    if (unit.unitType == UnitTypes.Medic ||
+                        unit.unitType == UnitTypes.Mechanic ||
+                        (unit.actionTarget != null && unit.actionTarget.name == unit.priorityList[0]) ||
+                        unit.actionTarget == targetToAssign ||
+                        unit == unitCache ||
+                        (unit.actionTarget != null && unit.priorityList.IndexOf(targetToAssign.name) > unit.priorityList.IndexOf(unit.actionTarget.name)))
+                    {
+                        Debug.Log(unit + " cannot be assigned a target");
+                        continue;
+                    }
+
+                    // Otherwise, if the target matches the unit's current level of priority, assign it
+                    else if (targetToAssign.name == unit.priorityList[i])
+                    {
+                        Debug.Log("Assigning target to " + unit);
+                        unit.actionTarget = targetToAssign;
+                        targetQueue.Remove(targetToAssign);
+                        break;
+                    }
+
+                    // If nothing is assigned, cache the current unit and move current target to back of the queue
+                    else
+                    {
+                        Debug.Log("Nothing Assigned");
+                        targetQueue.Remove(targetToAssign);
+                        targetQueue.Add(targetToAssign);
+                        unitCache = unit;
+                    }
                 }
 
-                // Otherwise, if the target matches the unit's current level of priority, assign it
-                else if (targetToAssign.name == unit.priorityList[i])
-                {
-                    Debug.Log("Assigning target to " + unit);
-                    unit.actionTarget = targetToAssign;
-                    targetQueue.Remove(targetToAssign);
-                    break;
-                }
-
-                // If nothing is assigned, cache the current unit and move current target to back of the queue
-                else
-                {
-                    Debug.Log("Nothing Assigned");
-                    targetQueue.Remove(targetToAssign);
-                    targetQueue.Add(targetToAssign);
-                    unitCache = unit;
-                }
+                unitCache = null;
             }
-
-            unitCache = null;
         }
+
+        else
+            Debug.Log("No targets to assign");
     }
 
     #endregion
