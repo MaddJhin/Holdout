@@ -51,7 +51,6 @@ public class EnemyControlMinion : MonoBehaviour
     private float elapsedTime;
     private Vector3 targetLoc;
     private NavMeshObstacle obstacle;
-    private GameManager gm;
     private LineRenderer atkLine;               // Temporary
 
     // Animation attributes
@@ -68,7 +67,6 @@ public class EnemyControlMinion : MonoBehaviour
         vision = GetComponent<UnitSight>();
         obstacle = GetComponent<NavMeshObstacle>();
         m_Animator = GetComponentInChildren<Animator>();
-        gm = GameObject.FindObjectOfType<GameManager>();
     }
 
 	void Start(){
@@ -88,16 +86,6 @@ public class EnemyControlMinion : MonoBehaviour
 		action.damage = damage;
 
 	}
-
-    void OnEnable()
-    {
-        gm.AddObjective();
-    }
-
-    void OnDisable()
-    {
-        gm.RemoveObjective();
-    }
 
 	void Update()
     {

@@ -19,141 +19,30 @@ using System.IO;
  * Authors: Andrew Tully
  */
 
-public class GameManager : MonoBehaviour
+public static class GameManager
 {
-    public GameObject[] playerLoadout = new GameObject[7];
-    public float spawnOffset = 1f;                                      // Distance between player units being spawned
-    public List<GameObject> availableUnits;                             // List of units available to the player
+    public static GameObject[] playerLoadout = new GameObject[7];
+    public static List<GameObject> availableUnits;                             // List of units available to the player
+    public static int[] loadoutIndex = new int[7];
 
-    private int objectiveCounter;
-    private List<Spawner> spawnList;
-    private int inactiveSpawns;
-    private GameObject UI_canvas;
-    private GameObject UI_playerPanel;
-    private InputManager IM;
-    private GameObject spawnPoint;
-    private int[] loadoutIndex;
-
-    // Following region ensures that there is only ever one game manager
-    #region Singleton
-    private static GameManager _instance;
-
-    public static GameManager instance
-    {
-        get
+    public static string[] unitToSpawn = 
         {
-            if (_instance == null)
-            {
-                _instance = GameObject.FindObjectOfType<GameManager>();
+        "PlayerCharacter_Marksman",
+        "PlayerCharacter_Mechanic",
+        "PlayerCharacter_Medic",
+        "PlayerCharacter_Trooper"
+        };
 
-                DontDestroyOnLoad(_instance.gameObject);
-            }
-
-            return _instance;
-        }
-    }
-
-    void Awake()
-    {
-        if (_instance == null)
-        {
-
-            Debug.Log("Creating singleton");
-            // If this instance is the first in the scene, it becomes the singleton
-            _instance = this;
-            DontDestroyOnLoad(this);
-        }
-
-        else
-        {
-            // If another Singleton already exists, destroy this object
-            if (this != _instance)
-            {
-                Debug.Log("Destroying invalid singleton");
-                Destroy(this.gameObject);
-            }
-        }
-
-        loadoutIndex = new int[7];
-    }
-    #endregion
-
-    void OnLevelWasLoaded(int level)
-    {
-        if (level != 1)
-        {
-            objectiveCounter = 0;
-            inactiveSpawns = 0;
-            spawnList = new List<Spawner>();
-
-            Debug.Log("Fetching Spawners");
-            Spawner[] temp = GameObject.FindObjectsOfType<Spawner>();   // Get all spawners in scene
-
-            // Ignore Player tagged spawners
-            foreach (var spawn in temp)
-            {
-                if (spawn.tag == "Enemy Spawn")
-                    spawnList.Add(spawn);
-            }
-
-            Debug.Log("Spawn List: " + spawnList);
-
-            // Temporary
-            // Used for testing purposes
-
-
-            Debug.Log("Preparing to Spawn Units");
-
-            UI_canvas = GameObject.Find("Canvas");
-            UI_playerPanel = GameObject.Find("PlayerPortraitsMenu");
-            IM = GameObject.FindObjectOfType<InputManager>();
-            spawnPoint = GameObject.FindGameObjectWithTag("PlayerSpawnPoint");
-            Debug.Log("Spawn attempted complete");
-
-            AssignLoadoutSlot();
-            AssignLoadoutUI();
-            SpawnPlayerUnits();
-        }
-    }
+    [HideInInspector]
+    public static int[] unlockedLevels;
 
     // Following region handles the tracking of objectives and transition conditions
     #region Objectives & Transitions
 
-    public void SwitchScene(string sceneName)
+    static void SwitchScene(string sceneName)
     {
         Debug.Log("Switching to " + sceneName);
         Application.LoadLevel(sceneName);
-    }
-
-    public void AddObjective()
-    {
-        objectiveCounter++;
-    }
-
-    public void RemoveObjective()
-    {
-        /*
-        objectiveCounter--;
-
-
-        if (inactiveSpawns == spawnList.Count && objectiveCounter <= 0)
-        {
-            Debug.Log("Level Complete");
-        }*/
-    }
-
-    public void IsSpawnInactive()
-    {
-
-        // Check each spawner in the scene to see if it's active and still spawned
-        foreach (var spawn in spawnList)
-        {
-            // If the spawner is finished spawning, add it to the tally of completed spawners
-            if (!spawn.isActiveAndEnabled)
-            {
-                inactiveSpawns++;
-            }
-        }
     }
 
     #endregion
@@ -165,38 +54,27 @@ public class GameManager : MonoBehaviour
     * Parameters: player character id to spawn, order in which to spawn character
     * Returns: Void
     */
-    public void AssignLoadoutIndex(int characterIndex, int orderIndex)
+    public static void AssignLoadoutIndex(int characterIndex, int orderIndex)
     {
         loadoutIndex[orderIndex] = characterIndex;
-    }
+        Debug.Log("New unitIndex is: " + characterIndex);
 
-    /* Function: Assigns a unit to the appropriate loadout slot
-     * Parameters: None
-     * Returns: Void
-     */
-    public void AssignLoadoutSlot()
-    {
-        for (int i = 0; i <loadoutIndex.Length; i++)
-        {
-            playerLoadout[i] = Instantiate(availableUnits[loadoutIndex[i]]);
-            playerLoadout[i].SetActive(false);
-        }
     }
 
     /* Function: Spawns all units in the loadout into the scene
      * Parameters: None
      * Returns: None
      */
-    public void SpawnPlayerUnits()
+    public static void SpawnPlayerUnits(GameObject spawnPoint, int spawnOffset)
     {
         Debug.Log("Number of Units to Spawn: " + playerLoadout.Length);
-        
+
 
         // Sets the player units' location to a specific point on the map
         foreach (var unit in playerLoadout)
-        {            
-            spawnPoint.transform.position = new Vector3(spawnPoint.transform.position.x + spawnOffset, 
-                                                        spawnPoint.transform.position.y, 
+        {
+            spawnPoint.transform.position = new Vector3(spawnPoint.transform.position.x + spawnOffset,
+                                                        spawnPoint.transform.position.y,
                                                         spawnPoint.transform.position.z);
 
             unit.transform.position = spawnPoint.transform.position;
@@ -208,19 +86,19 @@ public class GameManager : MonoBehaviour
      * Parameters: None
      * Returns: None
      */
-    public void AssignLoadoutUI()
+    public static void AssignLoadoutUI(GameObject UI_playerPanel, InputManager IM)
     {
         Button[] b = UI_playerPanel.GetComponentsInChildren<Button>();                                       // Gets each button in the canvas
-        //Debug.Log("Game Manager button refs: ");
+        Debug.Log("Game Manager button refs: ");
         int i;
 
         for (i = 0; i < playerLoadout.Length; i++)
         {
             Debug.Log(b[i]);
 
-            //Debug.Log("Adding Listener for: " + playerLoadout[i] + " at position " + i);
+            Debug.Log("Adding Listener for: " + playerLoadout[i] + " at position " + i);
 
-			PlayerUnitControl param = playerLoadout[i].GetComponent<PlayerUnitControl>();     // Cache the character controller to be added
+            PlayerUnitControl param = playerLoadout[i].GetComponent<PlayerUnitControl>();     // Cache the character controller to be added
             GameObject playerChar = playerLoadout[i];
 
             b[i].onClick.RemoveAllListeners();                                                          // Remove all previous listeners
@@ -234,7 +112,7 @@ public class GameManager : MonoBehaviour
     // Handles save & load logic
     #region Data Management
 
-    public void Save()
+    public static void Save()
     {
         BinaryFormatter bf = new BinaryFormatter();
         FileStream file = File.Open(Application.persistentDataPath + "/gameInfo.dat", FileMode.Open);
@@ -249,7 +127,7 @@ public class GameManager : MonoBehaviour
         file.Close();
     }
 
-    public void Load()
+    public static void Load()
     {
         if (File.Exists(Application.persistentDataPath + "/gameInfo.dat"))
         {

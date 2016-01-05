@@ -30,7 +30,6 @@ public class Spawner : MonoBehaviour
     public string targetObject;
 
     private UnitSight tempSight;        // Temporary UnitSight reference for setting default targets
-    private GameManager gm;
 
     IEnumerator SpawnLoop()
     {
@@ -55,10 +54,6 @@ public class Spawner : MonoBehaviour
                         Debug.Log("Spawning " + A.prefab);
                         GameObject obj = GenericPooler.current.GetPooledObject(A.prefab);
 
-                        if (obj.tag != "Player")
-                        {
-                            gm.AddObjective();
-                        }
 
                         if (targetObject != null)
                         {
@@ -84,7 +79,6 @@ public class Spawner : MonoBehaviour
 
         Debug.Log("Spawn Loop Complete");
         gameObject.SetActive(false);
-        gm.IsSpawnInactive();
 
         //m_DelayFactor *= difficultyFactor;
         yield return null;  // prevents crash if all delays are 0        
@@ -94,7 +88,6 @@ public class Spawner : MonoBehaviour
     {
         Debug.Log("Starting spawn loop");
         StartCoroutine(SpawnLoop());
-        gm = GameObject.FindObjectOfType<GameManager>();
     }
 
 }

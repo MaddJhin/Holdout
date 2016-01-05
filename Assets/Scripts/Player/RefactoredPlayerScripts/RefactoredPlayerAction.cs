@@ -64,6 +64,20 @@ public class RefactoredPlayerAction : MonoBehaviour
 
     public void Shoot(UnitStats targetHealth)
     {
+        Debug.Log("Shooting at target");
+        gameObject.transform.LookAt(targetHealth.gameObject.transform);
+
+        if (targetHealth != null)
+        {
+            // ... the enemy should take damage.
+            Debug.Log(targetHealth.currentHealth);
+            targetHealth.TakeDamage(damagePerHit);
+            Debug.Log(targetHealth.currentHealth);
+        }
+    }
+
+    public void OldShoot(UnitStats targetHealth)
+    {
         Debug.Log("Shot at");
         // Set the shootRay so that it starts at the end of the shoot point and points forward from the barrel.
         gameObject.transform.LookAt(targetHealth.gameObject.transform);

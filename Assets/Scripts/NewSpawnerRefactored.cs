@@ -50,8 +50,6 @@ public class NewSpawnerRefactored : MonoBehaviour
 
     public List<SpawnerWave> waves;
 
-    private GameManager gm;
-
     public void AddWave()
     {
         waves.Add(new SpawnerWave());
@@ -60,11 +58,6 @@ public class NewSpawnerRefactored : MonoBehaviour
     public void RemoveWave(SpawnerWave wave)
     {
         waves.Remove(wave);
-    }
-
-    void Awake()
-    {
-        gm = GameObject.FindObjectOfType<GameManager>();
     }
 
     // Use this for initialization
@@ -103,7 +96,6 @@ public class NewSpawnerRefactored : MonoBehaviour
         }
 
         gameObject.SetActive(false);
-        gm.IsSpawnInactive();
         yield return null;
     }
 

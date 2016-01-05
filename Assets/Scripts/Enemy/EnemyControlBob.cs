@@ -50,8 +50,10 @@ public class EnemyControlBob : MonoBehaviour
     private float elapsedTime;
     private Vector3 targetLoc;
 	private NavMeshObstacle obstacle;
-    private GameManager gm;
 
+    private Animator m_Animator;
+    private float m_TurnAmount;
+    private float m_ForwardAmount;
 
     void Awake()
     {
@@ -60,7 +62,7 @@ public class EnemyControlBob : MonoBehaviour
 		action = GetComponent<EnemyAttack>();
 		vision = GetComponent<UnitSight>();
 		obstacle = GetComponent<NavMeshObstacle>();
-        gm = GameObject.FindObjectOfType<GameManager>();
+        m_Animator = GetComponentInChildren<Animator>();
 	}
 	
 	void Start(){
@@ -79,18 +81,10 @@ public class EnemyControlBob : MonoBehaviour
 		action.damage = damage;
 	}
 
-    void OnEnable()
-    {
-        gm.AddObjective();
-    }
-
-    void OnDisable()
-    {
-        gm.RemoveObjective();
-    }
-
     void Update()
     {
+        UpdateMovementAnimator(agent.desiredVelocity);
+
 		if (vision.actionTarget != null)
 		{
 			targetLoc = vision.actionTarget.transform.position;
@@ -100,12 +94,15 @@ public class EnemyControlBob : MonoBehaviour
         if (stats.attackSpeed < elapsedTime && vision.targetDistance < agent.stoppingDistance)
         {
             Debug.Log("Attacking");
+            m_Animator.SetBool("Walk Forward", false);
             elapsedTime = 0f;
             Attack();
         }
 
         else
+        {
             Move();
+        }
 
         elapsedTime += Time.deltaTime;
     }
@@ -123,5 +120,18 @@ public class EnemyControlBob : MonoBehaviour
     {
         agent.Resume();
         agent.SetDestination(targetLoc);
+    }
+
+    void UpdateMovementAnimator(Vector3 move)
+    {
+        //Set float values based on nav agent velocity
+        if (move.magnitude > 1f) move.Normalize();
+        move = transform.InverseTransformDirection(move);
+        m_TurnAmount = Mathf.Atan2(move.x, move.z);
+        m_ForwardAmount = move.z;
+
+        // Update animator float values 
+        m_Animator.SetFloat("Forward", m_ForwardAmount, 0.1f, Time.deltaTime);
+        m_Animator.SetFloat("Turn", m_TurnAmount, 0.1f, Time.deltaTime);
     }
 }
