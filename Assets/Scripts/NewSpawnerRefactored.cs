@@ -60,7 +60,13 @@ public class NewSpawnerRefactored : MonoBehaviour
         waves.Remove(wave);
     }
 
-    public IEnumerator SpawnLoop()
+    // Use this for initialization
+    void Start()
+    {
+        StartCoroutine(SpawnLoop());
+    }
+
+    IEnumerator SpawnLoop()
     {
         switch (spawnerType)
         {

@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
 
 public class LevelManager : MonoBehaviour
 {
@@ -9,37 +8,16 @@ public class LevelManager : MonoBehaviour
     public int levelDuration;
     public int nextLevel;
     public int spawnOffset = 1;
-    public float spawnMilitiaCooldown;
-    public GameObject[] enemySpawners;
-    public GameObject[] militiaSpawners;
 
     private GameObject spawnPoint;
     private GameObject UI_playerPanel;
     private InputManager IM;
-    private List<NewSpawnerRefactored> enemySpawnerCache = new List<NewSpawnerRefactored>();
-    private List<NewSpawnerRefactored> militiaSpawnerCache = new List<NewSpawnerRefactored>();
 
     void Awake()
     {
         UI_playerPanel = GameObject.Find("PlayerPortraitsMenu");
         IM = GameObject.FindObjectOfType<InputManager>();
         spawnPoint = GameObject.FindGameObjectWithTag("PlayerSpawnPoint");
-
-        if (enemySpawners.Length > 0)
-        {
-            for (int i = 0; i < enemySpawners.Length; i++)
-            {
-                enemySpawnerCache.Add(enemySpawners[i].GetComponent<NewSpawnerRefactored>());
-            }
-        }
-
-        if (militiaSpawners.Length > 0)
-        {
-            for (int i = 0; i < militiaSpawners.Length; i++)
-            {
-                militiaSpawnerCache.Add(militiaSpawners[i].GetComponent<NewSpawnerRefactored>());
-            }
-        }
     }
 
     void Start()
@@ -48,7 +26,6 @@ public class LevelManager : MonoBehaviour
         AssignLoadoutSlot();
         GameManager.AssignLoadoutUI(UI_playerPanel, IM);
         GameManager.SpawnPlayerUnits(spawnPoint, spawnOffset);
-        StartCoroutine(LevelCompleteCountdown());
     }
 
     /* Function: Assigns a unit to the appropriate loadout slot
@@ -70,16 +47,7 @@ public class LevelManager : MonoBehaviour
     IEnumerator LevelCompleteCountdown()
     {
         yield return new WaitForSeconds(startCountdown);
-
         // Start spawners
-        if (enemySpawnerCache.Count > 0)
-        {
-            for (int i = 0; i < enemySpawnerCache.Count; i++)
-            {
-                StartCoroutine(enemySpawnerCache[i].SpawnLoop());
-            }
-        }
-
         yield return new WaitForSeconds(levelDuration);
         LevelCompleted();
     }
@@ -93,16 +61,5 @@ public class LevelManager : MonoBehaviour
         // Deactivate all enemies
         // Promp player to continue?
         // Load next level
-    }
-
-    public void SpawnMilitia()
-    {
-        if (militiaSpawnerCache.Count > 0)
-        {
-            for (int i = 0; i < militiaSpawnerCache.Count; i++)
-            {
-                StartCoroutine(militiaSpawnerCache[i].SpawnLoop());
-            }
-        }
     }
 }
