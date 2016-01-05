@@ -49,10 +49,12 @@ public class WorldMenuManager : MonoBehaviour
     {
         launchButton.onClick.RemoveAllListeners();
         launchButton.onClick.AddListener(delegate { LoadLevel(parameter); });
-        launchButton.onClick.AddListener(delegate { GameManager.instance.AssignLoadoutSlot(); });
     }
 
-    void LoadLevel(int lvlIndex) {
+    void LoadLevel(int lvlIndex)
+    {
+        Debug.Log("Load level Called");
         Application.LoadLevel(lvlIndex);
+        Debug.Log("New level loaded");
     }
 }

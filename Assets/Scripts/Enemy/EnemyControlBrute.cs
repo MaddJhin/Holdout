@@ -53,7 +53,6 @@ public class EnemyControlBrute : MonoBehaviour
     private float elapsedTime;
     private Vector3 targetLoc;
     private NavMeshObstacle obstacle;
-    private GameManager gm;
     private Animator m_Animator;
     private ParticleSystem m_ParticleSystem;
 
@@ -64,7 +63,6 @@ public class EnemyControlBrute : MonoBehaviour
         action = GetComponent<EnemyAttack>();
         vision = GetComponent<UnitSight>();
         obstacle = GetComponent<NavMeshObstacle>();
-        gm = GameObject.FindObjectOfType<GameManager>();
         m_Animator = GetComponent<Animator>();
         m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
     }
@@ -85,16 +83,6 @@ public class EnemyControlBrute : MonoBehaviour
         action.damage = damage;
 
 	}
-
-    void OnEnable()
-    {
-        gm.AddObjective();
-    }
-
-    void OnDisable()
-    {
-        gm.RemoveObjective();
-    }
 
     void Update()
     {

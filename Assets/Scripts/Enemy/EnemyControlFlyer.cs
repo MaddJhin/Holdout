@@ -43,7 +43,6 @@ public class EnemyControlFlyer : MonoBehaviour
     private UnitSight vision;
     private Vector3 targetLoc;
 	private EnemyAttack action;
-    private GameManager gm;
 
     void Awake()
     {
@@ -51,7 +50,6 @@ public class EnemyControlFlyer : MonoBehaviour
         stats = GetComponent<UnitStats>();
         vision = GetComponent<UnitSight>();
 		action = GetComponent<EnemyAttack>();
-        gm = GameObject.FindObjectOfType<GameManager>();
     }
 
 	void Start (){		
@@ -63,11 +61,6 @@ public class EnemyControlFlyer : MonoBehaviour
 		stats.attackRange = attackRange;
 		action.damage = damage;
 	}
-
-    void OnEnable()
-    {
-        gm.AddObjective();
-    }
 
     void Update()
     {

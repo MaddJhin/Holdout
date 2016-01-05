@@ -1,50 +1,65 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class LevelManager : MonoBehaviour 
+public class LevelManager : MonoBehaviour
 {
     // Number of waves in the current level
-    public int totalWaves;
-    public int currentWave;
-    public string nextLevel;
+    public int startCountdown;
+    public int levelDuration;
+    public int nextLevel;
+    public int spawnOffset = 1;
 
-    private GameManager gameManager;
-    private Spawner[] activeSpawners;
+    private GameObject spawnPoint;
+    private GameObject UI_playerPanel;
+    private InputManager IM;
 
     void Awake()
     {
-        // Get reference to the active GameManager
-        gameManager = FindObjectOfType<GameManager>();
-        activeSpawners = FindObjectsOfType<Spawner>();
+        UI_playerPanel = GameObject.Find("PlayerPortraitsMenu");
+        IM = GameObject.FindObjectOfType<InputManager>();
+        spawnPoint = GameObject.FindGameObjectWithTag("PlayerSpawnPoint");
     }
 
-    void Update()
+    void Start()
     {
-        // If level is complete, use GameManager to bring up relevant menu
-        for (int i = 0; i < activeSpawners.Length; i++)
+        Debug.Log("Level Manager Start");
+        AssignLoadoutSlot();
+        GameManager.AssignLoadoutUI(UI_playerPanel, IM);
+        GameManager.SpawnPlayerUnits(spawnPoint, spawnOffset);
+    }
+
+    /* Function: Assigns a unit to the appropriate loadout slot
+    * Parameters: None
+    * Returns: Void
+    */
+    void AssignLoadoutSlot()
+    {
+        for (int i = 0; i < GameManager.loadoutIndex.Length; i++)
         {
-            if (activeSpawners[i].waveCounter >= activeSpawners[i].waves.Count)
-            {
-                Debug.Log("Level Complete");
-            }
+            int unitIndex = GameManager.loadoutIndex[i];
+            string unitToSpawn = GameManager.unitToSpawn[unitIndex];
+            GameManager.playerLoadout[i] = Instantiate(Resources.Load(unitToSpawn)) as GameObject;
+            GameManager.playerLoadout[i].SetActive(false);
+            Debug.Log("Unit index: " + unitIndex + ", spawning: " + unitToSpawn);
         }
     }
 
-    void IsWaveComplete()
+    IEnumerator LevelCompleteCountdown()
     {
-        // Check if current wave is complete
-        // If it is, move to next wave and begin it
+        yield return new WaitForSeconds(startCountdown);
+        // Start spawners
+        yield return new WaitForSeconds(levelDuration);
+        LevelCompleted();
     }
 
-    bool IsLevelComplete()
+    void LevelCompleted()
     {
-        if (currentWave > totalWaves)
-        {
-            Debug.Log("Level Complete");
-            return true;
-        }
-
-        else
-            return false;
+        Debug.Log("Level Complete");
+        // Stop Spawning
+        // Pop up completed message
+        // Update completed level in save file
+        // Deactivate all enemies
+        // Promp player to continue?
+        // Load next level
     }
 }
