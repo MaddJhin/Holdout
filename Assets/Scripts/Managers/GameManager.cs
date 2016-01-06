@@ -103,7 +103,7 @@ public static class GameManager
 
             b[i].onClick.RemoveAllListeners();                                                          // Remove all previous listeners
             b[i].onClick.AddListener(delegate { IM.SetTarget(param); });                                // Add a new listener with the cached controller
-            b[i].onClick.AddListener(delegate { IM.FocusCamera(playerChar); });
+            //b[i].onClick.AddListener(delegate { IM.FocusCamera(playerChar); });
         }
     }
 

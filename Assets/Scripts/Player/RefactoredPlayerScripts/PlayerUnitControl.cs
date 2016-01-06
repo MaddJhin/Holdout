@@ -222,6 +222,28 @@ public class PlayerUnitControl : MonoBehaviour
     }
     #endregion
 
+    #region Unit Targeting
+
+    public IEnumerator CheckForTarget(Collider[]targets)
+    {
+        for (int i = 0; i < priorityList.Count; i++)
+        {
+            Debug.Log("Checking priority at level " + i);
+            for (int j = 0; j < targets.Length; j++)
+            {
+                if (targets[j].tag == priorityList[i])
+                {
+                    Debug.Log("Assigning target" + targets[j] + " to " + priorityList[i]);
+                    actionTarget = targets[j].gameObject;
+                }
+            }
+        }
+
+        yield return null;
+    }
+
+    #endregion
+
     #region Movement Functionality
 
     void Move()

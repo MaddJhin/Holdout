@@ -21,7 +21,7 @@ public class RefactoredBarricade : MonoBehaviour
     public List<PlayerUnitControl> residentList = new List<PlayerUnitControl>();
     UnitStats stats;
     public List<GameObject> targetQueue = new List<GameObject>();
-    LayerMask enemyMask;
+    public LayerMask enemyMask;
     PlayerUnitControl unit;
 
     #region Caches
@@ -54,7 +54,7 @@ public class RefactoredBarricade : MonoBehaviour
     void Awake()
     {
         InvokeRepeating("CheckForEnemies", checkAfter, sightCheckDelay);
-        InvokeRepeating("AssignTarget", checkAfter, assignTargetDelay);
+        //InvokeRepeating("AssignTarget", checkAfter, assignTargetDelay);
         InvokeRepeating("FindRetreatPoints", checkAfter, 0.5f);
         InvokeRepeating("CheckForRetreat", checkAfter, 0.35f);
     }
@@ -185,11 +185,25 @@ public class RefactoredBarricade : MonoBehaviour
             Debug.Log("Checking for enemy units");
             Collider[] targetsInRange = Physics.OverlapSphere(transform.position, sightRadius, enemyMask);
 
+            // If there are enemies in range, ping residents to perform a sight check
+            if (targetsInRange.Length > 0)
+            {
+                for (int i = 0; i < residentList.Count; i++)
+                {
+                    Debug.Log("Pinging residents");
+                    StartCoroutine(residentList[i].CheckForTarget(targetsInRange));
+                }
+            }
+
+            else
+                Debug.Log("No enemies inrange");
+
+            /*
             foreach (var target in targetsInRange)
             {
                 if (!targetQueue.Contains(target.gameObject))
                     targetQueue.Add(target.gameObject);
-            }
+            }*/
         }
 
         else
