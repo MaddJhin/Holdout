@@ -41,6 +41,12 @@ public class EnemyAttack : MonoBehaviour {
 		PunchEffects();
 	}
 
+    public void Shoot(GameObject target)
+    {
+        UnitStats targetHealth = target.GetComponent<UnitStats>();
+        targetHealth.TakeDamage(damage);
+    }
+
 	public void Slam(GameObject target)
 	{		
 		AreaOfEffect aoe = new AreaOfEffect();
