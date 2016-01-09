@@ -185,6 +185,7 @@ public class PlayerUnitControl : MonoBehaviour
         {
             Debug.Log("Out of range, approaching");
             Move();
+            performingAction = false;
         }        
     }
 
