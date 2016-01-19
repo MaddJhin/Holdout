@@ -41,7 +41,6 @@ public static class GameManager
 
     static void SwitchScene(string sceneName)
     {
-        Debug.Log("Switching to " + sceneName);
         Application.LoadLevel(sceneName);
     }
 
@@ -57,7 +56,6 @@ public static class GameManager
     public static void AssignLoadoutIndex(int characterIndex, int orderIndex)
     {
         loadoutIndex[orderIndex] = characterIndex;
-        Debug.Log("New unitIndex is: " + characterIndex);
 
     }
 
@@ -67,9 +65,6 @@ public static class GameManager
      */
     public static void SpawnPlayerUnits(GameObject spawnPoint, int spawnOffset)
     {
-        Debug.Log("Number of Units to Spawn: " + playerLoadout.Length);
-
-
         // Sets the player units' location to a specific point on the map
         foreach (var unit in playerLoadout)
         {
@@ -89,15 +84,10 @@ public static class GameManager
     public static void AssignLoadoutUI(GameObject UI_playerPanel, InputManager IM)
     {
         Button[] b = UI_playerPanel.GetComponentsInChildren<Button>();                                       // Gets each button in the canvas
-        Debug.Log("Game Manager button refs: ");
         int i;
 
         for (i = 0; i < playerLoadout.Length; i++)
         {
-            Debug.Log(b[i]);
-
-            Debug.Log("Adding Listener for: " + playerLoadout[i] + " at position " + i);
-
             PlayerUnitControl param = playerLoadout[i].GetComponent<PlayerUnitControl>();     // Cache the character controller to be added
             GameObject playerChar = playerLoadout[i];
 

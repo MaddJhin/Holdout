@@ -48,8 +48,6 @@ public class InputManager : MonoBehaviour {
     {
         if (_instance == null)
         {
-
-            Debug.Log("Creating singleton");
             // If this instance is the first in the scene, it becomes the singleton
             _instance = this;
             DontDestroyOnLoad(this);
@@ -60,7 +58,6 @@ public class InputManager : MonoBehaviour {
             // If another Singleton already exists, destroy this object
             if (this != _instance)
             {
-                Debug.Log("Destroying invalid singleton");
                 Destroy(this.gameObject);
             }
         }
@@ -110,7 +107,6 @@ public class InputManager : MonoBehaviour {
 					SetWaypointButtons(barricade);
 					
 					menuManager.ShowMenu(menuManager.waypointMenu);
-					Debug.Log("Barricade Found");
 				}
 
 				else
@@ -131,7 +127,6 @@ public class InputManager : MonoBehaviour {
 
 	public void SetTarget (PlayerUnitControl player)
     {
-        Debug.Log("Target set to: " + player);
 
         // Reset previous target's outline color before setting new target
         //if (targetRend != null && player != setTargetOn)
@@ -171,12 +166,20 @@ public class InputManager : MonoBehaviour {
          * */
 	}
 
-	public void Move (BarricadeWaypoint target, RefactoredBarricade barricade){
+	public void Move (BarricadeWaypoint target, RefactoredBarricade barricade)
+    {
 		if (setTargetOn.currentWaypoint != null)
 		{
 			setTargetOn.currentWaypoint.occupied = false;
             setTargetOn.currentBarricade.residentList.Remove(setTargetOn);
+
+            if (setTargetOn.unitType == UnitTypes.Mechanic)
+                StartCoroutine(setTargetOn.EndFortify());
+
+            else if (setTargetOn.unitType == UnitTypes.Medic)
+                StartCoroutine(setTargetOn.DeactivateHeal());
 		}
+        setTargetOn.healthRegenRate = 0;
 		setTargetOn.currentWaypoint = target;
         setTargetOn.currentBarricade = barricade;
 		target.occupied = true;
@@ -214,7 +217,6 @@ public class InputManager : MonoBehaviour {
 				break;
 			}
 			
-			Debug.Log("All front waypoints ocuupied");
 			DisableButton(frontWaypointButton);
 		}
 		
@@ -228,7 +230,6 @@ public class InputManager : MonoBehaviour {
 				break;
 			}
 			
-			Debug.Log("All rear waypoints ocuupied");
 			DisableButton(rearWaypointButton);
 		}
 	}

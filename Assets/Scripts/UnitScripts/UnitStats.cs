@@ -34,7 +34,7 @@ public class UnitStats : MonoBehaviour
     [HideInInspector]
     public float healthPercentage;
 
-    public enum statusEffects { stun };
+    public enum statusEffects { stun, slow, healed};
 
     void Awake()
     {
@@ -45,7 +45,6 @@ public class UnitStats : MonoBehaviour
     {
         if (currentHealth <= 0)
         {
-            Debug.Log("Killing Unit");
             KillUnit();
         }
 
@@ -69,7 +68,6 @@ public class UnitStats : MonoBehaviour
     public void KillUnit()
     {
         // Deactivates the unit
-        Debug.Log("Removing Unit");
         gameObject.SetActive(false);
     }
 
@@ -81,9 +79,14 @@ public class UnitStats : MonoBehaviour
         }
     }
 
-    IEnumerator ActivateStun(float duration)
+    public IEnumerator ActivateStun(float duration)
     {
         yield return null;
         yield return new WaitForSeconds(duration);
+    }
+
+    public IEnumerator ActivateSlow(float slowPercentage, float duration)
+    {
+        yield return null;
     }
 }

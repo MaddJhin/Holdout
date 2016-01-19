@@ -31,7 +31,6 @@ public class GenericPooler : MonoBehaviour
             }
 
             poolDict.Add(poolObj.name, tempPool);
-            Debug.Log(poolObj.name);
         }  
     }
 
@@ -42,15 +41,10 @@ public class GenericPooler : MonoBehaviour
      */
     public GameObject GetPooledObject(string objType)
     {
-        Debug.Log("Pool arg: " + objType);
-
         List<GameObject> iterList;                                      // Temp list to grab all objects of requested type
 
         if (poolDict.ContainsKey(objType))                              // Check if the requested object is in the pool 
         {
-            Debug.Log("Key " + objType + " was found");
-            Debug.Log("Fetching value " + poolDict[objType]);
-
             iterList = poolDict[objType];                               // Grab all objects of requested type
 
             for (int i = 0; i < iterList.Count; i++)                    // Iterate through requested types
@@ -60,9 +54,6 @@ public class GenericPooler : MonoBehaviour
                     return iterList[i];
             }
         }
-
-        else
-            Debug.Log("Key not found");
 
         return null;
     }
