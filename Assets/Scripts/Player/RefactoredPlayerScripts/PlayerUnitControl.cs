@@ -15,6 +15,7 @@ public class PlayerUnitControl : MonoBehaviour
     #region Unit Attributes & Stats
     [Header("Unit Attributes")]
     public float maxHealth = 100f;
+    public float healthRegenRate = 0f;
     public float sightRange;
     public bool stunImmunity = false;
     public UnitTypes unitType;
@@ -31,18 +32,16 @@ public class PlayerUnitControl : MonoBehaviour
     public float timeBetweenAttacks = 0.15f;
 
     [Header("Heal Behavior Attributes")]
-    [Tooltip("Amount of health healed per tick of the Medic's heal ability")]
-    public float healPerTick = 10f;
+    [Tooltip("Amount of health healed per second of the Medic's heal ability")]
+    public float healPerTick = 5f;
 
-    [Tooltip("How many ticks of healing will occur")]
-    public int numberOfTicks = 3;
+    [Header("Repair Behavior Attributes")]
+    [Tooltip("The amount of health healed per second of the Mechanic's repair")]
+    public float repairPerTick = 5f;
 
-    [Tooltip("Time between each tick of healing occurring")]
-    public float timeBetweenTicks = 1;
-
-    [Tooltip("Number of seconds between heals")]
-    public float timeBetweenHeals = 3f;
-    public float healRange = 100f;
+    [Header("Mechanic Support Attributes")]
+    public float slowPercentage = 10f;
+    public float slowDuration = 0.5f;
 
     #endregion
 
@@ -66,6 +65,7 @@ public class PlayerUnitControl : MonoBehaviour
     Rigidbody m_RigidBody;
     bool performingAction;
     string selectedAction;
+    public List<PlayerUnitControl> residentListCache;
 
     #endregion
 
@@ -87,19 +87,21 @@ public class PlayerUnitControl : MonoBehaviour
         m_Animator = GetComponentInChildren<Animator>();
         m_RigidBody = GetComponent<Rigidbody>();
 
+        InvokeRepeating("SelfHeal", 10, 1);
+
         // Determine which action should be repeated
         switch(unitType)
         {
             case UnitTypes.Medic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
-                InvokeRepeating("CheckForHeal", 2, 0.5f);
-                selectedAction = "Heal";
+                actionTarget = this.gameObject;
+                selectedAction = "ActivateHeal";
                 break;
 
             case UnitTypes.Mechanic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
-                InvokeRepeating("CheckForRepair", 2, 0.5f);
-                selectedAction = "Heal";
+                actionTarget = this.gameObject;
+                selectedAction = "BeginFortify";
                 break;
             
             case UnitTypes.Trooper:
@@ -124,17 +126,24 @@ public class PlayerUnitControl : MonoBehaviour
         performingAction = false;
         playerAction.actionTarget = actionTarget;
         playerAction.attackRange = attackRange;
-        playerAction.healRange = healRange;
         playerAction.damagePerHit = damagePerHit;
         playerAction.healPerHit = healPerTick;
         stats.maxHealth = maxHealth;
         stats.currentHealth = maxHealth;
-        
+        residentListCache = new List<PlayerUnitControl>();
 	}
 	
 	// Update is called once per frame
 	void Update () 
     {
+        if (stats.currentHealth <= 0 || currentBarricade == null)
+        {
+            if (unitType == UnitTypes.Medic)
+                StartCoroutine(DeactivateHeal());
+
+            else if (unitType == UnitTypes.Mechanic)
+                StartCoroutine(EndFortify());
+        }
 
         // If the unit has a target, select the appropriate action
         if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
@@ -189,43 +198,90 @@ public class PlayerUnitControl : MonoBehaviour
         }        
     }
 
-    IEnumerator Heal()
+    IEnumerator ActivateHeal()
     {
-        int tickCounter = 0;
-        UnitStats targetStatCache = actionTarget.GetComponent<UnitStats>();
-
-        // Enable particle effects on target
-        foreach (var pfx in m_ParticleSystem)
+        Debug.Log("Activating Heal");
+        // Check if the resident list has changed
+        if (currentBarricade != null &&
+            agent.hasPath == false)
         {
-            pfx.transform.position = actionTarget.transform.position;
-            pfx.enableEmission = true;
+            Debug.Log("Modifying Heal Values");
+            // Cache the new resident list
+            residentListCache = currentBarricade.residentList;
+
+            for (int i = 0; i < residentListCache.Count; i++)
+            {
+                residentListCache[i].healthRegenRate = healPerTick;
+            }
+
+            yield return new WaitForSeconds(timeBetweenAttacks);
+            performingAction = false;
         }
-
-        // Perform each tick of healing
-        while (tickCounter < numberOfTicks)
-        {
-            tickCounter++;
-            playerAction.Heal(healPerTick, targetStatCache);
-
-            yield return new WaitForSeconds(timeBetweenTicks);
-        }
-
-        // Disable particle effects
-        foreach (var pfx in m_ParticleSystem)
-        {
-            pfx.enableEmission = false;
-        }
-
-        // Once finished healing the target, null your current target
-        actionTarget = null;
-        yield return new WaitForSeconds(timeBetweenHeals);
-        performingAction = false;
     }
+
+    public IEnumerator DeactivateHeal()
+    {
+        Debug.Log("Deactivating Heal");
+        if (currentBarricade.residentList.Count > 0)
+        {
+            for (int i = 0; i < currentBarricade.residentList.Count; i++)
+            {
+                currentBarricade.residentList[i].healthRegenRate = 0;
+            }
+        }
+
+        yield return null;
+    }
+
+    IEnumerator BeginFortify()
+    {
+        Debug.Log("Beginning Fortification");
+
+        if (currentBarricade != null && agent.hasPath == false)
+        {
+            Debug.Log("Adjusting Self Heal Values");
+            currentBarricade.fortified = true;
+            currentBarricade.selfHealAmount = repairPerTick;
+        }
+        
+        performingAction = false;
+        yield return null;
+    }
+
+    public IEnumerator EndFortify()
+    {
+        Debug.Log("Ending Fortification");
+
+        if (currentBarricade != null)
+        {
+            currentBarricade.fortified = false;
+        }
+
+        yield return null;
+    }
+
+    public IEnumerator Slow(Collider[] targets)
+    {
+        Debug.Log("Slowing enemy units"); 
+        for (int i = 0; i < targets.Length; i++)
+        {
+            Debug.Log("Slowing " + targets[i]);
+            targets[i].GetComponent<EnemyUnitControl>().SetSlow(slowPercentage, slowDuration);
+        }
+
+        yield return null;
+    }
+
+    void SelfHeal()
+    {
+        stats.Heal(healthRegenRate);
+    }
+
     #endregion
 
     #region Unit Targeting
 
-    public IEnumerator CheckForTarget(Collider[]targets)
+    public IEnumerator CheckForTarget(Collider[] targets)
     {
         for (int i = 0; i < priorityList.Count; i++)
         {
@@ -290,51 +346,6 @@ public class PlayerUnitControl : MonoBehaviour
         // Attack Range Indicator
         Gizmos.color = attackRangeIndicator;
         Gizmos.DrawWireSphere(transform.position, attackRange);
-
-        // Heal Range Indicator
-        Gizmos.color = healIndicator;
-        Gizmos.DrawWireSphere(transform.position, healRange);
-    }
-
-    #endregion
-
-    #region Heal & Repair Checks
-
-    void CheckForHeal()
-    {
-        Debug.Log("Checking for units to heal");
-
-        if (currentBarricade != null)
-        {
-            PlayerUnitControl tempTarget = currentBarricade.residentList[0];        // Used as a baseline for determining min
-
-            foreach (var unit in currentBarricade.residentList)
-            {
-                // If unit at max health, a medic, or the temporary target then skip to the next unit
-                if (unit.stats.currentHealth == unit.maxHealth || unit.unitType == UnitTypes.Medic || unit == tempTarget)
-                    continue;
-
-                // If the unit has a lower % of health than the temp target, make it the new temp
-                else if ((unit.stats.currentHealth / unit.maxHealth) < (tempTarget.stats.currentHealth / tempTarget.maxHealth))
-                {
-                    tempTarget = unit;
-                }
-            }
-
-            // If the temp target has less health than it's max, set it as the target
-            // Used to prevent the target from defaulting to a full health initial temp target
-            if (tempTarget.stats.currentHealth < tempTarget.maxHealth)
-                actionTarget = tempTarget.gameObject;
-        }
-    }
-
-    void CheckForRepair()
-    {
-        if (currentBarricade.GetComponent<UnitStats>().currentHealth < currentBarricade.maxHealth)
-        {
-            actionTarget = currentBarricade.gameObject;
-            StartCoroutine(Heal());
-        }
     }
 
     #endregion

@@ -2,9 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class RefactoredBarricade : MonoBehaviour 
+public class RefactoredBarricade : MonoBehaviour
 {
+
+    #region Barricade Attributes
     public float maxHealth = 100;
+    public float selfHealAmount = 1;
+    public float healRateSeconds = 1;
     public float sightCheckDelay = .5f;
 
     [Tooltip("Begins checking for enemies, assigning & retreating X seconds after spawning")]
@@ -23,12 +27,15 @@ public class RefactoredBarricade : MonoBehaviour
     public List<GameObject> targetQueue = new List<GameObject>();
     public LayerMask enemyMask;
     PlayerUnitControl unit;
+    public bool fortified = false;
+    #endregion
 
     #region Caches
 
     RefactoredBarricade retreatBarricadeCache;
     List<BarricadeWaypoint> retreatWaypointsCache;
     PlayerUnitControl unitCache;            // Used to skip searches on subsequent identical units
+    float baseSelfHealCache;
 
     #endregion
 
@@ -40,6 +47,7 @@ public class RefactoredBarricade : MonoBehaviour
         BarricadeWaypoint[] temp = GetComponentsInChildren<BarricadeWaypoint>();
         stats.maxHealth = maxHealth;
         unitCache = null;
+        baseSelfHealCache = selfHealAmount;
 
         foreach (var curr in temp)
         {
@@ -54,11 +62,21 @@ public class RefactoredBarricade : MonoBehaviour
     void Awake()
     {
         InvokeRepeating("CheckForEnemies", checkAfter, sightCheckDelay);
-        //InvokeRepeating("AssignTarget", checkAfter, assignTargetDelay);
         InvokeRepeating("FindRetreatPoints", checkAfter, 0.5f);
         InvokeRepeating("CheckForRetreat", checkAfter, 0.35f);
+        InvokeRepeating("HealSelf", checkAfter, healRateSeconds);
     }
 
+    void HealSelf()
+    {
+        if (fortified)
+            stats.Heal(selfHealAmount);
+
+        else
+            stats.Heal(baseSelfHealCache);
+    }
+
+    #region Retreat Methods
     // Search for open waypoints and along retreat line and send units to them
     void FindRetreatPoints()
     {
@@ -113,6 +131,8 @@ public class RefactoredBarricade : MonoBehaviour
             residentList[i].agent.SetDestination(residentList[i].currentWaypoint.transform.position);
         }
     }
+
+    #endregion
 
     #region Assign Waypoints
 
@@ -191,82 +211,21 @@ public class RefactoredBarricade : MonoBehaviour
                 for (int i = 0; i < residentList.Count; i++)
                 {
                     Debug.Log("Pinging residents");
-                    StartCoroutine(residentList[i].CheckForTarget(targetsInRange));
+                    if (residentList[i].unitType == UnitTypes.Trooper ||
+                        residentList[i].unitType == UnitTypes.Marksman)
+                        StartCoroutine(residentList[i].CheckForTarget(targetsInRange));
+
+                    else if (residentList[i].unitType == UnitTypes.Mechanic)
+                        StartCoroutine(residentList[i].Slow(targetsInRange));
                 }
             }
 
             else
                 Debug.Log("No enemies inrange");
-
-            /*
-            foreach (var target in targetsInRange)
-            {
-                if (!targetQueue.Contains(target.gameObject))
-                    targetQueue.Add(target.gameObject);
-            }*/
         }
 
         else
             Debug.Log("No residents present - Cancelling vision check");
-    }
-
-    void AssignTarget()
-    {
-        if (residentList.Count > 0 && targetQueue.Count > 0)
-        {
-            Debug.Log("Assigning Targets");
-            GameObject targetToAssign = targetQueue[0];
-            targetToAssign.name = targetToAssign.name.Replace("(Clone)", "");
-
-            // Loop to iterate through each level of priority
-            for (int i = 0; i < 4; i++)
-            {
-                Debug.Log("Checking Level " + i + " of priority");
-                // Loop through each unit at the barricade, and check it at level N of priority
-                for (int j = 0; i < residentList.Count; i++)
-                {
-                    unit = residentList[j];
-
-                    Debug.Log("CHECKING PRIORITY OF " + targetQueue[0].name + " FOR " + unit);
-
-                    // If the unit has a target at the top level of priority,
-                    // Or if the unit is the same as the previous unit which failed: skip it
-                    if (unit.unitType == UnitTypes.Medic ||
-                        unit.unitType == UnitTypes.Mechanic ||
-                        (unit.actionTarget != null && unit.actionTarget.name == unit.priorityList[0]) ||
-                        unit.actionTarget == targetToAssign ||
-                        unit == unitCache ||
-                        (unit.actionTarget != null && unit.priorityList.IndexOf(targetToAssign.name) > unit.priorityList.IndexOf(unit.actionTarget.name)))
-                    {
-                        Debug.Log(unit + " cannot be assigned a target");
-                        continue;
-                    }
-
-                    // Otherwise, if the target matches the unit's current level of priority, assign it
-                    else if (targetToAssign.name == unit.priorityList[i])
-                    {
-                        Debug.Log("Assigning target to " + unit);
-                        unit.actionTarget = targetToAssign;
-                        targetQueue.Remove(targetToAssign);
-                        break;
-                    }
-
-                    // If nothing is assigned, cache the current unit and move current target to back of the queue
-                    else
-                    {
-                        Debug.Log("Nothing Assigned");
-                        targetQueue.Remove(targetToAssign);
-                        targetQueue.Add(targetToAssign);
-                        unitCache = unit;
-                    }
-                }
-
-                unitCache = null;
-            }
-        }
-
-        else
-            Debug.Log("No targets to assign");
     }
 
     #endregion

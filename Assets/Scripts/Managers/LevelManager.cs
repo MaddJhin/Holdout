@@ -10,6 +10,7 @@ public class LevelManager : MonoBehaviour
     public int nextLevel;
     public int spawnOffset = 1;
     public float spawnMilitiaCooldown;
+    public GameObject evacShuttle;
     public GameObject[] enemySpawners;
     public GameObject[] militiaSpawners;
 
