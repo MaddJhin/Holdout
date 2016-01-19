@@ -84,9 +84,4 @@ public class UnitStats : MonoBehaviour
         yield return null;
         yield return new WaitForSeconds(duration);
     }
-
-    public IEnumerator ActivateSlow(float slowPercentage, float duration)
-    {
-        yield return null;
-    }
 }
