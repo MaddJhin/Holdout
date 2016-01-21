@@ -94,13 +94,11 @@ public class PlayerUnitControl : MonoBehaviour
         {
             case UnitTypes.Medic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
-                actionTarget = this.gameObject;
                 selectedAction = "ActivateHeal";
                 break;
 
             case UnitTypes.Mechanic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
-                actionTarget = this.gameObject;
                 selectedAction = "BeginFortify";
                 break;
             
@@ -122,7 +120,12 @@ public class PlayerUnitControl : MonoBehaviour
     // Use this for initialization
 	void Start () 
     {
-        actionTarget = null;
+        if (unitType == UnitTypes.Mechanic || unitType == UnitTypes.Medic)
+            actionTarget = this.gameObject;
+
+        else
+            actionTarget = null;
+
         performingAction = false;
         playerAction.actionTarget = actionTarget;
         playerAction.attackRange = attackRange;
