@@ -60,7 +60,7 @@ public class PlayerUnitControl : MonoBehaviour
     bool targetInRange;								// Tracks when target enters and leaves range
     float originalStoppingDistance;					// Used to store preset agent stopping distance
     NavMeshObstacle obstacle;						// Used to indicate other units to avoid this one
-    Animator m_Animator;
+    public Animator m_Animator;
     ParticleSystem[] m_ParticleSystem;
     Rigidbody m_RigidBody;
     bool performingAction;
@@ -147,6 +147,13 @@ public class PlayerUnitControl : MonoBehaviour
             else if (unitType == UnitTypes.Mechanic)
                 StartCoroutine(EndFortify());
         }
+        Debug.Log(agent.velocity.magnitude);
+
+        if (agent.velocity.magnitude > 0.5)
+            m_Animator.SetBool("Moving", true);
+
+        else
+            m_Animator.SetBool("Moving", false);
 
         // If the unit has a target, select the appropriate action
         if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
@@ -173,6 +180,7 @@ public class PlayerUnitControl : MonoBehaviour
     {
         //Shoot at target if in range of Barricade
         Debug.Log("Beginning Shoot Coroutine");
+        m_Animator.SetTrigger("Acting");
         playerAction.Shoot(actionTarget.GetComponent<UnitStats>());
         yield return new WaitForSeconds(timeBetweenAttacks);
         performingAction = false;
@@ -187,6 +195,7 @@ public class PlayerUnitControl : MonoBehaviour
         if (Vector3.Distance(actionTarget.transform.position, transform.position) <= attackRange)
         {
             Debug.Log("Beginning Slash Coroutine");
+            m_Animator.SetTrigger("Action");
             Stop();
             playerAction.Attack(actionTarget.GetComponent<UnitStats>());
             yield return new WaitForSeconds(timeBetweenAttacks);
@@ -196,7 +205,7 @@ public class PlayerUnitControl : MonoBehaviour
         else
         {
             Debug.Log("Out of range, approaching");
-            Move();
+            Move(actionTarget.transform.position);
             performingAction = false;
         }        
     }
@@ -306,14 +315,14 @@ public class PlayerUnitControl : MonoBehaviour
 
     #region Movement Functionality
 
-    void Move()
+    public void Move(Vector3 targetPos)
     {
         targetInRange = false;
-
+        m_Animator.SetBool("Moving", true);
         obstacle.enabled = false;
         agent.enabled = true;
-        agent.SetDestination(actionTarget.transform.position);
-        agent.Resume();
+        agent.SetDestination(targetPos);
+        agent.Resume();        
     }
 
     void Stop()
@@ -321,6 +330,7 @@ public class PlayerUnitControl : MonoBehaviour
         if (agent.enabled)
         {
             agent.Stop();
+            m_Animator.SetBool("Moving", false);
         }
     }
 
