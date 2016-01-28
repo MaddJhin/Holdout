@@ -19,6 +19,7 @@ public class PlayerUnitControl : MonoBehaviour
     public float sightRange;
     public bool stunImmunity = false;
     public UnitTypes unitType;
+    public float moveSpeed = 1f;
 
     //[Tooltip("How far the unit can go before returning to it's waypoint")]
     //public float barricadeMaxThether;
@@ -133,6 +134,7 @@ public class PlayerUnitControl : MonoBehaviour
         playerAction.healPerHit = healPerTick;
         stats.maxHealth = maxHealth;
         stats.currentHealth = maxHealth;
+        m_Animator.speed = moveSpeed;
         residentListCache = new List<PlayerUnitControl>();
 	}
 	
@@ -220,6 +222,7 @@ public class PlayerUnitControl : MonoBehaviour
             Debug.Log("Modifying Heal Values");
             // Cache the new resident list
             residentListCache = currentBarricade.residentList;
+            m_Animator.SetBool("Acting", true);
 
             for (int i = 0; i < residentListCache.Count; i++)
             {
@@ -236,6 +239,7 @@ public class PlayerUnitControl : MonoBehaviour
         Debug.Log("Deactivating Heal");
         if (currentBarricade.residentList.Count > 0)
         {
+            m_Animator.SetBool("Acting", false);
             for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
                 currentBarricade.residentList[i].healthRegenRate = 0;
@@ -252,6 +256,7 @@ public class PlayerUnitControl : MonoBehaviour
         if (currentBarricade != null && agent.hasPath == false)
         {
             Debug.Log("Adjusting Self Heal Values");
+            m_Animator.SetBool("Acting", true);
             currentBarricade.fortified = true;
             currentBarricade.selfHealAmount = repairPerTick;
         }
@@ -266,6 +271,7 @@ public class PlayerUnitControl : MonoBehaviour
 
         if (currentBarricade != null)
         {
+            m_Animator.SetBool("Acting", false);
             currentBarricade.fortified = false;
         }
 
