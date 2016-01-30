@@ -20,6 +20,7 @@ public class EnemyUnitControl : MonoBehaviour
     public EnemyTypes unitType;
     public GameObject targetLocation;
     public bool slowed = false;
+    public float moveSpeed = 1f;
 
     [Header("Attack Attributes")]
     public float damagePerHit = 20f;
@@ -50,6 +51,7 @@ public class EnemyUnitControl : MonoBehaviour
     bool performingAction;
     LayerMask playerLayer;
     float baseAttackSpeedCache;
+    int animSelector;
 
     #endregion
 
@@ -57,7 +59,7 @@ public class EnemyUnitControl : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         obstacle = GetComponent<NavMeshObstacle>();
-        m_Animator = GetComponent<Animator>();
+        m_Animator = GetComponentInChildren<Animator>();
         m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
         enemyAttack = GetComponent<EnemyAttack>();
         stats = GetComponent<UnitStats>();
@@ -69,6 +71,8 @@ public class EnemyUnitControl : MonoBehaviour
         {
             case EnemyTypes.Minion:
                 selectedAction = "Punch";
+                animSelector = Random.Range(0, 2);
+                m_Animator.SetInteger("AnimSelector", animSelector);
                 break;
 
             case EnemyTypes.Brute:
@@ -95,12 +99,19 @@ public class EnemyUnitControl : MonoBehaviour
         actionTarget = null;
         stats.maxHealth = maxHealth;
         stats.currentHealth = maxHealth;
+        m_Animator.speed = moveSpeed;
         playerLayer = LayerMask.GetMask("Player");
 	}
 	
 	// Update is called once per frame
 	void Update () 
     {
+        if (agent.velocity.magnitude > 0.5)
+            m_Animator.SetBool("Moving", true);
+
+        else
+            m_Animator.SetBool("Moving", false);
+
         // If the unit has a target, select the appropriate action
         if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
         {
@@ -128,6 +139,7 @@ public class EnemyUnitControl : MonoBehaviour
         {
             Debug.Log("Attacking");
             Stop();
+            m_Animator.SetTrigger("Action");
             enemyAttack.Punch(actionTarget);
             yield return new WaitForSeconds(stats.attackSpeed);
             performingAction = false;
@@ -148,6 +160,7 @@ public class EnemyUnitControl : MonoBehaviour
         {
             Debug.Log("Beginning Slash Coroutine");
             Stop();
+            m_Animator.SetTrigger("Action");
             enemyAttack.Slam(actionTarget);
             yield return new WaitForSeconds(stats.attackSpeed);
             performingAction = false;
@@ -186,6 +199,7 @@ public class EnemyUnitControl : MonoBehaviour
         {
             Debug.Log("Beginning Slash Coroutine");
             Stop();
+            m_Animator.SetTrigger("Action");
             enemyAttack.Shoot(actionTarget);
             yield return new WaitForSeconds(stats.attackSpeed);
             performingAction = false;
@@ -202,8 +216,10 @@ public class EnemyUnitControl : MonoBehaviour
     {
         float oldAttackSpeed = timeBetweenAttacks;                  // Cache old attack speed
         timeBetweenAttacks = timeBetweenAttacks - ((timeBetweenAttacks * slowAmount) / 100);
+        m_Animator.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
         yield return new WaitForSeconds(slowDuration);
         timeBetweenAttacks = oldAttackSpeed;
+        m_Animator.speed = moveSpeed;
     }
 
     #endregion
