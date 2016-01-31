@@ -87,6 +87,7 @@ public class PlayerUnitControl : MonoBehaviour
         obstacle = GetComponent<NavMeshObstacle>();
         m_Animator = GetComponentInChildren<Animator>();
         m_RigidBody = GetComponent<Rigidbody>();
+        m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
 
         InvokeRepeating("SelfHeal", 10, 1);
 
@@ -220,6 +221,12 @@ public class PlayerUnitControl : MonoBehaviour
             agent.hasPath == false)
         {
             Debug.Log("Modifying Heal Values");
+            
+            for (int i = 0; i < m_ParticleSystem.Length; i++)
+            {
+                m_ParticleSystem[i].Play();
+            }
+
             // Cache the new resident list
             residentListCache = currentBarricade.residentList;
             m_Animator.SetBool("Acting", true);
@@ -239,6 +246,11 @@ public class PlayerUnitControl : MonoBehaviour
         Debug.Log("Deactivating Heal");
         if (currentBarricade.residentList.Count > 0)
         {
+            for (int i = 0; i < m_ParticleSystem.Length; i++)
+            {
+                m_ParticleSystem[i].Pause();
+            }
+
             m_Animator.SetBool("Acting", false);
             for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
@@ -255,6 +267,11 @@ public class PlayerUnitControl : MonoBehaviour
 
         if (currentBarricade != null && agent.hasPath == false)
         {
+            for (int i = 0; i < m_ParticleSystem.Length; i++)
+            {
+                m_ParticleSystem[i].Play();
+            }
+
             Debug.Log("Adjusting Self Heal Values");
             m_Animator.SetBool("Acting", true);
             currentBarricade.fortified = true;
@@ -271,6 +288,11 @@ public class PlayerUnitControl : MonoBehaviour
 
         if (currentBarricade != null)
         {
+            for (int i = 0; i < m_ParticleSystem.Length; i++)
+            {
+                m_ParticleSystem[i].Play();
+            }
+
             m_Animator.SetBool("Acting", false);
             currentBarricade.fortified = false;
         }
