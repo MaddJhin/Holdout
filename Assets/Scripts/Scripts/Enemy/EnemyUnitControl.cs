@@ -26,6 +26,7 @@ public class EnemyUnitControl : MonoBehaviour
     public float damagePerHit = 20f;
     public float attackRange = 2f;
     public float timeBetweenAttacks = 0.15f;
+    public float projectileSpeed = 5f;
 
     #endregion
 
@@ -38,10 +39,11 @@ public class EnemyUnitControl : MonoBehaviour
     EnemyAttack enemyAttack;
     UnitStats stats;
     ParticleSystem[] m_ParticleSystem;
+    Vector3 projectileTargetPos;
 
     // Object References
     GameObject actionTarget;
-    
+    public Projectile projectile;
 
     #endregion
 
@@ -101,6 +103,7 @@ public class EnemyUnitControl : MonoBehaviour
         stats.currentHealth = maxHealth;
         m_Animator.speed = moveSpeed;
         playerLayer = LayerMask.GetMask("Player");
+        projectile.gameObject.SetActive(false);
 	}
 	
 	// Update is called once per frame
@@ -194,22 +197,26 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Shoot()
     {
-        Debug.Log("Beginning Explode Coroutine");
-        if (Vector3.Distance(actionTarget.transform.position, transform.position) <= attackRange)
-        {
-            Debug.Log("Beginning Slash Coroutine");
-            Stop();
-            m_Animator.SetTrigger("Action");
-            enemyAttack.Shoot(actionTarget);
-            yield return new WaitForSeconds(stats.attackSpeed);
-            performingAction = false;
-        }
+        Debug.Log("Beginning Shoot Coroutine");
+        Debug.Log("Shooting");
 
-        else
+        Stop();
+        m_Animator.SetTrigger("Action");
+        projectile.gameObject.SetActive(true);
+        projectile.FireProjectile(actionTarget.transform.position, projectileSpeed, transform.position);
+        enemyAttack.Shoot(actionTarget);
+        yield return new WaitForSeconds(stats.attackSpeed);
+        performingAction = false;
+         
+    }
+
+    void resetProjectile()
+    {
+        if (projectile.transform.position == projectileTargetPos)
         {
-            Debug.Log("Out of range, approaching");
-            Move(actionTarget.transform.position);
-        } 
+            projectile.gameObject.SetActive(false);
+            projectile.transform.position = transform.position;
+        }
     }
 
     public IEnumerator SetSlow(float slowAmount, float slowDuration)
