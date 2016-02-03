@@ -32,6 +32,9 @@ public class PlayerUnitControl : MonoBehaviour
     public float attackRange = 2f;
     public float timeBetweenAttacks = 0.15f;
 
+    [Header("Shoot Attributes")]
+    public Transform shootPoint;
+
     [Header("Heal Behavior Attributes")]
     [Tooltip("Amount of health healed per second of the Medic's heal ability")]
     public float healPerTick = 5f;
@@ -67,6 +70,9 @@ public class PlayerUnitControl : MonoBehaviour
     bool performingAction;
     string selectedAction;
     public List<PlayerUnitControl> residentListCache;
+    LineRenderer line;
+    Light light;
+    AudioSource gunshot;
 
     #endregion
 
@@ -88,6 +94,8 @@ public class PlayerUnitControl : MonoBehaviour
         m_Animator = GetComponentInChildren<Animator>();
         m_RigidBody = GetComponent<Rigidbody>();
         m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
+        gunshot = GetComponent<AudioSource>();
+        
 
         InvokeRepeating("SelfHeal", 10, 1);
 
@@ -107,10 +115,14 @@ public class PlayerUnitControl : MonoBehaviour
             case UnitTypes.Trooper:
                 InvokeRepeating("TetherCheck", 1, 0.5f);
                 selectedAction = "Slash";
+                Debug.Log(shootPoint);
                 break;
 
             case UnitTypes.Marksman:
                 selectedAction = "Shoot";
+                line = GetComponentInChildren<LineRenderer>();
+                light = GetComponentInChildren<Light>();
+                line.SetPosition(0, shootPoint.position);
                 break;
 
             default:
@@ -161,6 +173,13 @@ public class PlayerUnitControl : MonoBehaviour
         // If the unit has a target, select the appropriate action
         if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
         {
+            if (unitType == UnitTypes.Marksman)
+            {               
+                line.SetPosition(0, shootPoint.position);
+                line.SetPosition(1, actionTarget.transform.position);
+                line.enabled = true;
+            }
+
             performingAction = true;
             Debug.Log("Unit is acting");
             StartCoroutine(selectedAction);
@@ -170,6 +189,11 @@ public class PlayerUnitControl : MonoBehaviour
         {
             Debug.Log("Target inactive - Setting to null");
             actionTarget = null;
+
+            if (unitType == UnitTypes.Marksman)
+            {
+                line.enabled = false;
+            }
         }
 	}
 
@@ -184,9 +208,22 @@ public class PlayerUnitControl : MonoBehaviour
         //Shoot at target if in range of Barricade
         Debug.Log("Beginning Shoot Coroutine");
         m_Animator.SetTrigger("Acting");
+
+        line.enabled = true;
+        gunshot.PlayOneShot(gunshot.clip);
+        StartCoroutine(ShootFX());
         playerAction.Shoot(actionTarget.GetComponent<UnitStats>());
+
         yield return new WaitForSeconds(timeBetweenAttacks);
+        
         performingAction = false;
+    }
+
+    IEnumerator ShootFX()
+    {
+        light.enabled = true;
+        yield return new WaitForSeconds(0.2f);
+        light.enabled = false;
     }
 
     IEnumerator Slash()
