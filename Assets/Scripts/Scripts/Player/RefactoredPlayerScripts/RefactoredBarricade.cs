@@ -42,7 +42,6 @@ public class RefactoredBarricade : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        enemyMask = LayerMask.GetMask("Enemy");
         stats = GetComponent<UnitStats>();
         BarricadeWaypoint[] temp = GetComponentsInChildren<BarricadeWaypoint>();
         stats.maxHealth = maxHealth;

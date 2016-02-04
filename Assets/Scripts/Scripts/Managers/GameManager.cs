@@ -63,17 +63,12 @@ public static class GameManager
      * Parameters: None
      * Returns: None
      */
-    public static void SpawnPlayerUnits(GameObject spawnPoint, int spawnOffset)
+    public static void SpawnPlayerUnits(RefactoredBarricade evacShuttle)
     {
-        // Sets the player units' location to a specific point on the map
-        foreach (var unit in playerLoadout)
+        for (int i = 0; i < playerLoadout.Length; i++)
         {
-            spawnPoint.transform.position = new Vector3(spawnPoint.transform.position.x + spawnOffset,
-                                                        spawnPoint.transform.position.y,
-                                                        spawnPoint.transform.position.z);
-
-            unit.transform.position = spawnPoint.transform.position;
-            unit.SetActive(true);
+            playerLoadout[i].transform.position = evacShuttle.frontWaypoints[i].transform.position;
+            playerLoadout[i].SetActive(true);
         }
     }
 

@@ -10,7 +10,7 @@ public class LevelManager : MonoBehaviour
     public int nextLevel;
     public int spawnOffset = 1;
     public float spawnMilitiaCooldown;
-    public GameObject evacShuttle;
+    public RefactoredBarricade evacShuttle;
     public GameObject[] enemySpawners;
     public GameObject[] militiaSpawners;
 
@@ -48,9 +48,11 @@ public class LevelManager : MonoBehaviour
         Debug.Log("Level Manager Start");
         AssignLoadoutSlot();
         GameManager.AssignLoadoutUI(UI_playerPanel, IM);
-        GameManager.SpawnPlayerUnits(spawnPoint, spawnOffset);
+        GameManager.SpawnPlayerUnits(evacShuttle);
         StartCoroutine(LevelCompleteCountdown());
+        InvokeRepeating("LevelFailed", 0, 1f);
     }
+    
 
     /* Function: Assigns a unit to the appropriate loadout slot
     * Parameters: None
@@ -94,6 +96,16 @@ public class LevelManager : MonoBehaviour
         // Deactivate all enemies
         // Promp player to continue?
         // Load next level
+    }
+
+    void LevelFailed()
+    {
+        if (evacShuttle.gameObject.activeInHierarchy == false)
+        {
+            Debug.Log("Level Failed");
+            //Load Menu
+        }
+        
     }
 
     public void SpawnMilitia()
