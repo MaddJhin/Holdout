@@ -144,8 +144,6 @@ public class PlayerUnitControl : MonoBehaviour
         playerAction.attackRange = attackRange;
         playerAction.damagePerHit = damagePerHit;
         playerAction.healPerHit = healPerTick;
-        stats.maxHealth = maxHealth;
-        stats.currentHealth = maxHealth;
         m_Animator.speed = moveSpeed;
         residentListCache = new List<PlayerUnitControl>();
 	}

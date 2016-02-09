@@ -98,8 +98,6 @@ public class EnemyUnitControl : MonoBehaviour
     {
         performingAction = false;
         actionTarget = null;
-        stats.maxHealth = maxHealth;
-        stats.currentHealth = maxHealth;
         m_Animator.speed = moveSpeed;
         playerLayer = LayerMask.GetMask("Player");
         projectile.gameObject.SetActive(false);
