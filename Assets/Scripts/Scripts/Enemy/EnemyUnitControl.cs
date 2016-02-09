@@ -14,7 +14,6 @@ public class EnemyUnitControl : MonoBehaviour
     #region Unit Attributes & Stats
 
     [Header("Unit Attributes")]
-    public float maxHealth = 100f;
     public float sightRange;
     public bool stunImmunity = false;
     public EnemyTypes unitType;

@@ -18,7 +18,6 @@ using System.Collections;
 public class UnitStats : MonoBehaviour 
 {
     // Unit attributes
-    [HideInInspector]
     public float maxHealth;
     public float currentHealth;
 

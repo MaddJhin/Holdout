@@ -6,15 +6,14 @@ public class RefactoredBarricade : MonoBehaviour
 {
 
     #region Barricade Attributes
-    public float maxHealth = 100;
-    public float selfHealAmount = 1;
-    public float healRateSeconds = 1;
-    public float sightCheckDelay = .5f;
+    public float selfHealAmount;
+    public float healRateSeconds;
+    public float sightCheckDelay;
 
     [Tooltip("Begins checking for enemies, assigning & retreating X seconds after spawning")]
-    public float checkAfter = 5f;
-    public float sightRadius = 20f;
-    public float assignTargetDelay = .5f;
+    public float checkAfter;
+    public float sightRadius;
+    public float assignTargetDelay;
 
     [Tooltip("Barricade that units will retreat to")]
     public GameObject retreatBarricade;
@@ -44,7 +43,6 @@ public class RefactoredBarricade : MonoBehaviour
     {
         stats = GetComponent<UnitStats>();
         BarricadeWaypoint[] temp = GetComponentsInChildren<BarricadeWaypoint>();
-        stats.maxHealth = maxHealth;
         unitCache = null;
         baseSelfHealCache = selfHealAmount;
 

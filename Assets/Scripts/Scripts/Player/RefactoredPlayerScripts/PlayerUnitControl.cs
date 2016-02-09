@@ -14,7 +14,6 @@ public class PlayerUnitControl : MonoBehaviour
 {
     #region Unit Attributes & Stats
     [Header("Unit Attributes")]
-    public float maxHealth = 100f;
     public float healthRegenRate = 0f;
     public float sightRange;
     public bool stunImmunity = false;
