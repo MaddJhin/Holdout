@@ -72,6 +72,7 @@ public class PlayerUnitControl : MonoBehaviour
     LineRenderer line;
     Light light;
     AudioSource gunshot;
+    bool moving;
 
     #endregion
 
@@ -298,8 +299,9 @@ public class PlayerUnitControl : MonoBehaviour
     IEnumerator BeginFortify()
     {
         Debug.Log("Beginning Fortification");
+        moving = m_Animator.GetBool("Moving");
 
-        if (currentBarricade != null && agent.hasPath == false)
+        if (currentBarricade != null && agent.hasPath == false && agent.velocity.magnitude > 0.5)
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
