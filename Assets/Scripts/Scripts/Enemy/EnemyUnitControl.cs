@@ -42,6 +42,7 @@ public class EnemyUnitControl : MonoBehaviour
 
     // Object References
     GameObject actionTarget;
+    Collider targetCollider;
     public Projectile projectile;
 
     #endregion
@@ -100,14 +101,21 @@ public class EnemyUnitControl : MonoBehaviour
         actionTarget = null;
         m_Animator.speed = moveSpeed;
         playerLayer = LayerMask.GetMask("Player");
-        projectile.gameObject.SetActive(false);
+
+        if (projectile != null)
+        {
+            projectile.gameObject.SetActive(false);
+        }
 	}
 	
 	// Update is called once per frame
 	void Update () 
     {
         if (agent.velocity.magnitude > 0.5)
+        {
+            Debug.Log("Moving Unit");
             m_Animator.SetBool("Moving", true);
+        }
 
         else
             m_Animator.SetBool("Moving", false);
@@ -135,7 +143,7 @@ public class EnemyUnitControl : MonoBehaviour
     IEnumerator Punch()
     {
         Debug.Log("Beginning Punch Coroutine");
-        if (Vector3.Distance(transform.position, actionTarget.transform.position) <= attackRange)
+        if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Debug.Log("Attacking");
             Stop();
@@ -156,7 +164,7 @@ public class EnemyUnitControl : MonoBehaviour
     IEnumerator Slam()
     {
         Debug.Log("Beginning Slam Coroutine");
-        if (Vector3.Distance(actionTarget.transform.position, transform.position) <= attackRange)
+        if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Debug.Log("Beginning Slash Coroutine");
             Stop();
@@ -169,6 +177,7 @@ public class EnemyUnitControl : MonoBehaviour
         else
         {
             Debug.Log("Out of range, approaching");
+            performingAction = false;
             Move(actionTarget.transform.position);
         }     
     }
@@ -176,11 +185,12 @@ public class EnemyUnitControl : MonoBehaviour
     IEnumerator Explode()
     {
         Debug.Log("Beginng Explode Coroutine");
-        if (Vector3.Distance(actionTarget.transform.position, transform.position) <= attackRange)
+        if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
-            Debug.Log("Beginning Slash Coroutine");
+            Debug.Log("BOOM");
             Stop();
             enemyAttack.Explode(actionTarget);
+            stats.KillUnit();
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
         }
@@ -188,6 +198,7 @@ public class EnemyUnitControl : MonoBehaviour
         else
         {
             Debug.Log("Out of range, approaching");
+            performingAction = false;
             Move(actionTarget.transform.position);
         } 
     }
@@ -254,16 +265,14 @@ public class EnemyUnitControl : MonoBehaviour
     {
         if (actionTarget == null)
         {
-            Debug.Log("Performing Sight Check for " + unitType);
-
             Collider[] targetsInRange = Physics.OverlapSphere(transform.position, sightRange, playerLayer);
 
             if (targetsInRange.Length > 0)
+            {
                 actionTarget = targetsInRange[0].gameObject;
+                targetCollider = targetsInRange[0];
+            }
         }
-
-        else
-            Debug.Log("Ignoring Sight Check for " + unitType);
     }
 
     #endregion

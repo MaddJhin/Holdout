@@ -160,7 +160,6 @@ public class PlayerUnitControl : MonoBehaviour
             else if (unitType == UnitTypes.Mechanic)
                 StartCoroutine(EndFortify());
         }
-        Debug.Log(agent.velocity.magnitude);
 
         if (agent.velocity.magnitude > 0.5)
             m_Animator.SetBool("Moving", true);
@@ -256,24 +255,26 @@ public class PlayerUnitControl : MonoBehaviour
             agent.hasPath == false)
         {
             Debug.Log("Modifying Heal Values");
-            
+
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
                 m_ParticleSystem[i].Play();
             }
 
             // Cache the new resident list
-            residentListCache = currentBarricade.residentList;
             m_Animator.SetBool("Acting", true);
 
-            for (int i = 0; i < residentListCache.Count; i++)
+            for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
-                residentListCache[i].healthRegenRate = healPerTick;
+                currentBarricade.residentList[i].healthRegenRate = healPerTick;
             }
 
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
         }
+
+        else
+            performingAction = false;
     }
 
     public IEnumerator DeactivateHeal()

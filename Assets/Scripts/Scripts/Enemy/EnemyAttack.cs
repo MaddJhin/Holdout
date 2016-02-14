@@ -59,7 +59,7 @@ public class EnemyAttack : MonoBehaviour {
 		AreaOfEffect aoe = new AreaOfEffect();
 		aoe.AreaExplode(target.transform.position, attackRadius, damage, gameObject);
 		
-		DestructEffects();
+		//DestructEffects();
 		Debug.Log("BOOM!");
 	}
 	

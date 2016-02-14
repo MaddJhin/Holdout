@@ -34,6 +34,7 @@ public class RefactoredBarricade : MonoBehaviour
     RefactoredBarricade retreatBarricadeCache;
     List<BarricadeWaypoint> retreatWaypointsCache;
     PlayerUnitControl unitCache;            // Used to skip searches on subsequent identical units
+    Collider coll;
     float baseSelfHealCache;
 
     #endregion
@@ -42,6 +43,7 @@ public class RefactoredBarricade : MonoBehaviour
     void Start()
     {
         stats = GetComponent<UnitStats>();
+        coll = GetComponent<Collider>();
         BarricadeWaypoint[] temp = GetComponentsInChildren<BarricadeWaypoint>();
         unitCache = null;
         baseSelfHealCache = selfHealAmount;
