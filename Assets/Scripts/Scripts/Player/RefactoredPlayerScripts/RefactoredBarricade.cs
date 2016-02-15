@@ -201,7 +201,6 @@ public class RefactoredBarricade : MonoBehaviour
     {
         if (residentList.Count > 0)
         {
-            Debug.Log("Checking for enemy units");
             Collider[] targetsInRange = Physics.OverlapSphere(transform.position, sightRadius, enemyMask);
 
             // If there are enemies in range, ping residents to perform a sight check
@@ -209,7 +208,6 @@ public class RefactoredBarricade : MonoBehaviour
             {
                 for (int i = 0; i < residentList.Count; i++)
                 {
-                    Debug.Log("Pinging residents");
                     if (residentList[i].unitType == UnitTypes.Trooper ||
                         residentList[i].unitType == UnitTypes.Marksman)
                         StartCoroutine(residentList[i].CheckForTarget(targetsInRange));
@@ -218,13 +216,7 @@ public class RefactoredBarricade : MonoBehaviour
                         StartCoroutine(residentList[i].Slow(targetsInRange));
                 }
             }
-
-            else
-                Debug.Log("No enemies inrange");
         }
-
-        else
-            Debug.Log("No residents present - Cancelling vision check");
     }
 
     #endregion

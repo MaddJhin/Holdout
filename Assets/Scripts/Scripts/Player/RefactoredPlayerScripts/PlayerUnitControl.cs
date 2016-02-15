@@ -115,7 +115,6 @@ public class PlayerUnitControl : MonoBehaviour
             case UnitTypes.Trooper:
                 InvokeRepeating("TetherCheck", 1, 0.5f);
                 selectedAction = "Slash";
-                Debug.Log(shootPoint);
                 break;
 
             case UnitTypes.Marksman:
@@ -178,13 +177,11 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             performingAction = true;
-            Debug.Log("Unit is acting");
             StartCoroutine(selectedAction);
         }
 
         else if (actionTarget != null && !actionTarget.activeInHierarchy)
         {
-            Debug.Log("Target inactive - Setting to null");
             actionTarget = null;
 
             if (unitType == UnitTypes.Marksman)
@@ -203,7 +200,6 @@ public class PlayerUnitControl : MonoBehaviour
     IEnumerator Shoot()
     {
         //Shoot at target if in range of Barricade
-        Debug.Log("Beginning Shoot Coroutine");
         m_Animator.SetTrigger("Acting");
 
         line.enabled = true;
@@ -227,11 +223,9 @@ public class PlayerUnitControl : MonoBehaviour
     {
         // If in range of the target, attack it
         // Else, move into range of the target
-        Debug.Log("Checking Sight");
 
         if (Vector3.Distance(actionTarget.transform.position, transform.position) <= attackRange)
         {
-            Debug.Log("Beginning Slash Coroutine");
             m_Animator.SetTrigger("Action");
             Stop();
             playerAction.Attack(actionTarget.GetComponent<UnitStats>());
@@ -241,7 +235,6 @@ public class PlayerUnitControl : MonoBehaviour
 
         else
         {
-            Debug.Log("Out of range, approaching");
             Move(actionTarget.transform.position);
             performingAction = false;
         }        
@@ -249,13 +242,10 @@ public class PlayerUnitControl : MonoBehaviour
 
     IEnumerator ActivateHeal()
     {
-        Debug.Log("Activating Heal");
         // Check if the resident list has changed
         if (currentBarricade != null &&
             agent.hasPath == false)
         {
-            Debug.Log("Modifying Heal Values");
-
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
                 m_ParticleSystem[i].Play();
@@ -279,7 +269,6 @@ public class PlayerUnitControl : MonoBehaviour
 
     public IEnumerator DeactivateHeal()
     {
-        Debug.Log("Deactivating Heal");
         if (currentBarricade.residentList.Count > 0)
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
@@ -299,7 +288,6 @@ public class PlayerUnitControl : MonoBehaviour
 
     IEnumerator BeginFortify()
     {
-        Debug.Log("Beginning Fortification");
         moving = m_Animator.GetBool("Moving");
 
         if (currentBarricade != null && agent.hasPath == false && agent.velocity.magnitude > 0.5)
@@ -309,7 +297,6 @@ public class PlayerUnitControl : MonoBehaviour
                 m_ParticleSystem[i].Play();
             }
 
-            Debug.Log("Adjusting Self Heal Values");
             m_Animator.SetBool("Acting", true);
             currentBarricade.fortified = true;
             currentBarricade.selfHealAmount = repairPerTick;
@@ -321,8 +308,6 @@ public class PlayerUnitControl : MonoBehaviour
 
     public IEnumerator EndFortify()
     {
-        Debug.Log("Ending Fortification");
-
         if (currentBarricade != null)
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
@@ -339,10 +324,8 @@ public class PlayerUnitControl : MonoBehaviour
 
     public IEnumerator Slow(Collider[] targets)
     {
-        Debug.Log("Slowing enemy units"); 
         for (int i = 0; i < targets.Length; i++)
         {
-            Debug.Log("Slowing " + targets[i]);
             targets[i].GetComponent<EnemyUnitControl>().SetSlow(slowPercentage, slowDuration);
         }
 
@@ -362,12 +345,10 @@ public class PlayerUnitControl : MonoBehaviour
     {
         for (int i = 0; i < priorityList.Count; i++)
         {
-            Debug.Log("Checking priority at level " + i);
             for (int j = 0; j < targets.Length; j++)
             {
                 if (targets[j].tag == priorityList[i])
                 {
-                    Debug.Log("Assigning target" + targets[j] + " to " + priorityList[i]);
                     actionTarget = targets[j].gameObject;
                 }
             }

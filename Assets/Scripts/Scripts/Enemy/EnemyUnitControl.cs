@@ -113,7 +113,6 @@ public class EnemyUnitControl : MonoBehaviour
     {
         if (agent.velocity.magnitude > 0.5)
         {
-            Debug.Log("Moving Unit");
             m_Animator.SetBool("Moving", true);
         }
 
@@ -124,13 +123,11 @@ public class EnemyUnitControl : MonoBehaviour
         if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
         {
             performingAction = true;
-            Debug.Log("Unit is acting");
             StartCoroutine(selectedAction);
         }
 
         else if (actionTarget != null && !actionTarget.activeInHierarchy)
         {
-            Debug.Log("Target inactive - Setting to null");
             actionTarget = null;
         }
 
@@ -142,10 +139,8 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Punch()
     {
-        Debug.Log("Beginning Punch Coroutine");
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
-            Debug.Log("Attacking");
             Stop();
             m_Animator.SetTrigger("Action");
             enemyAttack.Punch(actionTarget);
@@ -155,7 +150,6 @@ public class EnemyUnitControl : MonoBehaviour
 
         else
         {
-            Debug.Log("Out of range, approaching");
             Move(actionTarget.transform.position);
             performingAction = false;
         } 
@@ -163,10 +157,8 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Slam()
     {
-        Debug.Log("Beginning Slam Coroutine");
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
-            Debug.Log("Beginning Slash Coroutine");
             Stop();
             m_Animator.SetTrigger("Action");
             enemyAttack.Slam(actionTarget);
@@ -176,7 +168,6 @@ public class EnemyUnitControl : MonoBehaviour
 
         else
         {
-            Debug.Log("Out of range, approaching");
             performingAction = false;
             Move(actionTarget.transform.position);
         }     
@@ -184,10 +175,8 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Explode()
     {
-        Debug.Log("Beginng Explode Coroutine");
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
-            Debug.Log("BOOM");
             Stop();
             enemyAttack.Explode(actionTarget);
             stats.KillUnit();
@@ -197,7 +186,6 @@ public class EnemyUnitControl : MonoBehaviour
 
         else
         {
-            Debug.Log("Out of range, approaching");
             performingAction = false;
             Move(actionTarget.transform.position);
         } 
@@ -205,9 +193,6 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Shoot()
     {
-        Debug.Log("Beginning Shoot Coroutine");
-        Debug.Log("Shooting");
-
         Stop();
         m_Animator.SetTrigger("Action");
         projectile.gameObject.SetActive(true);

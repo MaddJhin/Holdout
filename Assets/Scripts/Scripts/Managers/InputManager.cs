@@ -108,12 +108,6 @@ public class InputManager : MonoBehaviour {
 					
 					menuManager.ShowMenu(menuManager.waypointMenu);
 				}
-
-				else
-				{
-					// Remove UI highlight
-					setTargetOn = null;
-				}
 			}
         }
 		else if (!thirdPerson)

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -13,6 +14,7 @@ public class LevelManager : MonoBehaviour
     public RefactoredBarricade evacShuttle;
     public GameObject[] enemySpawners;
     public GameObject[] militiaSpawners;
+    public GameObject UICanvas;
 
     private GameObject spawnPoint;
     private GameObject UI_playerPanel;
@@ -45,7 +47,6 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("Level Manager Start");
         AssignLoadoutSlot();
         GameManager.AssignLoadoutUI(UI_playerPanel, IM);
         GameManager.SpawnPlayerUnits(evacShuttle);
@@ -66,7 +67,6 @@ public class LevelManager : MonoBehaviour
             string unitToSpawn = GameManager.unitToSpawn[unitIndex];
             GameManager.playerLoadout[i] = Instantiate(Resources.Load(unitToSpawn)) as GameObject;
             GameManager.playerLoadout[i].SetActive(false);
-            Debug.Log("Unit index: " + unitIndex + ", spawning: " + unitToSpawn);
         }
     }
 
@@ -95,7 +95,11 @@ public class LevelManager : MonoBehaviour
         // Update completed level in save file
         // Deactivate all enemies
         // Promp player to continue?
-        // Load next level
+
+        if (UICanvas != null)
+            UICanvas.SetActive(false);
+
+        SceneManager.LoadScene(nextLevel, LoadSceneMode.Single);
     }
 
     void LevelFailed()
@@ -103,7 +107,11 @@ public class LevelManager : MonoBehaviour
         if (evacShuttle.gameObject.activeInHierarchy == false)
         {
             Debug.Log("Level Failed");
-            //Load Menu
+
+            if (UICanvas != null)
+                UICanvas.SetActive(false);
+
+            SceneManager.LoadScene(0, LoadSceneMode.Single);
         }
         
     }
