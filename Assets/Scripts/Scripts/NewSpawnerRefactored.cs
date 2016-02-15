@@ -217,4 +217,9 @@ public class NewSpawnerRefactored : MonoBehaviour
 
         return waveIndex;
     }
+
+    public void BeginSpawnLoop()
+    {
+        StartCoroutine(SpawnLoop());
+    }
 }
