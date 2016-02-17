@@ -200,7 +200,8 @@ public class InputManager : MonoBehaviour {
 		}
 	}
 
-	void SetWaypointButtons (RefactoredBarricade barricade){		
+	void SetWaypointButtons (RefactoredBarricade barricade)
+    {		
 		for (int f = 0; f < barricade.frontWaypoints.Count; f++)
 		{
 			if (barricade.frontWaypoints[f].occupied == false)
@@ -213,19 +214,25 @@ public class InputManager : MonoBehaviour {
 			
 			DisableButton(frontWaypointButton);
 		}
-		
-		for (int b = 0; b < barricade.backWaypoints.Count; b++)
-		{
-			if (barricade.backWaypoints[b].occupied == false)
-			{
-				EnableButton(rearWaypointButton);
-				
-				AddListeners(rearWaypointButton, barricade.backWaypoints[b], barricade);
-				break;
-			}
-			
-			DisableButton(rearWaypointButton);
-		}
+
+        if (barricade.backWaypoints.Count > 1)
+        {
+            for (int b = 0; b < barricade.backWaypoints.Count; b++)
+            {
+                if (barricade.backWaypoints[b].occupied == false)
+                {
+                    EnableButton(rearWaypointButton);
+
+                    AddListeners(rearWaypointButton, barricade.backWaypoints[b], barricade);
+                    break;
+                }
+
+                DisableButton(rearWaypointButton);
+            }
+        }
+
+        else
+            DisableButton(rearWaypointButton);
 	}
 
 	void AddListeners (Button b, BarricadeWaypoint parameter, RefactoredBarricade barricade){
