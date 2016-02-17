@@ -16,7 +16,6 @@ public class LevelManager : MonoBehaviour
     public GameObject[] militiaSpawners;
     public GameObject UICanvas;
 
-    private GameObject spawnPoint;
     private GameObject UI_playerPanel;
     private InputManager IM;
     private List<NewSpawnerRefactored> enemySpawnerCache = new List<NewSpawnerRefactored>();
@@ -24,9 +23,10 @@ public class LevelManager : MonoBehaviour
 
     void Awake()
     {
+        UICanvas.SetActive(true);
+        Debug.Log(UICanvas.activeInHierarchy);
         UI_playerPanel = GameObject.Find("PlayerPortraitsMenu");
         IM = GameObject.FindObjectOfType<InputManager>();
-        spawnPoint = GameObject.FindGameObjectWithTag("PlayerSpawnPoint");
 
         if (enemySpawners.Length > 0)
         {
@@ -47,9 +47,12 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
+        UICanvas.SetActive(true);
+        Debug.Log(UICanvas.activeInHierarchy);
         AssignLoadoutSlot();
         GameManager.AssignLoadoutUI(UI_playerPanel, IM);
         GameManager.SpawnPlayerUnits(evacShuttle);
+        
         StartCoroutine(LevelCompleteCountdown());
         InvokeRepeating("LevelFailed", 0, 1f);
     }
@@ -63,6 +66,12 @@ public class LevelManager : MonoBehaviour
     {
         for (int i = 0; i < GameManager.loadoutIndex.Length; i++)
         {
+            if (GameManager.loadoutIndex[i] == -1)
+            {
+                GameManager.playerLoadout[i] = null;
+                continue;
+            }
+
             int unitIndex = GameManager.loadoutIndex[i];
             string unitToSpawn = GameManager.unitToSpawn[unitIndex];
             GameManager.playerLoadout[i] = Instantiate(Resources.Load(unitToSpawn)) as GameObject;
@@ -96,8 +105,17 @@ public class LevelManager : MonoBehaviour
         // Deactivate all enemies
         // Promp player to continue?
 
-        if (UICanvas != null)
+        if (UICanvas != null && nextLevel < 2)
             UICanvas.SetActive(false);
+
+        for (int i = 0; i < GameManager.playerLoadout.Length; i++)
+        {
+            if (GameManager.playerLoadout[i].activeInHierarchy == false)
+            {
+                GameManager.loadoutIndex[i] = -1;
+                Destroy(GameManager.playerLoadout[i]);
+            }
+        }
 
         SceneManager.LoadScene(nextLevel, LoadSceneMode.Single);
     }

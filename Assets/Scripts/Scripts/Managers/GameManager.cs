@@ -67,8 +67,11 @@ public static class GameManager
     {
         for (int i = 0; i < playerLoadout.Length; i++)
         {
-            playerLoadout[i].transform.position = evacShuttle.frontWaypoints[i].transform.position;
-            playerLoadout[i].SetActive(true);
+            if (playerLoadout[i] != null)
+            {
+                playerLoadout[i].transform.position = evacShuttle.frontWaypoints[i].transform.position;
+                playerLoadout[i].SetActive(true);
+            }        
         }
     }
 
@@ -83,12 +86,15 @@ public static class GameManager
 
         for (i = 0; i < playerLoadout.Length; i++)
         {
-            PlayerUnitControl param = playerLoadout[i].GetComponent<PlayerUnitControl>();     // Cache the character controller to be added
-            GameObject playerChar = playerLoadout[i];
+            if (playerLoadout[i] != null)
+            {
+                PlayerUnitControl param = playerLoadout[i].GetComponent<PlayerUnitControl>();     // Cache the character controller to be added
+                GameObject playerChar = playerLoadout[i];
 
-            b[i].onClick.RemoveAllListeners();                                                          // Remove all previous listeners
-            b[i].onClick.AddListener(delegate { IM.SetTarget(param); });                                // Add a new listener with the cached controller
-            //b[i].onClick.AddListener(delegate { IM.FocusCamera(playerChar); });
+                b[i].onClick.RemoveAllListeners();                                                          // Remove all previous listeners
+                b[i].onClick.AddListener(delegate { IM.SetTarget(param); });                                // Add a new listener with the cached controller
+                //b[i].onClick.AddListener(delegate { IM.FocusCamera(playerChar); });
+            }
         }
     }
 

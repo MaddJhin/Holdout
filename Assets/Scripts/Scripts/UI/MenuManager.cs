@@ -47,9 +47,7 @@ public class MenuManager : MonoBehaviour {
 	void Awake()
 	{
 		if (_instance == null)
-		{
-			
-			Debug.Log("Creating singleton");
+		{			
 			// If this instance is the first in the scene, it becomes the singleton
 			_instance = this;
 			DontDestroyOnLoad(this);
@@ -60,7 +58,6 @@ public class MenuManager : MonoBehaviour {
 			// If another Singleton already exists, destroy this object
 			if (this != _instance)
 			{
-				Debug.Log("Destroying invalid singleton");
 				Destroy(this.gameObject);
 			}
 		}
