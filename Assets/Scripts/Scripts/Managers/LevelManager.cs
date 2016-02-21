@@ -6,15 +6,22 @@ using System.Collections.Generic;
 public class LevelManager : MonoBehaviour
 {
     // Number of waves in the current level
+    [Header("Level Progress Attributes")]
     public int startCountdown;
     public int levelDuration;
     public int nextLevel;
-    public int spawnOffset = 1;
-    public float spawnMilitiaCooldown;
+    
+    [Header("Level Object References")]
     public RefactoredBarricade evacShuttle;
     public GameObject[] enemySpawners;
     public GameObject[] militiaSpawners;
+    public GameObject[] barricades;
     public GameObject UICanvas;
+
+    [Header("Miscellaneous Attributes")]
+    public int spawnOffset = 1;
+    public float spawnMilitiaCooldown;
+    public int levelPerformance;
 
     private GameObject UI_playerPanel;
     private InputManager IM;
@@ -105,6 +112,9 @@ public class LevelManager : MonoBehaviour
         // Deactivate all enemies
         // Promp player to continue?
 
+        levelPerformance = CalculateLevelPerformance();
+        Debug.Log(levelPerformance);
+
         if (UICanvas != null && nextLevel < 2)
             UICanvas.SetActive(false);
 
@@ -143,5 +153,25 @@ public class LevelManager : MonoBehaviour
                 StartCoroutine(militiaSpawnerCache[i].SpawnLoop());
             }
         }
+    }
+
+    int CalculateLevelPerformance()
+    {
+        int scoreCounter = 0;
+
+        for (int i = 0; i < barricades.Length; i++)
+        {
+            if (barricades[i].activeInHierarchy)
+                scoreCounter++;
+        }
+
+        if (scoreCounter >= barricades.Length)
+            return 3;
+
+        else if (scoreCounter <= 1)
+            return 1;
+
+        else
+            return 2;
     }
 }
