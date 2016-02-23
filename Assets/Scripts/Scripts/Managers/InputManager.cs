@@ -20,6 +20,7 @@ public class InputManager : MonoBehaviour {
 	private Button frontWaypointButton;
 	private Button rearWaypointButton;
     private float startTime;
+    private int touchCountCache;
 
     private Renderer[] rendCache;                 // Used to cache the selected unit's renderer
     private Renderer targetRend;
@@ -79,9 +80,20 @@ public class InputManager : MonoBehaviour {
         startTime = Time.time;
     }
 
-    void Update () {
-		// Run when user clicks
-		if (!Input.GetMouseButtonDown(0))
+    void Update ()
+    {
+
+        for (int i = 0; i < Input.touchCount; ++i)
+        {
+            if (Input.GetTouch(i).phase == TouchPhase.Began)
+            {
+                Debug.Log("Tap Count" + Input.GetTouch(i).tapCount);
+                touchCountCache = Input.GetTouch(i).tapCount;
+            }
+        }
+
+        // Run when user clicks
+        if (!Input.GetMouseButtonDown(0))
 		{
 			return;
 		}
@@ -124,10 +136,14 @@ public class InputManager : MonoBehaviour {
 
         // Reset previous target's outline color before setting new target
         //if (targetRend != null && player != setTargetOn)
-          //  targetRend.material.SetColor("_OutlineColor", colorCache);
+        //  targetRend.material.SetColor("_OutlineColor", colorCache);
 
         // Set new target and cache their renderer for future color changes
-		setTargetOn = player;
+        setTargetOn = player;
+
+        if (touchCountCache > 1)
+            FocusCamera(player.gameObject);
+
         /*
         rendCache = player.gameObject.GetComponentsInChildren<Renderer>();
 
@@ -158,7 +174,7 @@ public class InputManager : MonoBehaviour {
         else
             Debug.Log("Could not change alpha - No Renderer found");
          * */
-	}
+    }
 
 	public void Move (BarricadeWaypoint target, RefactoredBarricade barricade)
     {
