@@ -32,13 +32,10 @@ public class EnemyAttack : MonoBehaviour {
     [HideInInspector]
 	public float attackRadius = 5f;
 
-	private ParticleSystem explosionFX;                 // Stores the instance of the explosion Particle System
-
 	public void Punch(GameObject target)
 	{
 		UnitStats targetHealth = target.GetComponent<UnitStats>();
 		targetHealth.TakeDamage(damage);
-		PunchEffects();
 	}
 
     public void Shoot(GameObject target)
@@ -51,7 +48,6 @@ public class EnemyAttack : MonoBehaviour {
 	{		
 		AreaOfEffect aoe = new AreaOfEffect();
 		aoe.AreaStun(target.transform.position, attackRadius, damage, stunDuration, gameObject);	
-		SlamEffects();
 	}
 	
 	public void Explode(GameObject target)
@@ -61,24 +57,5 @@ public class EnemyAttack : MonoBehaviour {
 		
 		//DestructEffects();
 		Debug.Log("BOOM!");
-	}
-	
-	// Audio and Visual effects for selfDestruct
-	void DestructEffects()
-	{
-		explosionFX.transform.position = gameObject.transform.position;
-		explosionFX.Play();
-	}
-
-	// Audio and Visual effects for punching
-	void SlamEffects()
-	{
-		
-	}
-
-	// Audio and Visual effects for punching
-	void PunchEffects()
-	{
-		
 	}
 }

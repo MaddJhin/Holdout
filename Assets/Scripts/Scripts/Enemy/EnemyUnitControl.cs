@@ -37,7 +37,7 @@ public class EnemyUnitControl : MonoBehaviour
     Animator m_Animator;
     EnemyAttack enemyAttack;
     UnitStats stats;
-    ParticleSystem[] m_ParticleSystem;
+    ParticleSystem m_ParticleSystem;
     Vector3 projectileTargetPos;
 
     // Object References
@@ -62,7 +62,6 @@ public class EnemyUnitControl : MonoBehaviour
         agent = GetComponent<NavMeshAgent>();
         obstacle = GetComponent<NavMeshObstacle>();
         m_Animator = GetComponentInChildren<Animator>();
-        m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
         enemyAttack = GetComponent<EnemyAttack>();
         stats = GetComponent<UnitStats>();
         baseAttackSpeedCache = timeBetweenAttacks;
@@ -78,6 +77,7 @@ public class EnemyUnitControl : MonoBehaviour
                 break;
 
             case EnemyTypes.Brute:
+                m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
                 selectedAction = "Slam";
                 break;
 
@@ -86,6 +86,7 @@ public class EnemyUnitControl : MonoBehaviour
                 break;
 
             case EnemyTypes.Bob:
+                m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
                 selectedAction = "Explode";
                 break;
 
@@ -160,10 +161,11 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
+            //m_ParticleSystem.Play(true);
             m_Animator.SetTrigger("Action");
             enemyAttack.Slam(actionTarget);
             yield return new WaitForSeconds(stats.attackSpeed);
-            performingAction = false;
+            performingAction = false;         
         }
 
         else
@@ -180,8 +182,9 @@ public class EnemyUnitControl : MonoBehaviour
             Stop();
             enemyAttack.Explode(actionTarget);
             stats.KillUnit();
+            m_ParticleSystem.Play(true);
             yield return new WaitForSeconds(timeBetweenAttacks);
-            performingAction = false;
+            performingAction = false;         
         }
 
         else
