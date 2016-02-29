@@ -102,6 +102,7 @@ public class EnemyUnitControl : MonoBehaviour
         actionTarget = null;
         m_Animator.speed = moveSpeed;
         playerLayer = LayerMask.GetMask("Player");
+        targetLocation = GameObject.Find("Evac Shuttle");
 
         if (projectile != null)
         {
