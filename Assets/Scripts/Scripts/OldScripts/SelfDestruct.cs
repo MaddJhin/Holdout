@@ -20,7 +20,7 @@ public class SelfDestruct : MonoBehaviour
         attacking = true;
 
         AreaOfEffect aoe = new AreaOfEffect();
-        aoe.AreaExplode(target.transform.position, radius, damage, gameObject);
+        //aoe.AreaExplode(target.transform.position, radius, damage, gameObject);
         
         DestructEffects();
         attacking = false;
