@@ -22,10 +22,11 @@ public class EnemyUnitControl : MonoBehaviour
     public float moveSpeed = 1f;
 
     [Header("Attack Attributes")]
-    public float damagePerHit = 20f;
-    public float attackRange = 2f;
-    public float timeBetweenAttacks = 0.15f;
-    public float projectileSpeed = 5f;
+    public float damagePerHit;
+    public float attackRange;
+    public float timeBetweenAttacks;
+    public float projectileSpeed;
+    public LayerMask validTargets;
 
     #endregion
 
@@ -141,12 +142,14 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Punch()
     {
+        Debug.Log("Beginning Punch");
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
+            Debug.Log("Punch in Range");
             Stop();
             m_Animator.SetTrigger("Action");
             enemyAttack.Punch(actionTarget);
-            yield return new WaitForSeconds(stats.attackSpeed);
+            yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
         }
 
@@ -162,10 +165,11 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
-            //m_ParticleSystem.Play(true);
             m_Animator.SetTrigger("Action");
-            enemyAttack.Slam(actionTarget);
-            yield return new WaitForSeconds(stats.attackSpeed);
+            enemyAttack.Slam(actionTarget, validTargets);
+            Debug.Log("Waiting for " + stats.attackSpeed + " seconds");
+            yield return new WaitForSeconds(timeBetweenAttacks);
+            Debug.Log("Finished Waiting");
             performingAction = false;         
         }
 
@@ -181,7 +185,7 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
-            enemyAttack.Explode(actionTarget);
+            enemyAttack.Explode(actionTarget, validTargets);
             stats.KillUnit();
             m_ParticleSystem.Play(true);
             yield return new WaitForSeconds(timeBetweenAttacks);
@@ -197,12 +201,13 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Shoot()
     {
+        Debug.Log("Damage set to: " + damagePerHit);
         Stop();
         m_Animator.SetTrigger("Action");
         projectile.gameObject.SetActive(true);
         projectile.FireProjectile(actionTarget.transform.position, projectileSpeed, transform.position);
-        enemyAttack.Shoot(actionTarget);
-        yield return new WaitForSeconds(stats.attackSpeed);
+        enemyAttack.Shoot(actionTarget, damagePerHit);
+        yield return new WaitForSeconds(timeBetweenAttacks);
         performingAction = false;
          
     }

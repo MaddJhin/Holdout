@@ -126,7 +126,7 @@ public class EnemyControlBrute : MonoBehaviour
         m_ParticleSystem.Stop();
         m_ParticleSystem.Play();
         Debug.Log(vision.actionTarget);
-        action.Slam(vision.actionTarget);
+        //action.Slam(vision.actionTarget);
     }
 
     void Move()

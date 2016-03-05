@@ -24,36 +24,40 @@ using System.Collections;
 public class EnemyAttack : MonoBehaviour {
 
     [HideInInspector]
-	public float damage = 5f;
+	public float damage;
 
     [HideInInspector]
 	public float stunDuration = 1f;
 
     [HideInInspector]
-	public float attackRadius = 5f;
+	public float attackRadius;
 
 	public void Punch(GameObject target)
 	{
+        Debug.Log("Activating Punch");
+        Debug.Log(target);
 		UnitStats targetHealth = target.GetComponent<UnitStats>();
 		targetHealth.TakeDamage(damage);
+        Debug.Log("Completing Punch");
 	}
 
-    public void Shoot(GameObject target)
+    public void Shoot(GameObject target, float damagePerHit)
     {
         UnitStats targetHealth = target.GetComponent<UnitStats>();
-        targetHealth.TakeDamage(damage);
+        Debug.Log("Dealing " + damagePerHit);
+        targetHealth.TakeDamage(damagePerHit);
     }
 
-	public void Slam(GameObject target)
+	public void Slam(GameObject target, int attackMask)
 	{		
 		AreaOfEffect aoe = new AreaOfEffect();
-		aoe.AreaStun(target.transform.position, attackRadius, damage, stunDuration, gameObject);	
+		aoe.AreaStun(target.transform.position, attackRadius, damage, stunDuration, gameObject, attackMask);	
 	}
 	
-	public void Explode(GameObject target)
+	public void Explode(GameObject target, int attackMask)
 	{		
 		AreaOfEffect aoe = new AreaOfEffect();
-		aoe.AreaExplode(target.transform.position, attackRadius, damage, gameObject);
+		aoe.AreaExplode(target.transform.position, attackRadius, damage, gameObject, attackMask);
 		
 		//DestructEffects();
 		Debug.Log("BOOM!");
