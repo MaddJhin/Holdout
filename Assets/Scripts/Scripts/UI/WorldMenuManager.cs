@@ -58,12 +58,15 @@ public class WorldMenuManager : MonoBehaviour
             if (GameManager.loadoutIndex[i] == -1)
             {
                 Debug.Log("A full loadout is required to launch the mission");
-                continue;
+                break;
             }
 
-            Debug.Log("Load level Called");
-            Application.LoadLevel(lvlIndex);
-            Debug.Log("New level loaded");
+            if (i == (GameManager.loadoutIndex.Length - 1))
+            {
+                Debug.Log("Load level Called");
+                Application.LoadLevel(lvlIndex);
+                Debug.Log("New level loaded");
+            }
         }
         
         

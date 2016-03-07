@@ -73,6 +73,8 @@ public class PlayerUnitControl : MonoBehaviour
     Light light;
     AudioSource gunshot;
     bool moving;
+    Renderer[] rendCache;
+    Color colorCache;
 
     #endregion
 
@@ -95,7 +97,7 @@ public class PlayerUnitControl : MonoBehaviour
         m_RigidBody = GetComponent<Rigidbody>();
         m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
         gunshot = GetComponent<AudioSource>();
-        
+        rendCache = GetComponentsInChildren<Renderer>();
 
         InvokeRepeating("SelfHeal", 10, 1);
 
@@ -133,6 +135,16 @@ public class PlayerUnitControl : MonoBehaviour
     // Use this for initialization
 	void Start () 
     {
+        for (int i = 0; i < rendCache.Length; i++)
+        {
+            if (rendCache[i].material.HasProperty("_OutlineColor"))
+            {
+                colorCache = rendCache[i].material.GetColor("_OutlineColor");
+                colorCache.a = (10F / 255F);
+                rendCache[i].material.SetColor("_OutlineColor", colorCache);
+            }
+        }
+
         if (unitType == UnitTypes.Mechanic || unitType == UnitTypes.Medic)
             actionTarget = this.gameObject;
 
