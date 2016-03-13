@@ -23,7 +23,7 @@ public static class GameManager
 {
     public static GameObject[] playerLoadout = new GameObject[7];
     public static List<GameObject> availableUnits;                             // List of units available to the player
-    public static int[] loadoutIndex = new int[7];
+    public static int[] loadoutIndex = { -1, -1, -1, -1, -1, -1, -1 };
 
     public static string[] unitToSpawn = 
         {

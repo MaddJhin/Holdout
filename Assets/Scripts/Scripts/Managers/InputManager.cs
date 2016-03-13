@@ -135,35 +135,37 @@ public class InputManager : MonoBehaviour {
     {
 
         // Reset previous target's outline color before setting new target
-        //if (targetRend != null && player != setTargetOn)
-        //  targetRend.material.SetColor("_OutlineColor", colorCache);
+        if (targetRend != null && player != setTargetOn)
+          targetRend.material.SetColor("_OutlineColor", colorCache);
 
         // Set new target and cache their renderer for future color changes
         setTargetOn = player;
 
         if (touchCountCache > 1)
             FocusCamera(player.gameObject);
-
-        /*
+      
         rendCache = player.gameObject.GetComponentsInChildren<Renderer>();
-
+        
         // Create new color from cache, change alpha, and apply
         if (rendCache != null)
         {
-            foreach (var renderer in rendCache)
+            Debug.Log("Renderer found");
+            for (int i = 0; i < rendCache.Length; i++)
             {
-                if (renderer.material.HasProperty("_OutlineColor"))
+                if (rendCache[i].material.HasProperty("_OutlineColor"))
                 {
-                    targetRend = renderer;
+                    Debug.Log("Outline Renderer Found");
+                    targetRend = rendCache[i];
 
-                    if (colorCache != renderer.material.GetColor("_OutlineColor"))
+                    if (colorCache != rendCache[i].material.GetColor("_OutlineColor"))
                     {
-                        colorCache = renderer.material.GetColor("_OutlineColor");
+                        Debug.Log("Received outline colour");
+                        colorCache = rendCache[i].material.GetColor("_OutlineColor");
                         newColorCache = colorCache;
                         newColorCache.a = (255F);
                     }
-                    
-                    renderer.material.SetColor("_OutlineColor", newColorCache);
+
+                    rendCache[i].material.SetColor("_OutlineColor", newColorCache);
                 }
 
                 else
@@ -173,7 +175,7 @@ public class InputManager : MonoBehaviour {
 
         else
             Debug.Log("Could not change alpha - No Renderer found");
-         * */
+         
     }
 
 	public void Move (BarricadeWaypoint target, RefactoredBarricade barricade)
