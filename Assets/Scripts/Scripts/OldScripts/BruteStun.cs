@@ -28,7 +28,7 @@ public class BruteStun : MonoBehaviour {
         attacking = true;
 
         AreaOfEffect aoe = new AreaOfEffect();
-        aoe.AreaStun(target.transform.position, radius, damage, duration, gameObject);
+        //aoe.AreaStun(target.transform.position, radius, damage, duration, gameObject);
 
         SlamEffects();
         attacking = false;

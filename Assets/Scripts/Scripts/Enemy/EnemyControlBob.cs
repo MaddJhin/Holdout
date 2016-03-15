@@ -111,7 +111,7 @@ public class EnemyControlBob : MonoBehaviour
     {        
         agent.Stop();
         Debug.Log(vision.actionTarget);
-        action.Explode(vision.actionTarget);
+        //action.Explode(vision.actionTarget);
 
         gameObject.SetActive(false);
     }

@@ -6,52 +6,28 @@ public class AreaOfEffect : MonoBehaviour
     private int colliderIndex;
     private UnitStats cache;
 
-    public void AreaStun(Vector3 center, float radius, float damage, float duration, GameObject source)
+    public void AreaStun(Vector3 center, float radius, float damage, float duration, GameObject source, int attackMask)
     {
-        Collider[] hitColliders = Physics.OverlapSphere(center, radius);
-        colliderIndex = 0;
+        Collider[] hitColliders = Physics.OverlapSphere(center, radius, attackMask);
 
-        Debug.Log("Potential Targets: " + hitColliders.Length);
-
-        while (colliderIndex < hitColliders.Length)
+        for (int i = 0; i < hitColliders.Length; i++)
         {
-            if ((hitColliders[colliderIndex].gameObject.layer != source.layer) &&
-                (cache = hitColliders[colliderIndex].gameObject.GetComponent<UnitStats>()))
-            {
-                Debug.Log("Valid Target" + hitColliders[colliderIndex]);
-                cache.TakeDamage(damage);
+            cache = hitColliders[i].gameObject.GetComponent<UnitStats>();
+            cache.TakeDamage(damage);
 
-                if(!cache.stunImmunity)
-                    cache.ApplyStatus(UnitStats.statusEffects.stun, duration);
-
-                Debug.Log("Target Attacked");
-            }
-
-            colliderIndex++;
+            if (!cache.stunImmunity)
+                cache.ApplyStatus(UnitStats.statusEffects.stun, duration);
         }
     }
 
-    public void AreaExplode(Vector3 center, float radius, float damage, GameObject source)
+    public void AreaExplode(Vector3 center, float radius, float damage, GameObject source, int attackMask)
     {
-        Collider[] hitColliders = Physics.OverlapSphere(center, radius);
-        colliderIndex = 0;
+        Collider[] hitColliders = Physics.OverlapSphere(center, radius, attackMask);
 
-        
-
-        Debug.Log("Potential Targets: " + hitColliders.Length);
-
-        while (colliderIndex < hitColliders.Length)
+        for (int i = 0; i < hitColliders.Length; i++)
         {
-            if ((hitColliders[colliderIndex].gameObject.layer != source.layer) &&
-                (cache = hitColliders[colliderIndex].gameObject.GetComponent<UnitStats>()))
-            {
-                Debug.Log("Valid Target" + hitColliders[colliderIndex]);
-                //hitColliders[colliderIndex].gameObject.GetComponent<UnitStats>().TakeDamage(damage);
-                cache.TakeDamage(damage);
-                Debug.Log("Target Attacked");
-            }
-
-            colliderIndex++;
+            cache = hitColliders[i].gameObject.GetComponent<UnitStats>();
+            cache.TakeDamage(damage);
         }
     }
 
