@@ -87,7 +87,6 @@ public class InputManager : MonoBehaviour {
         {
             if (Input.GetTouch(i).phase == TouchPhase.Began)
             {
-                Debug.Log("Tap Count" + Input.GetTouch(i).tapCount);
                 touchCountCache = Input.GetTouch(i).tapCount;
             }
         }
@@ -149,17 +148,14 @@ public class InputManager : MonoBehaviour {
         // Create new color from cache, change alpha, and apply
         if (rendCache != null)
         {
-            Debug.Log("Renderer found");
             for (int i = 0; i < rendCache.Length; i++)
             {
                 if (rendCache[i].material.HasProperty("_OutlineColor"))
                 {
-                    Debug.Log("Outline Renderer Found");
                     targetRend = rendCache[i];
 
                     if (colorCache != rendCache[i].material.GetColor("_OutlineColor"))
                     {
-                        Debug.Log("Received outline colour");
                         colorCache = rendCache[i].material.GetColor("_OutlineColor");
                         newColorCache = colorCache;
                         newColorCache.a = (255F);

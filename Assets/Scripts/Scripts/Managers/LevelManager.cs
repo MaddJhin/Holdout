@@ -2,6 +2,7 @@
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Analytics;
 
 public class LevelManager : MonoBehaviour
 {
@@ -27,11 +28,11 @@ public class LevelManager : MonoBehaviour
     private InputManager IM;
     private List<NewSpawnerRefactored> enemySpawnerCache = new List<NewSpawnerRefactored>();
     private List<NewSpawnerRefactored> militiaSpawnerCache = new List<NewSpawnerRefactored>();
+    private GameObject[] playerLoadoutCache;
 
     void Awake()
     {
         UICanvas.SetActive(true);
-        Debug.Log(UICanvas.activeInHierarchy);
         UI_playerPanel = GameObject.Find("PlayerPortraitsMenu");
         IM = GameObject.FindObjectOfType<InputManager>();
 
@@ -55,7 +56,6 @@ public class LevelManager : MonoBehaviour
     void Start()
     {
         UICanvas.SetActive(true);
-        Debug.Log(UICanvas.activeInHierarchy);
         AssignLoadoutSlot();
         GameManager.AssignLoadoutUI(UI_playerPanel, IM);
         GameManager.SpawnPlayerUnits(evacShuttle);
@@ -83,6 +83,22 @@ public class LevelManager : MonoBehaviour
             string unitToSpawn = GameManager.unitToSpawn[unitIndex];
             GameManager.playerLoadout[i] = Instantiate(Resources.Load(unitToSpawn)) as GameObject;
             GameManager.playerLoadout[i].SetActive(false);
+            playerLoadoutCache = GameManager.playerLoadout;
+        }
+        
+        Debug.Log("Logging Loadout Analytics");
+        if (GameManager.playerLoadout[0] != null)
+        {
+            Analytics.CustomEvent("LevelLoadout", new Dictionary<string, object>
+            {
+                {"Slot One", GameManager.playerLoadout[0].name},
+                {"Slot Two", GameManager.playerLoadout[1].name},
+                {"Slot Three", GameManager.playerLoadout[2].name},
+                {"Slot Four", GameManager.playerLoadout[3].name},
+                {"Slot Five", GameManager.playerLoadout[4].name},
+                {"Slot Six", GameManager.playerLoadout[5].name},
+                {"Slot Seven", GameManager.playerLoadout[6].name},
+            });
         }
     }
 
@@ -125,7 +141,26 @@ public class LevelManager : MonoBehaviour
                 GameManager.loadoutIndex[i] = -1;
                 Destroy(GameManager.playerLoadout[i]);
             }
+
+            else
+            {
+                Debug.Log("Logging Survivor Analytics");
+                Analytics.CustomEvent("UnitSurived", new Dictionary<string, object>
+                  {
+                    {"Scene ID", SceneManager.GetActiveScene().buildIndex},
+                    {"Survivor", GameManager.playerLoadout[i].name}
+                  });
+            }
         }
+
+        Debug.Log("Logging Completion Analytics");
+        Analytics.CustomEvent("MissionComplete", new Dictionary<string, object>
+          {
+            {"Scene ID", SceneManager.GetActiveScene().buildIndex},
+            {"Mission Complete", true},
+            {"Remaining Barricades", barricades.Length},
+            {"Mission Result", levelPerformance}
+          });
 
         SceneManager.LoadScene(nextLevel, LoadSceneMode.Single);
     }
@@ -138,6 +173,15 @@ public class LevelManager : MonoBehaviour
 
             if (UICanvas != null)
                 UICanvas.SetActive(false);
+
+            Debug.Log("Logging Failure Analytics");
+            Analytics.CustomEvent("MissionFailed", new Dictionary<string, object>
+            {
+                {"Scene ID", SceneManager.GetActiveScene().buildIndex},
+                {"Mission Complete", false},
+                {"Remaining Barricades", barricades.Length},
+                {"Mission Result", levelPerformance}
+            });
 
             SceneManager.LoadScene(0, LoadSceneMode.Single);
         }

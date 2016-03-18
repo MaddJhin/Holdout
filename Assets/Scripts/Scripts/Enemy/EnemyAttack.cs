@@ -34,17 +34,14 @@ public class EnemyAttack : MonoBehaviour {
 
 	public void Punch(GameObject target)
 	{
-        Debug.Log("Activating Punch");
         Debug.Log(target);
 		UnitStats targetHealth = target.GetComponent<UnitStats>();
 		targetHealth.TakeDamage(damage);
-        Debug.Log("Completing Punch");
 	}
 
     public void Shoot(GameObject target, float damagePerHit)
     {
         UnitStats targetHealth = target.GetComponent<UnitStats>();
-        Debug.Log("Dealing " + damagePerHit);
         targetHealth.TakeDamage(damagePerHit);
     }
 
@@ -58,8 +55,5 @@ public class EnemyAttack : MonoBehaviour {
 	{		
 		AreaOfEffect aoe = new AreaOfEffect();
 		aoe.AreaExplode(target.transform.position, attackRadius, damage, gameObject, attackMask);
-		
-		//DestructEffects();
-		Debug.Log("BOOM!");
 	}
 }
