@@ -30,15 +30,15 @@ public class CameraScroll : MonoBehaviour {
 #if UNITY_ANDROID
         if (Input.touchCount > 0)
         {
-            vertical = Input.touches[0].deltaPosition.x;
-            side= Input.touches[0].deltaPosition.y;
+            side = Input.touches[0].deltaPosition.x * speed;
+            vertical = Input.touches[0].deltaPosition.y * speed;
         }
 
 #endif
 
 #if UNITY_EDITOR
         vertical = Input.GetAxis("Vertical") * speed;
-		side = Input.GetAxis("Horizontal") * speed;
+        side = Input.GetAxis("Horizontal") * speed;
 #endif
  
 		// Adjust for framerate differences
