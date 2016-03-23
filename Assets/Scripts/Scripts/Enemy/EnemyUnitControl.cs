@@ -120,10 +120,11 @@ public class EnemyUnitControl : MonoBehaviour
 
     void OnEnable()
     {
-        m_AudioSource.clip = unitAudio[0];
-
-        if (m_AudioSource.clip != null)
+        if (unitAudio[0] != null)
+        {
+            m_AudioSource.clip = unitAudio[0];
             m_AudioSource.Play();
+        }
     }
 	
 	// Update is called once per frame
@@ -195,7 +196,6 @@ public class EnemyUnitControl : MonoBehaviour
     {
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
-            Debug.Log("Exploding");
             Stop();
             m_ParticleSystem.Play(true);
             m_ParticleSystem.transform.parent = null;

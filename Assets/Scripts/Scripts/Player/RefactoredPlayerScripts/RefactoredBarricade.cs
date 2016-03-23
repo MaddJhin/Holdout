@@ -62,7 +62,7 @@ public class RefactoredBarricade : MonoBehaviour
     {
         InvokeRepeating("CheckForEnemies", checkAfter, sightCheckDelay);
         InvokeRepeating("FindRetreatPoints", checkAfter, 0.5f);
-        InvokeRepeating("CheckForRetreat", checkAfter, 0.35f);
+        //InvokeRepeating("CheckForRetreat", checkAfter, 0.35f);
         InvokeRepeating("HealSelf", checkAfter, healRateSeconds);
     }
 
@@ -121,6 +121,8 @@ public class RefactoredBarricade : MonoBehaviour
 
     void RetreatFrom(RefactoredBarricade retreatFromBarricade)
     {
+        FindRetreatPoints();
+           
         // If there are places to retreat to from this Barricade, retreat
         for (int i = 0; i < residentList.Count; i++)
         {
