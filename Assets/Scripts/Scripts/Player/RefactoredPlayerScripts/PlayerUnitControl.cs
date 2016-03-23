@@ -75,6 +75,7 @@ public class PlayerUnitControl : MonoBehaviour
     bool moving;
     Renderer[] rendCache;
     Color colorCache;
+    AudioSource m_AudioSource;
 
     #endregion
 
@@ -98,6 +99,7 @@ public class PlayerUnitControl : MonoBehaviour
         m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
         gunshot = GetComponent<AudioSource>();
         rendCache = GetComponentsInChildren<Renderer>();
+        m_AudioSource = GetComponent<AudioSource>();
 
         InvokeRepeating("SelfHeal", 10, 1);
 
@@ -240,6 +242,7 @@ public class PlayerUnitControl : MonoBehaviour
         {
             m_Animator.SetTrigger("Action");
             Stop();
+            m_AudioSource.Play();
             playerAction.Attack(actionTarget.GetComponent<UnitStats>());
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
@@ -266,6 +269,9 @@ public class PlayerUnitControl : MonoBehaviour
             // Cache the new resident list
             m_Animator.SetBool("Acting", true);
 
+            if (!m_AudioSource.isPlaying)
+                m_AudioSource.Play();
+
             for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
                 currentBarricade.residentList[i].healthRegenRate = healPerTick;
@@ -289,6 +295,7 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             m_Animator.SetBool("Acting", false);
+            m_AudioSource.Stop();
             for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
                 currentBarricade.residentList[i].healthRegenRate = 0;
@@ -302,7 +309,7 @@ public class PlayerUnitControl : MonoBehaviour
     {
         moving = m_Animator.GetBool("Moving");
 
-        if (currentBarricade != null && agent.hasPath == false && agent.velocity.magnitude > 0.5)
+        if (currentBarricade != null && agent.hasPath == false && agent.velocity.magnitude < 0.5)
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
@@ -310,6 +317,9 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             m_Animator.SetBool("Acting", true);
+
+            if (!m_AudioSource.isPlaying)
+                m_AudioSource.Play();
             currentBarricade.fortified = true;
             currentBarricade.selfHealAmount = repairPerTick;
         }
@@ -328,6 +338,7 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             m_Animator.SetBool("Acting", false);
+            m_AudioSource.Stop();
             currentBarricade.fortified = false;
         }
 

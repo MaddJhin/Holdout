@@ -20,6 +20,7 @@ public class EnemyUnitControl : MonoBehaviour
     public GameObject targetLocation;
     public bool slowed = false;
     public float moveSpeed = 1f;
+    public LayerMask visionLayer;
 
     [Header("Attack Attributes")]
     public float damagePerHit;
@@ -27,6 +28,10 @@ public class EnemyUnitControl : MonoBehaviour
     public float timeBetweenAttacks;
     public float projectileSpeed;
     public LayerMask validTargets;
+
+    [Header("Audio Attributes")]
+    [Tooltip("Spawn audio must always be first in array")]
+    public AudioClip[] unitAudio;
 
     #endregion
 
@@ -40,10 +45,13 @@ public class EnemyUnitControl : MonoBehaviour
     UnitStats stats;
     ParticleSystem m_ParticleSystem;
     Vector3 projectileTargetPos;
+    AudioSource m_AudioSource;
 
     // Object References
     GameObject actionTarget;
     Collider targetCollider;
+
+    [Header("Projectile Attributes")]
     public Projectile projectile;
 
     #endregion
@@ -52,7 +60,7 @@ public class EnemyUnitControl : MonoBehaviour
 
     string selectedAction;
     bool performingAction;
-    LayerMask playerLayer;
+    
     float baseAttackSpeedCache;
     int animSelector;
 
@@ -65,6 +73,7 @@ public class EnemyUnitControl : MonoBehaviour
         m_Animator = GetComponentInChildren<Animator>();
         enemyAttack = GetComponent<EnemyAttack>();
         stats = GetComponent<UnitStats>();
+        m_AudioSource = GetComponent<AudioSource>();
         baseAttackSpeedCache = timeBetweenAttacks;
 
         InvokeRepeating("VisionCheck", 2f, 0.5f);
@@ -102,14 +111,20 @@ public class EnemyUnitControl : MonoBehaviour
         performingAction = false;
         actionTarget = null;
         m_Animator.speed = moveSpeed;
-        playerLayer = LayerMask.GetMask("Player");
-        targetLocation = GameObject.Find("Evac Shuttle");
 
         if (projectile != null)
         {
             projectile.gameObject.SetActive(false);
         }
 	}
+
+    void OnEnable()
+    {
+        m_AudioSource.clip = unitAudio[0];
+
+        if (m_AudioSource.clip != null)
+            m_AudioSource.Play();
+    }
 	
 	// Update is called once per frame
 	void Update () 
@@ -142,10 +157,8 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Punch()
     {
-        Debug.Log("Beginning Punch");
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
-            Debug.Log("Punch in Range");
             Stop();
             m_Animator.SetTrigger("Action");
             enemyAttack.Punch(actionTarget);
@@ -167,9 +180,7 @@ public class EnemyUnitControl : MonoBehaviour
             Stop();
             m_Animator.SetTrigger("Action");
             enemyAttack.Slam(actionTarget, validTargets);
-            Debug.Log("Waiting for " + stats.attackSpeed + " seconds");
             yield return new WaitForSeconds(timeBetweenAttacks);
-            Debug.Log("Finished Waiting");
             performingAction = false;         
         }
 
@@ -184,7 +195,11 @@ public class EnemyUnitControl : MonoBehaviour
     {
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
+            Debug.Log("Exploding");
             Stop();
+            m_ParticleSystem.Play(true);
+            m_ParticleSystem.transform.parent = null;
+            AudioSource.PlayClipAtPoint(unitAudio[1], transform.position);
             enemyAttack.Explode(actionTarget, validTargets);
             stats.KillUnit();
             m_ParticleSystem.Play(true);
@@ -201,15 +216,23 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Shoot()
     {
-        Debug.Log("Damage set to: " + damagePerHit);
         Stop();
+        
         m_Animator.SetTrigger("Action");
+        /*
         projectile.gameObject.SetActive(true);
-        projectile.FireProjectile(actionTarget.transform.position, projectileSpeed, transform.position);
+        m_AudioSource.clip = unitAudio[1];
+        m_AudioSource.Play();
+        projectile.FireProjectile(actionTarget.transform.position, projectileSpeed, transform.position); */
         enemyAttack.Shoot(actionTarget, damagePerHit);
         yield return new WaitForSeconds(timeBetweenAttacks);
         performingAction = false;
          
+    }
+
+    public void LaunchProjectile()
+    {
+        projectile.FireProjectile(actionTarget.transform.position, projectileSpeed, transform.position);
     }
 
     void resetProjectile()
@@ -259,7 +282,7 @@ public class EnemyUnitControl : MonoBehaviour
     {
         if (actionTarget == null)
         {
-            Collider[] targetsInRange = Physics.OverlapSphere(transform.position, sightRange, playerLayer);
+            Collider[] targetsInRange = Physics.OverlapSphere(transform.position, sightRange, visionLayer);
 
             if (targetsInRange.Length > 0)
             {
