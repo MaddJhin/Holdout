@@ -105,6 +105,7 @@ public class PlayerUnitControl : MonoBehaviour
         m_AudioSource = GetComponent<AudioSource>();
 
         InvokeRepeating("SelfHeal", 10, 1);
+        InvokeRepeating("EvaluateSituation", 5, 0.5f);
 
         // Determine which action should be repeated
         switch(unitType)
@@ -112,11 +113,13 @@ public class PlayerUnitControl : MonoBehaviour
             case UnitTypes.Medic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
                 selectedAction = "ActivateHeal";
+                InvokeRepeating("DeactivateSupportAbilities", 5, 1);
                 break;
 
             case UnitTypes.Mechanic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
                 selectedAction = "BeginFortify";
+                InvokeRepeating("DeactivateSupportAbilities", 5, 1);
                 break;
             
             case UnitTypes.Trooper:
@@ -168,14 +171,8 @@ public class PlayerUnitControl : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
-        if (stats.currentHealth <= 0 || currentBarricade == null)
-        {
-            if (unitType == UnitTypes.Medic)
-                StartCoroutine(DeactivateHeal());
-
-            else if (unitType == UnitTypes.Mechanic)
-                StartCoroutine(EndFortify());
-        }
+        
+        
 
         if (agent.velocity.magnitude > 0.5)
             m_Animator.SetBool("Moving", true);
@@ -184,28 +181,7 @@ public class PlayerUnitControl : MonoBehaviour
             m_Animator.SetBool("Moving", false);
 
         // If the unit has a target, select the appropriate action
-        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
-        {
-            if (unitType == UnitTypes.Marksman)
-            {               
-                line.SetPosition(0, shootPoint.position);
-                line.SetPosition(1, actionTarget.transform.position);
-                line.enabled = true;
-            }
-
-            performingAction = true;
-            StartCoroutine(selectedAction);
-        }
-
-        else if (actionTarget != null && !actionTarget.activeInHierarchy)
-        {
-            actionTarget = null;
-
-            if (unitType == UnitTypes.Marksman)
-            {
-                line.enabled = false;
-            }
-        }
+        
 	}
 
     #region Unit Actions
@@ -299,13 +275,15 @@ public class PlayerUnitControl : MonoBehaviour
 
             m_Animator.SetBool("Acting", false);
             m_AudioSource.Stop();
+
             for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
                 currentBarricade.residentList[i].healthRegenRate = 0;
             }
         }
 
-        yield return null;
+        else
+            yield return null;
     }
 
     IEnumerator BeginFortify()
@@ -361,6 +339,44 @@ public class PlayerUnitControl : MonoBehaviour
     void SelfHeal()
     {
         stats.Heal(healthRegenRate);
+    }
+
+    void EvaluateSituation()
+    {
+        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+        {
+            if (unitType == UnitTypes.Marksman)
+            {
+                line.SetPosition(0, shootPoint.position);
+                line.SetPosition(1, actionTarget.transform.position);
+                line.enabled = true;
+            }
+
+            performingAction = true;
+            StartCoroutine(selectedAction);
+        }
+
+        else if (actionTarget != null && !actionTarget.activeInHierarchy)
+        {
+            actionTarget = null;
+
+            if (unitType == UnitTypes.Marksman)
+            {
+                line.enabled = false;
+            }
+        }
+    }
+
+    void DeactivateSupportAbilities()
+    {
+        if (stats.currentHealth <= 0 || currentBarricade == null)
+        {
+            if (unitType == UnitTypes.Medic)
+                StartCoroutine(DeactivateHeal());
+
+            else if (unitType == UnitTypes.Mechanic)
+                StartCoroutine(EndFortify());
+        }
     }
 
     #endregion
