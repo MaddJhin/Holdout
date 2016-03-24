@@ -20,6 +20,9 @@ public class PlayerUnitControl : MonoBehaviour
     public UnitTypes unitType;
     public float moveSpeed = 1f;
 
+    [HideInInspector]
+    public HpBarManager hpBar;
+
     //[Tooltip("How far the unit can go before returning to it's waypoint")]
     //public float barricadeMaxThether;
 

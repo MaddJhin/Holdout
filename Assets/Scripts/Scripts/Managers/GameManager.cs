@@ -93,6 +93,8 @@ public static class GameManager
 
                 b[i].onClick.RemoveAllListeners();                                                          // Remove all previous listeners
                 b[i].onClick.AddListener(delegate { IM.SetTarget(param); });                                // Add a new listener with the cached controller
+                HpBarManager hpData = b[i].GetComponent<HpBarManager>();
+                param.hpBar = hpData;
                 //b[i].onClick.AddListener(delegate { IM.FocusCamera(playerChar); });
             }
         }

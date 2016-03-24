@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 
 /* USAGE:
@@ -33,11 +34,23 @@ public class UnitStats : MonoBehaviour
     [HideInInspector]
     public float healthPercentage;
 
+    [HideInInspector]
+    public Image hpBar;
+
     public enum statusEffects { stun, slow, healed};
 
     void Awake()
     {
         currentHealth = maxHealth;
+    }
+
+    void Start()
+    {
+        if (gameObject.tag == "Player")
+        {
+            HpBarManager barManager = GetComponent<PlayerUnitControl>().hpBar;
+            hpBar = barManager.hpbar;
+        }
     }
 
 	void Update () 
@@ -54,6 +67,10 @@ public class UnitStats : MonoBehaviour
     public void TakeDamage(float damageTaken)
     {
         currentHealth -= damageTaken;
+        if (gameObject.tag == "Player")
+        {
+            hpBar.fillAmount = currentHealth / maxHealth;
+        }
     }
 
 	public void Heal(float healAmount)
