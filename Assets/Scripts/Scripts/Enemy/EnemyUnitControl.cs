@@ -120,7 +120,7 @@ public class EnemyUnitControl : MonoBehaviour
 
     void OnEnable()
     {
-        if (unitAudio[0] != null)
+        if (unitAudio[0] != null && m_AudioSource != null)
         {
             m_AudioSource.clip = unitAudio[0];
             m_AudioSource.Play();

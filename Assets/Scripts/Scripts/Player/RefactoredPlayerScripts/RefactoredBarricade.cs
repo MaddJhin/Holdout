@@ -79,36 +79,43 @@ public class RefactoredBarricade : MonoBehaviour
     // Search for open waypoints and along retreat line and send units to them
     void FindRetreatPoints()
     {
-        if (retreatBarricadeCache = retreatBarricade.GetComponent<RefactoredBarricade>())
+        if (retreatBarricade != null)
         {
-            if (retreatBarricadeCache != null && retreatBarricadeCache.residentList.Count < 5)
+            if (retreatBarricadeCache = retreatBarricade.GetComponent<RefactoredBarricade>())
             {
-                retreatWaypointsCache = new List<BarricadeWaypoint>();
-
-                // Compile list of open waypoints
-                // Add open front waypoints
-                for (int i = 0; i < retreatBarricadeCache.frontWaypoints.Count; i++)
+                if (retreatBarricadeCache != null && retreatBarricadeCache.residentList.Count < 5)
                 {
-                    // If the waypoint is not occupied, or marked for retreat, mark it
-                    if (!retreatBarricadeCache.frontWaypoints[i].occupied ||
-                        retreatWaypointsCache.Contains(retreatBarricadeCache.frontWaypoints[i]))
+                    retreatWaypointsCache = new List<BarricadeWaypoint>();
+
+                    // Compile list of open waypoints
+                    // Add open front waypoints
+                    for (int i = 0; i < retreatBarricadeCache.frontWaypoints.Count; i++)
                     {
-                        retreatWaypointsCache.Add(retreatBarricadeCache.frontWaypoints[i]);
+                        // If the waypoint is not occupied, or marked for retreat, mark it
+                        if (!retreatBarricadeCache.frontWaypoints[i].occupied ||
+                            retreatWaypointsCache.Contains(retreatBarricadeCache.frontWaypoints[i]))
+                        {
+                            retreatWaypointsCache.Add(retreatBarricadeCache.frontWaypoints[i]);
+                        }
                     }
-                }
 
-                // Add open back waypoints
-                for (int i = 0; i < retreatBarricadeCache.backWaypoints.Count; i++)
-                {
-                    // If the waypoint is not occupied, or marked for retreat, mark it
-                    if (!retreatBarricadeCache.backWaypoints[i].occupied ||
-                        retreatWaypointsCache.Contains(retreatBarricadeCache.frontWaypoints[i]))
+                    // Add open back waypoints
+                    for (int i = 0; i < retreatBarricadeCache.backWaypoints.Count; i++)
                     {
-                        retreatWaypointsCache.Add(retreatBarricadeCache.backWaypoints[i]);
+                        // If the waypoint is not occupied, or marked for retreat, mark it
+                        if (!retreatBarricadeCache.backWaypoints[i].occupied ||
+                            retreatWaypointsCache.Contains(retreatBarricadeCache.frontWaypoints[i]))
+                        {
+                            retreatWaypointsCache.Add(retreatBarricadeCache.backWaypoints[i]);
+                        }
                     }
                 }
             }
         }
+
+        else
+            retreatBarricadeCache = null;
+        
     }
 
     void CheckForRetreat()

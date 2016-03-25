@@ -266,7 +266,7 @@ public class PlayerUnitControl : MonoBehaviour
 
     public IEnumerator DeactivateHeal()
     {
-        if (currentBarricade.residentList.Count > 0)
+        if (currentBarricade != null && currentBarricade.residentList.Count > 0)
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
