@@ -77,8 +77,9 @@ public class EnemyUnitControl : MonoBehaviour
         baseAttackSpeedCache = timeBetweenAttacks;
 
         InvokeRepeating("VisionCheck", 2f, 0.5f);
+        //InvokeRepeating("EvaluateSituation", 5, 0.5f);
 
-        switch(unitType)
+        switch (unitType)
         {
             case EnemyTypes.Minion:
                 selectedAction = "Punch";
@@ -150,9 +151,9 @@ public class EnemyUnitControl : MonoBehaviour
             actionTarget = null;
         }
 
-        else if (actionTarget == null)
+        else if (actionTarget == null && targetLocation != null)
             Move(targetLocation.transform.position);
-	}
+    }
 
     #region Unit Actions
 
@@ -228,6 +229,11 @@ public class EnemyUnitControl : MonoBehaviour
         yield return new WaitForSeconds(timeBetweenAttacks);
         performingAction = false;
          
+    }
+
+    void EvaluateSituation()
+    {
+        
     }
 
     public void LaunchProjectile()
