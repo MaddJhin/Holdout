@@ -171,8 +171,8 @@ public class PlayerUnitControl : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
-        
-        
+        //if (Vector3.Distance(transform.position, currentBarricade.transform.position) == 1f)
+            //currentBarricade.door.RequestOpen();
 
         if (agent.velocity.magnitude > 0.5)
             m_Animator.SetBool("Moving", true);
@@ -438,6 +438,34 @@ public class PlayerUnitControl : MonoBehaviour
         else
             return;
     }
+
+    public IEnumerator RetreatFrom(RefactoredBarricade retreatFromBarricade)
+    {
+        int i = 0;
+
+        // As long as there are retreatpoints, check for occupied
+        while (i < currentBarricade.retreatPoints.Count)
+        {
+            if (!currentBarricade.retreatPoints[i].occupied)
+            {
+                Debug.Log("Retreating to: " + currentBarricade.retreatPoints[i].gameObject + " (iteration " + + i + ")");
+                Debug.Log("Barricade before retreat: " + currentBarricade);
+                agent.SetDestination(currentBarricade.retreatPoints[i].transform.position);
+                currentBarricade = currentBarricade.retreatPoints[i].belongsTo;
+                Debug.Log("Barricade after retreat: " + currentBarricade);
+                currentBarricade.retreatPoints[i].resident = gameObject;
+                Debug.Log("Barricade before movement: " + currentBarricade);
+                
+                break;
+            }
+
+            i++;
+        }
+
+
+        yield return null;
+    }
+
     #endregion
 
     #region Designer Readability Methods

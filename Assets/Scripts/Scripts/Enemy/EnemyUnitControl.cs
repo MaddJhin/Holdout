@@ -76,7 +76,7 @@ public class EnemyUnitControl : MonoBehaviour
         m_AudioSource = GetComponent<AudioSource>();
         baseAttackSpeedCache = timeBetweenAttacks;
 
-        InvokeRepeating("VisionCheck", 2f, 0.5f);
+        //InvokeRepeating("VisionCheck", 2f, 0.5f);
         //InvokeRepeating("EvaluateSituation", 5, 0.5f);
 
         switch (unitType)
@@ -151,7 +151,7 @@ public class EnemyUnitControl : MonoBehaviour
             actionTarget = null;
         }
 
-        else if (actionTarget == null && targetLocation != null)
+        if (actionTarget == null && targetLocation != null)
             Move(targetLocation.transform.position);
     }
 

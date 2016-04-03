@@ -6,6 +6,7 @@ public class RefactoredBarricade : MonoBehaviour
 {
 
     #region Barricade Attributes
+    [Header("Barricade Attributes")]
     public float selfHealAmount;
     public float healRateSeconds;
     public float sightCheckDelay;
@@ -15,27 +16,34 @@ public class RefactoredBarricade : MonoBehaviour
     public float sightRadius;
     public float assignTargetDelay;
 
+    [Header("Retreat Info")]
     [Tooltip("Barricade that units will retreat to")]
-    public GameObject retreatBarricade;
-
+    public RefactoredBarricade retreatBarricade;    
     public List<BarricadeWaypoint> frontWaypoints;
     public List<BarricadeWaypoint> backWaypoints;
 
+    public List<BarricadeWaypoint> retreatPoints;
+
+    [Header("Resident Info")]
     public List<PlayerUnitControl> residentList = new List<PlayerUnitControl>();
     UnitStats stats;
     public List<GameObject> targetQueue = new List<GameObject>();
     public LayerMask enemyMask;
     PlayerUnitControl unit;
     public bool fortified = false;
+
+    [HideInInspector]
+    public DoorOpen door;
     #endregion
 
     #region Caches
-
+    BarricadeWaypoint[] waypointCache;
     RefactoredBarricade retreatBarricadeCache;
     List<BarricadeWaypoint> retreatWaypointsCache;
     PlayerUnitControl unitCache;            // Used to skip searches on subsequent identical units
     Collider coll;
     float baseSelfHealCache;
+    public int retreatPointIndexCache;              // Tracks the currently available retreatPoint
 
     #endregion
 
@@ -44,162 +52,63 @@ public class RefactoredBarricade : MonoBehaviour
     {
         stats = GetComponent<UnitStats>();
         coll = GetComponent<Collider>();
-        BarricadeWaypoint[] temp = GetComponentsInChildren<BarricadeWaypoint>();
+        door = GetComponent<DoorOpen>();
+        waypointCache = GetComponentsInChildren<BarricadeWaypoint>();
         unitCache = null;
         baseSelfHealCache = selfHealAmount;
-
-        foreach (var curr in temp)
-        {
-            if (curr.tag == "Front Waypoint")
-                frontWaypoints.Add(curr);
-
-            else
-                backWaypoints.Add(curr);
-        }
     }
 
     void Awake()
     {
-        InvokeRepeating("CheckForEnemies", checkAfter, sightCheckDelay);
-        InvokeRepeating("FindRetreatPoints", checkAfter, 0.5f);
-        //InvokeRepeating("CheckForRetreat", checkAfter, 0.35f);
+        //InvokeRepeating("CheckForEnemies", checkAfter, sightCheckDelay);
+        InvokeRepeating("CheckForRetreat", checkAfter, 0.35f);
         InvokeRepeating("HealSelf", checkAfter, healRateSeconds);
     }
 
     void HealSelf()
     {
-        if (fortified)
-            stats.Heal(selfHealAmount);
+        if (stats.currentHealth > 0)
+        {
+            if (fortified)
+                stats.Heal(selfHealAmount);
 
-        else
-            stats.Heal(baseSelfHealCache);
+            else
+                stats.Heal(baseSelfHealCache);
+        }
     }
 
     #region Retreat Methods
-    // Search for open waypoints and along retreat line and send units to them
-    void FindRetreatPoints()
-    {
-        if (retreatBarricade != null)
-        {
-            if (retreatBarricadeCache = retreatBarricade.GetComponent<RefactoredBarricade>())
-            {
-                if (retreatBarricadeCache != null && retreatBarricadeCache.residentList.Count < 5)
-                {
-                    retreatWaypointsCache = new List<BarricadeWaypoint>();
 
-                    // Compile list of open waypoints
-                    // Add open front waypoints
-                    for (int i = 0; i < retreatBarricadeCache.frontWaypoints.Count; i++)
-                    {
-                        // If the waypoint is not occupied, or marked for retreat, mark it
-                        if (!retreatBarricadeCache.frontWaypoints[i].occupied ||
-                            retreatWaypointsCache.Contains(retreatBarricadeCache.frontWaypoints[i]))
-                        {
-                            retreatWaypointsCache.Add(retreatBarricadeCache.frontWaypoints[i]);
-                        }
-                    }
-
-                    // Add open back waypoints
-                    for (int i = 0; i < retreatBarricadeCache.backWaypoints.Count; i++)
-                    {
-                        // If the waypoint is not occupied, or marked for retreat, mark it
-                        if (!retreatBarricadeCache.backWaypoints[i].occupied ||
-                            retreatWaypointsCache.Contains(retreatBarricadeCache.frontWaypoints[i]))
-                        {
-                            retreatWaypointsCache.Add(retreatBarricadeCache.backWaypoints[i]);
-                        }
-                    }
-                }
-            }
-        }
-
-        else
-            retreatBarricadeCache = null;
-        
-    }
-
+    // See if conditions for a retreat are satisfied
     void CheckForRetreat()
     {
-        if (stats.currentHealth <= 0 && residentList.Count > 0)
+        if (stats.currentHealth < 1 && residentList.Count > 0 && gameObject.activeInHierarchy)
         {
-            RetreatFrom(this);
-        }
-    }
-
-    void RetreatFrom(RefactoredBarricade retreatFromBarricade)
-    {
-        FindRetreatPoints();
-           
-        // If there are places to retreat to from this Barricade, retreat
-        for (int i = 0; i < residentList.Count; i++)
-        {
-            residentList[i].currentBarricade = retreatFromBarricade.retreatBarricadeCache;
-            residentList[i].currentWaypoint = retreatFromBarricade.retreatWaypointsCache[0];
-            retreatFromBarricade.retreatWaypointsCache.Remove(residentList[i].currentWaypoint);
-            residentList[i].agent.SetDestination(residentList[i].currentWaypoint.transform.position);
-        }
-    }
-
-    #endregion
-
-    #region Assign Waypoints
-
-    public bool AssignFrontWaypoint(GameObject unit)
-    {
-        PlayerUnitControl barricadeCache;
-
-        if (barricadeCache = unit.GetComponent<PlayerUnitControl>())
-        {
-            foreach (var waypoint in frontWaypoints)
+            for (int i = 0; i < residentList.Count; i++)
             {
-                if (waypoint.occupied == false)
-                {
-                    if (barricadeCache.currentWaypoint != null)
-                    {
-                        barricadeCache.currentWaypoint.occupied = false;
-                        barricadeCache.currentWaypoint.resident = null;
-                        barricadeCache.currentBarricade.residentList.Remove(barricadeCache);
-                    }
-
-                    barricadeCache.currentWaypoint = waypoint;
-                    waypoint.occupied = true;
-                    waypoint.resident = unit;
-                    residentList.Add(unit.GetComponent<PlayerUnitControl>());
-                    return true;
-                }
+                StartCoroutine(residentList[i].RetreatFrom(this));
             }
-        }
 
-        return false;
+            gameObject.SetActive(false);
+        }
     }
 
-    public bool AssignRearWaypoint(GameObject unit)
+    public void GetRetreatPoints(RefactoredBarricade retreatTarget)
     {
-        PlayerUnitControl barricadeCache;
-
-        if (barricadeCache = unit.GetComponent<PlayerUnitControl>())
+        for (int i = 0; i < retreatTarget.backWaypoints.Count; i++)
         {
-            foreach (var waypoint in backWaypoints)
-            {
-                if (waypoint.occupied == false)
-                {
-                    if (barricadeCache.currentWaypoint != null)
-                    {
-                        barricadeCache.currentWaypoint.occupied = false;
-                        barricadeCache.currentWaypoint.resident = null;
-                        barricadeCache.currentBarricade.residentList.Remove(barricadeCache);
-                    }
-
-                    barricadeCache.currentWaypoint = waypoint;
-                    waypoint.occupied = true;
-                    waypoint.resident = unit;
-                    residentList.Add(unit.GetComponent<PlayerUnitControl>());
-                    return true;
-                }
-            }
+            retreatPoints.Add(retreatTarget.backWaypoints[i]);
         }
 
-        return false;
+        for (int i = 0; i < retreatTarget.frontWaypoints.Count; i++)
+        {
+            retreatPoints.Add(retreatTarget.frontWaypoints[i]);
+        }
+
+        for (int i = 0; i < retreatTarget.retreatPoints.Count; i++)
+        {
+            retreatPoints.Add(retreatTarget.retreatPoints[i]);
+        }
     }
 
     #endregion

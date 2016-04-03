@@ -32,7 +32,7 @@ public class DoorOpen : MonoBehaviour
 
     void Update()
     {
-        CheckTrigger();
+        //CheckTrigger();
     }
 
     void CheckTrigger()
@@ -57,6 +57,11 @@ public class DoorOpen : MonoBehaviour
                 }
             }
         }
+    }
+
+    public void RequestOpen()
+    {
+        StartCoroutine(OpenDoor());
     }
 
     IEnumerator OpenDoor()

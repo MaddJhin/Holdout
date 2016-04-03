@@ -16,7 +16,7 @@ public class LevelManager : MonoBehaviour
     public RefactoredBarricade evacShuttle;
     public GameObject[] enemySpawners;
     public GameObject[] militiaSpawners;
-    public GameObject[] barricades;
+    public RefactoredBarricade[] barricades;
     public GameObject UICanvas;
 
     [Header("Miscellaneous Attributes")]
@@ -35,6 +35,7 @@ public class LevelManager : MonoBehaviour
         UICanvas.SetActive(true);
         UI_playerPanel = GameObject.Find("PlayerPortraitsMenu");
         IM = GameObject.FindObjectOfType<InputManager>();
+        RetreatPointSetup();
 
         if (enemySpawners.Length > 0)
         {
@@ -205,7 +206,7 @@ public class LevelManager : MonoBehaviour
 
         for (int i = 0; i < barricades.Length; i++)
         {
-            if (barricades[i].activeInHierarchy)
+            if (barricades[i].gameObject.activeInHierarchy)
                 scoreCounter++;
         }
 
@@ -217,5 +218,13 @@ public class LevelManager : MonoBehaviour
 
         else
             return 2;
+    }
+
+    void RetreatPointSetup()
+    {
+        for (int i = 0; i < barricades.Length; i++)
+        {
+            barricades[i].GetRetreatPoints(barricades[i].retreatBarricade);
+        }
     }
 }
