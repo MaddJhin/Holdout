@@ -60,7 +60,7 @@ public class RefactoredBarricade : MonoBehaviour
 
     void Awake()
     {
-        //InvokeRepeating("CheckForEnemies", checkAfter, sightCheckDelay);
+        InvokeRepeating("CheckForEnemies", checkAfter, sightCheckDelay);
         InvokeRepeating("CheckForRetreat", checkAfter, 0.35f);
         InvokeRepeating("HealSelf", checkAfter, healRateSeconds);
     }
