@@ -10,6 +10,8 @@ public class CameraScroll : MonoBehaviour {
     [Header("Camera Movement Constraints")]
     public float MIN_X;
     public float MAX_X;
+    public float MIN_Y;
+    public float MAX_Y;
     public float MIN_Z;
     public float MAX_Z;
 	
@@ -49,8 +51,9 @@ public class CameraScroll : MonoBehaviour {
 		cameraTarget.Translate(Vector3.forward * vertical, Space.World);
 		cameraTarget.Translate(Vector3.right * side, Space.World);
         cameraTarget.transform.position = new Vector3(
-                                                       cameraTarget.transform.position.x,
-                                                       cameraTarget.transform.position.y,
-                                                       cameraTarget.transform.position.z);
+                                                       Mathf.Clamp(cameraTarget.transform.position.x, MIN_X, MAX_X),
+                                                       Mathf.Clamp(cameraTarget.transform.position.y, MIN_Y, MAX_Y),
+                                                       Mathf.Clamp(cameraTarget.transform.position.z, MIN_Z, MAX_Z));
+        
     }
 }

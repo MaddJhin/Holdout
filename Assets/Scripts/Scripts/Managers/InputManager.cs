@@ -163,14 +163,9 @@ public class InputManager : MonoBehaviour {
 
                     rendCache[i].material.SetColor("_OutlineColor", newColorCache);
                 }
-
-                else
-                    Debug.Log("Cannot change alpha - Incorrect renderer");
             }
         }
-
-        else
-            Debug.Log("Could not change alpha - No Renderer found");
+        
          
     }
 

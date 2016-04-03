@@ -448,14 +448,9 @@ public class PlayerUnitControl : MonoBehaviour
         {
             if (!currentBarricade.retreatPoints[i].occupied)
             {
-                Debug.Log("Retreating to: " + currentBarricade.retreatPoints[i].gameObject + " (iteration " + + i + ")");
-                Debug.Log("Barricade before retreat: " + currentBarricade);
                 agent.SetDestination(currentBarricade.retreatPoints[i].transform.position);
                 currentBarricade = currentBarricade.retreatPoints[i].belongsTo;
-                Debug.Log("Barricade after retreat: " + currentBarricade);
                 currentBarricade.retreatPoints[i].resident = gameObject;
-                Debug.Log("Barricade before movement: " + currentBarricade);
-                
                 break;
             }
 
