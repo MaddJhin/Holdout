@@ -34,7 +34,6 @@ public class EnemyAttack : MonoBehaviour {
 
 	public void Punch(GameObject target)
 	{
-        Debug.Log(target);
 		UnitStats targetHealth = target.GetComponent<UnitStats>();
 		targetHealth.TakeDamage(damage);
 	}
