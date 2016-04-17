@@ -44,14 +44,7 @@ public class LevelManager : MonoBehaviour
                 enemySpawnerCache.Add(enemySpawners[i].GetComponent<NewSpawnerRefactored>());
             }
         }
-
-        if (militiaSpawners.Length > 0)
-        {
-            for (int i = 0; i < militiaSpawners.Length; i++)
-            {
-                militiaSpawnerCache.Add(militiaSpawners[i].GetComponent<NewSpawnerRefactored>());
-            }
-        }
+			
     }
 
     void Start()
