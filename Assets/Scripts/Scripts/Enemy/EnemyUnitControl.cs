@@ -64,6 +64,10 @@ public class EnemyUnitControl : MonoBehaviour
     float baseAttackSpeedCache;
     int animSelector;
 
+    Collider[] targetBuffer;
+    int targetBufferIndex;
+    Collider[] tempBuffer;
+
     #endregion
 
     void Awake()
@@ -76,8 +80,7 @@ public class EnemyUnitControl : MonoBehaviour
         m_AudioSource = GetComponent<AudioSource>();
         baseAttackSpeedCache = timeBetweenAttacks;
 
-        InvokeRepeating("VisionCheck", 2f, 0.5f);
-        InvokeRepeating("EvaluateSituation", 5, 0.5f);
+        //InvokeRepeating("EvaluateSituation", 5, 0.5f);
 
         switch (unitType)
         {
@@ -105,13 +108,13 @@ public class EnemyUnitControl : MonoBehaviour
                 break;
         }
     }
-
-    // Use this for initialization
+    
 	void Start () 
     {
         performingAction = false;
         actionTarget = null;
         m_Animator.speed = moveSpeed;
+        StartCoroutine(VisionCheck());
 
         if (projectile != null)
         {
@@ -283,7 +286,7 @@ public class EnemyUnitControl : MonoBehaviour
     #endregion
 
     #region Unit Targeting
-
+    /*
     public void VisionCheck()
     {
         if (actionTarget == null)
@@ -296,6 +299,45 @@ public class EnemyUnitControl : MonoBehaviour
                 targetCollider = targetsInRange[0];
             }
         }
+    }*/
+    
+    IEnumerator VisionCheck()
+    {
+        while (true)
+        {
+            if (actionTarget == null && (targetBuffer == null || targetBuffer.Length <= 0))
+            {
+                // Find new targets and save them to buffer
+                targetBuffer = Physics.OverlapSphere(transform.position, sightRange, visionLayer);
+                targetBufferIndex = targetBuffer.Length - 1;
+
+
+                // If targets were found, set them
+                if (targetBuffer.Length > 0)
+                {
+                    SetActionTarget();
+                }
+
+            }
+
+            else if (actionTarget == null && targetBuffer.Length > 0)
+            {
+                SetActionTarget();
+            }
+
+            yield return new WaitForSeconds(1f);
+        }
+    }
+
+    void SetActionTarget()
+    {
+        actionTarget = targetBuffer[targetBufferIndex].gameObject;
+        targetCollider = targetBuffer[targetBufferIndex];
+
+        // Remove newly selected actionTarget from buffer
+        tempBuffer = new Collider[targetBufferIndex];           // Temp array to represent buffer minus the newly selected target
+        targetBuffer.CopyTo(tempBuffer, 0);                     // Copy contents of buffer to temp buffer
+        targetBuffer = tempBuffer;                              // Set buffer to new contents
     }
 
     #endregion

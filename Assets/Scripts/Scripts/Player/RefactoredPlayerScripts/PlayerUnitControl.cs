@@ -105,7 +105,7 @@ public class PlayerUnitControl : MonoBehaviour
         m_AudioSource = GetComponent<AudioSource>();
 
         InvokeRepeating("SelfHeal", 10, 1);
-        InvokeRepeating("EvaluateSituation", 5, 0.5f);
+        
 
         // Determine which action should be repeated
         switch(unitType)
@@ -166,7 +166,8 @@ public class PlayerUnitControl : MonoBehaviour
         playerAction.healPerHit = healPerTick;
         m_Animator.speed = moveSpeed;
         residentListCache = new List<PlayerUnitControl>();
-	}
+        StartCoroutine(EvaluateSituation());
+    }
 	
 	// Update is called once per frame
 	void Update () 
@@ -341,29 +342,34 @@ public class PlayerUnitControl : MonoBehaviour
         stats.Heal(healthRegenRate);
     }
 
-    void EvaluateSituation()
+    IEnumerator EvaluateSituation()
     {
-        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+        while (true)
         {
-            if (unitType == UnitTypes.Marksman)
+            if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
             {
-                line.SetPosition(0, shootPoint.position);
-                line.SetPosition(1, actionTarget.transform.position);
-                line.enabled = true;
+                if (unitType == UnitTypes.Marksman)
+                {
+                    line.SetPosition(0, shootPoint.position);
+                    line.SetPosition(1, actionTarget.transform.position);
+                    line.enabled = true;
+                }
+
+                performingAction = true;
+                StartCoroutine(selectedAction);
             }
 
-            performingAction = true;
-            StartCoroutine(selectedAction);
-        }
-
-        else if (actionTarget != null && !actionTarget.activeInHierarchy)
-        {
-            actionTarget = null;
-
-            if (unitType == UnitTypes.Marksman)
+            else if (actionTarget != null && !actionTarget.activeInHierarchy)
             {
-                line.enabled = false;
+                actionTarget = null;
+
+                if (unitType == UnitTypes.Marksman)
+                {
+                    line.enabled = false;
+                }
             }
+
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -433,7 +439,9 @@ public class PlayerUnitControl : MonoBehaviour
     {
         if (Vector3.Distance(gameObject.transform.position, currentBarricade.transform.position) >= currentBarricade.sightRadius &&
             currentBarricade != null)
+        {
             agent.SetDestination(currentWaypoint.transform.position);
+        }
 
         else
             return;
