@@ -21,6 +21,7 @@ public class UnitStats : MonoBehaviour
     // Unit attributes
     public float maxHealth;
     public float currentHealth;
+    public Image worldSpaceHealthBar;
 
     [HideInInspector]
     public float attackSpeed;
@@ -70,6 +71,10 @@ public class UnitStats : MonoBehaviour
         if (gameObject.tag == "Player")
         {
             hpBar.fillAmount = currentHealth / maxHealth;
+        }
+        if (worldSpaceHealthBar != null)
+        {
+            worldSpaceHealthBar.fillAmount = currentHealth / maxHealth;
         }
     }
 

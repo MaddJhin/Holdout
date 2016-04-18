@@ -15,16 +15,19 @@ public class LevelManager : MonoBehaviour
     [Header("Level Object References")]
     public RefactoredBarricade evacShuttle;
     public GameObject[] enemySpawners;
+    public GameObject[] militiaSpawners;
     public RefactoredBarricade[] barricades;
     public GameObject UICanvas;
 
     [Header("Miscellaneous Attributes")]
     public int spawnOffset = 1;
+    public float spawnMilitiaCooldown;
     public int levelPerformance;
 
     private GameObject UI_playerPanel;
     private InputManager IM;
     private List<NewSpawnerRefactored> enemySpawnerCache = new List<NewSpawnerRefactored>();
+    private List<NewSpawnerRefactored> militiaSpawnerCache = new List<NewSpawnerRefactored>();
     private GameObject[] playerLoadoutCache;
 
     void Awake()
@@ -41,6 +44,7 @@ public class LevelManager : MonoBehaviour
                 enemySpawnerCache.Add(enemySpawners[i].GetComponent<NewSpawnerRefactored>());
             }
         }
+			
     }
 
     void Start()
@@ -176,6 +180,17 @@ public class LevelManager : MonoBehaviour
             SceneManager.LoadScene(0, LoadSceneMode.Single);
         }
         
+    }
+
+    public void SpawnMilitia()
+    {
+        if (militiaSpawnerCache.Count > 0)
+        {
+            for (int i = 0; i < militiaSpawnerCache.Count; i++)
+            {
+                StartCoroutine(militiaSpawnerCache[i].SpawnLoop());
+            }
+        }
     }
 
     int CalculateLevelPerformance()
