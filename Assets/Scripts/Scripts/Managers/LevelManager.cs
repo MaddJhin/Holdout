@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Analytics;
@@ -17,6 +18,8 @@ public class LevelManager : MonoBehaviour
     public GameObject[] enemySpawners;
     public GameObject[] militiaSpawners;
     public RefactoredBarricade[] barricades;
+
+    [Header("UI References")]
     public GameObject UICanvas;
 
     [Header("Miscellaneous Attributes")]
@@ -25,6 +28,11 @@ public class LevelManager : MonoBehaviour
     public int levelPerformance;
 
     private GameObject UI_playerPanel;
+    public  Image[] playerButton;
+    private GameObject playerLoadoutPanel;
+    private Sprite[] playerUnitIcons;
+    private Transform temp;
+
     private InputManager IM;
     private List<NewSpawnerRefactored> enemySpawnerCache = new List<NewSpawnerRefactored>();
     private List<NewSpawnerRefactored> militiaSpawnerCache = new List<NewSpawnerRefactored>();
@@ -32,10 +40,10 @@ public class LevelManager : MonoBehaviour
 
     void Awake()
     {
-        UICanvas.SetActive(true);
-        UI_playerPanel = GameObject.Find("PlayerPortraitsMenu");
+        UICanvas.SetActive(true);     
         IM = GameObject.FindObjectOfType<InputManager>();
         RetreatPointSetup();
+        playerUnitIcons = Resources.LoadAll<Sprite>("Button Icons");
 
         if (enemySpawners.Length > 0)
         {
@@ -44,7 +52,26 @@ public class LevelManager : MonoBehaviour
                 enemySpawnerCache.Add(enemySpawners[i].GetComponent<NewSpawnerRefactored>());
             }
         }
-			
+
+        // Get reference to the player portrait buttons
+        UI_playerPanel = GameObject.Find("PlayerPortraitsMenu");
+        playerButton = new Image[7];
+
+        // Find the panel holding the player portrait buttons
+        foreach (Transform t in UI_playerPanel.transform)
+        {
+            if (t.name == "Panel")
+            {
+                playerLoadoutPanel = t.gameObject;
+            }
+        }
+
+        // Grab each portrait button from the panel
+        for (int i = 0; i < playerLoadoutPanel.transform.childCount; i++)
+        {
+            temp = playerLoadoutPanel.transform.GetChild(i);
+            playerButton[i] = temp.GetComponent<Image>();
+        }
     }
 
     void Start()
@@ -75,6 +102,30 @@ public class LevelManager : MonoBehaviour
 
             int unitIndex = GameManager.loadoutIndex[i];
             string unitToSpawn = GameManager.unitToSpawn[unitIndex];
+
+            // Assign Unit Icons to Buttons
+            switch (GameManager.unitToSpawn[unitIndex])
+            {
+                case "Heavy Trooper":
+                    playerButton[i].sprite = playerUnitIcons[0];
+                    break;
+
+                case "Marksman":
+                    playerButton[i].sprite = playerUnitIcons[1];
+                    break;
+
+                case "Medic":
+                    playerButton[i].sprite = playerUnitIcons[2];
+                    break;
+
+                case "Mechanic":
+                    playerButton[i].sprite = playerUnitIcons[3];
+                    break;
+
+                default:
+                    break;
+            }
+            
             GameManager.playerLoadout[i] = Instantiate(Resources.Load(unitToSpawn)) as GameObject;
             GameManager.playerLoadout[i].SetActive(false);
             playerLoadoutCache = GameManager.playerLoadout;
