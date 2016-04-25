@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 9dd48c5563558e54c97669aba15b3565
-timeCreated: 1461246066
+timeCreated: 1461623606
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -8,6 +8,7 @@ TextureImporter:
     21300002: Button Icons_1
     21300004: Button Icons_2
     21300006: Button Icons_4
+    21300008: Button Icons_3
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -57,96 +58,113 @@ TextureImporter:
     - name: Button Icons_0
       rect:
         serializedVersion: 2
-        x: 65
-        y: 539
-        width: 130
-        height: 121
+        x: 13
+        y: 115
+        width: 280
+        height: 168
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: -32, y: 48.5}
-        - {x: -48, y: 45.5}
-        - {x: -48, y: -50.5}
-        - {x: -31, y: -53.5}
-        - {x: 33, y: -53.5}
-        - {x: 47, y: -20.5}
-        - {x: 47, y: 38.5}
-        - {x: 12, y: 48.5}
+      - - {x: 140, y: 44}
+        - {x: 136, y: 59}
+        - {x: 109, y: 83}
+        - {x: 106, y: 84}
+        - {x: -104, y: 84}
+        - {x: -107, y: 83}
+        - {x: -127, y: 64}
+        - {x: -135, y: 53}
+        - {x: -140, y: 43}
+        - {x: -140, y: -74}
+        - {x: -139, y: -75}
+        - {x: -82, y: -78}
+        - {x: -70, y: -84}
+        - {x: 75, y: -84}
+        - {x: 89, y: -73}
+        - {x: 139, y: -72}
+        - {x: 140, y: -71}
     - name: Button Icons_1
       rect:
         serializedVersion: 2
-        x: 314
-        y: 539
-        width: 130
-        height: 121
+        x: 395
+        y: 115
+        width: 280
+        height: 168
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: -29, y: 50.5}
-        - {x: -57, y: 38.5}
-        - {x: -57, y: -53.5}
-        - {x: 55, y: -53.5}
-        - {x: 55, y: 37.5}
-        - {x: 33, y: 50.5}
+      - - {x: 140, y: -72}
+        - {x: 140, y: 46}
+        - {x: 132, y: 61}
+        - {x: 111, y: 78}
+        - {x: 102, y: 84}
+        - {x: -111, y: 84}
+        - {x: -140, y: 50}
+        - {x: -140, y: -75}
+        - {x: -139, y: -76}
+        - {x: -82, y: -79}
+        - {x: -71, y: -84}
+        - {x: 72, y: -84}
+        - {x: 76, y: -82}
+        - {x: 89, y: -74}
+        - {x: 139, y: -73}
     - name: Button Icons_2
       rect:
         serializedVersion: 2
-        x: 557
-        y: 539
-        width: 130
-        height: 117
+        x: 783
+        y: 115
+        width: 282
+        height: 168
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: 18, y: -10.5}
-        - {x: 6, y: -24.5}
-        - {x: 6, y: -41.5}
-        - {x: 17, y: -52.5}
-        - {x: 37, y: -52.5}
-        - {x: 48, y: -41.5}
-        - {x: 48, y: -21.5}
-        - {x: 37, y: -10.5}
-      - - {x: 29, y: 49.5}
-        - {x: 13, y: 33.5}
-        - {x: -6, y: 35.5}
-        - {x: -38, y: 36.5}
-        - {x: -62, y: 10.5}
-        - {x: -62, y: -21.5}
-        - {x: -41, y: -42.5}
-        - {x: -9, y: -42.5}
-        - {x: 65, y: 2.5}
-        - {x: 65, y: 36.5}
-        - {x: 52, y: 49.5}
-    - name: Button Icons_4
+      - - {x: 141, y: 40}
+        - {x: 138, y: 51}
+        - {x: 130, y: 61}
+        - {x: 114, y: 77}
+        - {x: 103, y: 84}
+        - {x: -99, y: 84}
+        - {x: -105, y: 81}
+        - {x: -118, y: 74}
+        - {x: -141, y: 48}
+        - {x: -141, y: -76}
+        - {x: -139, y: -76}
+        - {x: -82, y: -80}
+        - {x: -73, y: -84}
+        - {x: 75, y: -84}
+        - {x: 87, y: -78}
+        - {x: 139, y: -73}
+        - {x: 141, y: -71}
+    - name: Button Icons_3
       rect:
         serializedVersion: 2
-        x: 812
-        y: 539
-        width: 130
-        height: 123
+        x: 1185
+        y: 115
+        width: 282
+        height: 170
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline:
-      - - {x: 19, y: -0.5}
-        - {x: 18, y: 0.5}
-        - {x: 21, y: -0.5}
-        - {x: 23, y: -0.5}
-        - {x: 46, y: -20.5}
-        - {x: 63, y: 5.5}
-        - {x: 63, y: 43.5}
-        - {x: 55, y: 49.5}
-        - {x: -17, y: 49.5}
-        - {x: -63, y: 27.5}
-        - {x: -63, y: -37.5}
-        - {x: -46, y: -56.5}
-        - {x: 12, y: -56.5}
-        - {x: 36, y: -23.5}
-        - {x: 25, y: -2.5}
-        - {x: 23, y: -0.5}
+      - - {x: 141, y: 42}
+        - {x: 134, y: 59}
+        - {x: 109, y: 80}
+        - {x: 99, y: 85}
+        - {x: -94, y: 85}
+        - {x: -103, y: 83}
+        - {x: -126, y: 66}
+        - {x: -139, y: 43}
+        - {x: -141, y: 27}
+        - {x: -141, y: -75}
+        - {x: -139, y: -77}
+        - {x: -82, y: -80}
+        - {x: -71, y: -85}
+        - {x: 75, y: -85}
+        - {x: 89, y: -75}
+        - {x: 139, y: -74}
+        - {x: 141, y: -72}
     outline: []
   spritePackingTag: 
   userData: 

@@ -106,19 +106,19 @@ public class LevelManager : MonoBehaviour
             // Assign Unit Icons to Buttons
             switch (GameManager.unitToSpawn[unitIndex])
             {
-                case "Heavy Trooper":
+                case "Marksman":
                     playerButton[i].sprite = playerUnitIcons[0];
                     break;
 
-                case "Marksman":
+                case "Medic":
                     playerButton[i].sprite = playerUnitIcons[1];
                     break;
 
-                case "Medic":
+                case "Mechanic":
                     playerButton[i].sprite = playerUnitIcons[2];
                     break;
 
-                case "Mechanic":
+                case "Heavy Trooper":
                     playerButton[i].sprite = playerUnitIcons[3];
                     break;
 
