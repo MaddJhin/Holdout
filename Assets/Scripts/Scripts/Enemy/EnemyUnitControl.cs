@@ -80,7 +80,7 @@ public class EnemyUnitControl : MonoBehaviour
         m_AudioSource = GetComponent<AudioSource>();
         baseAttackSpeedCache = timeBetweenAttacks;
 
-        //InvokeRepeating("EvaluateSituation", 5, 0.5f);
+        StartCoroutine(EvaluateSituation());
 
         switch (unitType)
         {
@@ -146,20 +146,30 @@ public class EnemyUnitControl : MonoBehaviour
             m_Animation.CrossFade("Idle");
         }
 
-        // If the unit has a target, select the appropriate action
-        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
-        {
-            performingAction = true;
-            StartCoroutine(selectedAction);
-        }
+        
+    }
 
-        else if (actionTarget != null && !actionTarget.activeInHierarchy)
+    IEnumerator EvaluateSituation()
+    {
+        while (true)
         {
-            actionTarget = null;
-        }
+            // If the unit has a target, select the appropriate action
+            if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+            {
+                performingAction = true;
+                StartCoroutine(selectedAction);
+            }
 
-        if (actionTarget == null && targetLocation != null)
-            Move(targetLocation.transform.position);
+            else if (actionTarget != null && !actionTarget.activeInHierarchy)
+            {
+                actionTarget = null;
+            }
+
+            if (actionTarget == null && targetLocation != null)
+                Move(targetLocation.transform.position);
+
+            yield return new WaitForSeconds(0.5f);
+        }
     }
 
     #region Unit Actions
@@ -237,11 +247,6 @@ public class EnemyUnitControl : MonoBehaviour
         yield return new WaitForSeconds(timeBetweenAttacks);
         performingAction = false;
          
-    }
-
-    void EvaluateSituation()
-    {
-        
     }
 
     public void LaunchProjectile()

@@ -83,14 +83,11 @@ public class RefactoredBarricade : MonoBehaviour
     // See if conditions for a retreat are satisfied
     IEnumerator CheckForRetreat()
     {
-        Debug.Log("Beginning Retreat Checks");
         while (true)
         {
-            Debug.Log("Checking Retreat");
             // If destroyed, and units are present; retreat & deactivate
             if (stats != null && stats.currentHealth < 1)
             {
-                Debug.Log("Retreating");
                 for (int i = 0; i < residentList.Count; i++)
                 {
                     StartCoroutine(residentList[i].RetreatFrom(this));
@@ -102,7 +99,6 @@ public class RefactoredBarricade : MonoBehaviour
             // Otherwise, if destroyed deactivate barricade 
             else if ((stats != null && stats.currentHealth < 1) && gameObject.activeInHierarchy)
             {
-                Debug.Log("Deactivating");
                 gameObject.SetActive(false);
             }
 
