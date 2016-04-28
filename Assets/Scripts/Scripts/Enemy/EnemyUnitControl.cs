@@ -134,7 +134,7 @@ public class EnemyUnitControl : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
-        if (agent.velocity.magnitude > 0.5)
+        if (agent.velocity.magnitude > 0.5 && unitType != EnemyTypes.Evoker)
         {
             //m_Animation.SetBool("Moving", true);
             m_Animation.CrossFade("Run");
