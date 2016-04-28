@@ -85,6 +85,7 @@ public class RefactoredBarricade : MonoBehaviour
     {
         while (true)
         {
+            // If destroyed, and units are present; retreat & deactivate
             if (stats.currentHealth < 1 && residentList.Count > 0 && gameObject.activeInHierarchy)
             {
                 for (int i = 0; i < residentList.Count; i++)
@@ -94,6 +95,10 @@ public class RefactoredBarricade : MonoBehaviour
 
                 gameObject.SetActive(false);
             }
+
+            // Otherwise, if destroyed deactivate barricade 
+            else if (stats.currentHealth < 1 && gameObject.activeInHierarchy)
+                gameObject.SetActive(false);
 
             yield return new WaitForSeconds(0.5f);
         }

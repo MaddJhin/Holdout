@@ -40,7 +40,7 @@ public class EnemyUnitControl : MonoBehaviour
     // Component References
     NavMeshAgent agent;
     NavMeshObstacle obstacle;
-    Animator m_Animator;
+    Animation m_Animation;
     EnemyAttack enemyAttack;
     UnitStats stats;
     ParticleSystem m_ParticleSystem;
@@ -74,7 +74,7 @@ public class EnemyUnitControl : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         obstacle = GetComponent<NavMeshObstacle>();
-        m_Animator = GetComponentInChildren<Animator>();
+        m_Animation = GetComponentInChildren<Animation>();
         enemyAttack = GetComponent<EnemyAttack>();
         stats = GetComponent<UnitStats>();
         m_AudioSource = GetComponent<AudioSource>();
@@ -87,7 +87,7 @@ public class EnemyUnitControl : MonoBehaviour
             case EnemyTypes.Minion:
                 selectedAction = "Punch";
                 animSelector = Random.Range(0, 2);
-                m_Animator.SetInteger("AnimSelector", animSelector);
+                //m_Animation.SetInteger("AnimSelector", animSelector);
                 break;
 
             case EnemyTypes.Brute:
@@ -113,7 +113,7 @@ public class EnemyUnitControl : MonoBehaviour
     {
         performingAction = false;
         actionTarget = null;
-        m_Animator.speed = moveSpeed;
+        //m_Animation.speed = moveSpeed;
         StartCoroutine(VisionCheck());
 
         if (projectile != null)
@@ -136,11 +136,15 @@ public class EnemyUnitControl : MonoBehaviour
     {
         if (agent.velocity.magnitude > 0.5)
         {
-            m_Animator.SetBool("Moving", true);
+            //m_Animation.SetBool("Moving", true);
+            m_Animation.CrossFade("Run");
         }
 
         else
-            m_Animator.SetBool("Moving", false);
+        {
+            //m_Animation.SetBool("Moving", false);
+            m_Animation.CrossFade("Idle");
+        }
 
         // If the unit has a target, select the appropriate action
         if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
@@ -165,7 +169,8 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
-            m_Animator.SetTrigger("Action");
+            //m_Animation.SetTrigger("Action");
+            m_Animation.CrossFade("Attack");
             enemyAttack.Punch(actionTarget);
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
@@ -183,7 +188,7 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
-            m_Animator.SetTrigger("Action");
+            m_Animation.CrossFade("Attack");
             enemyAttack.Slam(actionTarget, validTargets);
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;         
@@ -221,8 +226,8 @@ public class EnemyUnitControl : MonoBehaviour
     IEnumerator Shoot()
     {
         Stop();
-        
-        m_Animator.SetTrigger("Action");
+
+        m_Animation.CrossFade("Attack");
         /*
         projectile.gameObject.SetActive(true);
         m_AudioSource.clip = unitAudio[1];
@@ -257,10 +262,11 @@ public class EnemyUnitControl : MonoBehaviour
     {
         float oldAttackSpeed = timeBetweenAttacks;                  // Cache old attack speed
         timeBetweenAttacks = timeBetweenAttacks - ((timeBetweenAttacks * slowAmount) / 100);
-        m_Animator.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
+        //m_Animation.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
+        agent.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
         yield return new WaitForSeconds(slowDuration);
         timeBetweenAttacks = oldAttackSpeed;
-        m_Animator.speed = moveSpeed;
+        //m_Animation.speed = moveSpeed;
     }
 
     #endregion
