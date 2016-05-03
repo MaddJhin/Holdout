@@ -43,7 +43,7 @@ public class EnemyUnitControl : MonoBehaviour
     Animation m_Animation;
     EnemyAttack enemyAttack;
     UnitStats stats;
-    ParticleSystem m_ParticleSystem;
+    public ParticleSystem m_ParticleSystem;
     Vector3 projectileTargetPos;
     AudioSource m_AudioSource;
 
@@ -100,7 +100,6 @@ public class EnemyUnitControl : MonoBehaviour
                 break;
 
             case EnemyTypes.Bob:
-                m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
                 selectedAction = "Explode";
                 break;
 
@@ -113,7 +112,6 @@ public class EnemyUnitControl : MonoBehaviour
     {
         performingAction = false;
         actionTarget = null;
-        //m_Animation.speed = moveSpeed;
         StartCoroutine(VisionCheck());
 
         if (projectile != null)
@@ -134,15 +132,13 @@ public class EnemyUnitControl : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
-        if (agent.velocity.magnitude > 0.5 && unitType != EnemyTypes.Evoker)
+        if (agent.velocity.magnitude > 0.5 && unitType != EnemyTypes.Evoker && !performingAction)
         {
-            //m_Animation.SetBool("Moving", true);
             m_Animation.CrossFade("Run");
         }
 
-        else
+        else if (!performingAction)
         {
-            //m_Animation.SetBool("Moving", false);
             m_Animation.CrossFade("Idle");
         }
 
@@ -179,7 +175,6 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
-            //m_Animation.SetTrigger("Action");
             m_Animation.CrossFade("Attack");
             enemyAttack.Punch(actionTarget);
             yield return new WaitForSeconds(timeBetweenAttacks);
