@@ -175,10 +175,10 @@ public class PlayerUnitControl : MonoBehaviour
         //if (Vector3.Distance(transform.position, currentBarricade.transform.position) == 1f)
         //currentBarricade.door.RequestOpen();
 
-        if (agent.velocity.magnitude > 0.5)
+        if (agent.velocity.magnitude > 0.5 && !performingAction)
             m_Animation.CrossFade("Run");
 
-        else
+        else if (!performingAction)
             m_Animation.CrossFade("Idle");
 
         // If the unit has a target, select the appropriate action
