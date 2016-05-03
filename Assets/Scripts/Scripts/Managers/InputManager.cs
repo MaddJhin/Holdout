@@ -50,7 +50,6 @@ public class InputManager : MonoBehaviour {
         {
             // If this instance is the first in the scene, it becomes the singleton
             _instance = this;
-            DontDestroyOnLoad(this);
         }
 
         else

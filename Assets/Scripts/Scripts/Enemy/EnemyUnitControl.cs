@@ -297,20 +297,6 @@ public class EnemyUnitControl : MonoBehaviour
     #endregion
 
     #region Unit Targeting
-    /*
-    public void VisionCheck()
-    {
-        if (actionTarget == null)
-        {
-            Collider[] targetsInRange = Physics.OverlapSphere(transform.position, sightRange, visionLayer);
-
-            if (targetsInRange.Length > 0)
-            {
-                actionTarget = targetsInRange[0].gameObject;
-                targetCollider = targetsInRange[0];
-            }
-        }
-    }*/
     
     IEnumerator VisionCheck()
     {
@@ -324,14 +310,14 @@ public class EnemyUnitControl : MonoBehaviour
 
 
                 // If targets were found, set them
-                if (targetBuffer.Length > 0)
+                if (targetBuffer != null && targetBuffer.Length > 0 && (targetBufferIndex != targetBuffer.Length -1))
                 {
                     SetActionTarget();
                 }
 
             }
 
-            else if (actionTarget == null && targetBuffer.Length > 0)
+            else if (actionTarget == null && (targetBuffer != null && targetBuffer.Length > 0))
             {
                 SetActionTarget();
             }
@@ -345,12 +331,11 @@ public class EnemyUnitControl : MonoBehaviour
         actionTarget = targetBuffer[targetBufferIndex].gameObject;
         targetCollider = targetBuffer[targetBufferIndex];
 
-        // Remove newly selected actionTarget from buffer
-        tempBuffer = new Collider[targetBufferIndex];           // Temp array to represent buffer minus the newly selected target
-        targetBuffer.CopyTo(tempBuffer, 0);                     // Copy contents of buffer to temp buffer
-        targetBuffer = tempBuffer;                              // Set buffer to new contents
+        // If the shrink target is less than 0 don't shrink
+        if (targetBufferIndex - 1 >= 0)
+            System.Array.Resize(ref targetBuffer, targetBufferIndex - 1);
+        
     }
-
     #endregion
 
     #region Designer Readability Methods
