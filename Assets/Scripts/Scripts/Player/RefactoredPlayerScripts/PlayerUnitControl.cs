@@ -208,6 +208,7 @@ public class PlayerUnitControl : MonoBehaviour
     {
         light.enabled = true;
         yield return new WaitForSeconds(0.2f);
+        m_AudioSource.Play();
         light.enabled = false;
     }
 
