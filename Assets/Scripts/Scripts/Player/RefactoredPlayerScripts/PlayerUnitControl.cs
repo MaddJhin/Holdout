@@ -113,13 +113,11 @@ public class PlayerUnitControl : MonoBehaviour
             case UnitTypes.Medic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
                 selectedAction = "ActivateHeal";
-                InvokeRepeating("DeactivateSupportAbilities", 5, 1);
                 break;
 
             case UnitTypes.Mechanic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
                 selectedAction = "BeginFortify";
-                InvokeRepeating("DeactivateSupportAbilities", 5, 1);
                 break;
             
             case UnitTypes.Trooper:
@@ -172,17 +170,13 @@ public class PlayerUnitControl : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
-        //if (Vector3.Distance(transform.position, currentBarricade.transform.position) == 1f)
-        //currentBarricade.door.RequestOpen();
-
-        if (agent.velocity.magnitude > 0.5 && !performingAction)
+        if (agent.velocity.magnitude > 0.5)
+        {
             m_Animation.CrossFade("Run");
+        }
 
         else if (!performingAction)
-            m_Animation.CrossFade("Idle");
-
-        // If the unit has a target, select the appropriate action
-        
+            m_Animation.CrossFade("Idle");       
 	}
 
     #region Unit Actions
@@ -257,7 +251,6 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             yield return new WaitForSeconds(timeBetweenAttacks);
-            performingAction = false;
         }
 
         else
@@ -270,16 +263,17 @@ public class PlayerUnitControl : MonoBehaviour
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
-                m_ParticleSystem[i].Pause();
+                m_ParticleSystem[i].Stop();
             }
 
             m_Animation.CrossFade("Idle");
-            m_AudioSource.Stop();
 
             for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
                 currentBarricade.residentList[i].healthRegenRate = 0;
             }
+
+            performingAction = false;
         }
 
         else
@@ -299,11 +293,14 @@ public class PlayerUnitControl : MonoBehaviour
 
             if (!m_AudioSource.isPlaying)
                 m_AudioSource.Play();
+
             currentBarricade.fortified = true;
             currentBarricade.selfHealAmount = repairPerTick;
         }
         
-        performingAction = false;
+        else
+            performingAction = false;
+
         yield return null;
     }
 
@@ -313,13 +310,15 @@ public class PlayerUnitControl : MonoBehaviour
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
-                m_ParticleSystem[i].Play();
+                m_ParticleSystem[i].Stop();
             }
 
             m_Animation.CrossFade("Idle");
             m_AudioSource.Stop();
             currentBarricade.fortified = false;
         }
+
+        performingAction = false;
 
         yield return null;
     }
@@ -367,18 +366,6 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             yield return new WaitForSeconds(0.5f);
-        }
-    }
-
-    void DeactivateSupportAbilities()
-    {
-        if (stats.currentHealth <= 0 || currentBarricade == null)
-        {
-            if (unitType == UnitTypes.Medic)
-                StartCoroutine(DeactivateHeal());
-
-            else if (unitType == UnitTypes.Mechanic)
-                StartCoroutine(EndFortify());
         }
     }
 
