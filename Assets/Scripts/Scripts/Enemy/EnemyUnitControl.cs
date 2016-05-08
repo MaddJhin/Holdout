@@ -40,10 +40,10 @@ public class EnemyUnitControl : MonoBehaviour
     // Component References
     NavMeshAgent agent;
     NavMeshObstacle obstacle;
-    Animator m_Animator;
+    Animation m_Animation;
     EnemyAttack enemyAttack;
     UnitStats stats;
-    ParticleSystem m_ParticleSystem;
+    public ParticleSystem m_ParticleSystem;
     Vector3 projectileTargetPos;
     AudioSource m_AudioSource;
 
@@ -64,27 +64,30 @@ public class EnemyUnitControl : MonoBehaviour
     float baseAttackSpeedCache;
     int animSelector;
 
+    Collider[] targetBuffer;
+    int targetBufferIndex;
+    Collider[] tempBuffer;
+
     #endregion
 
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
         obstacle = GetComponent<NavMeshObstacle>();
-        m_Animator = GetComponentInChildren<Animator>();
+        m_Animation = GetComponentInChildren<Animation>();
         enemyAttack = GetComponent<EnemyAttack>();
         stats = GetComponent<UnitStats>();
         m_AudioSource = GetComponent<AudioSource>();
         baseAttackSpeedCache = timeBetweenAttacks;
 
-        InvokeRepeating("VisionCheck", 2f, 0.5f);
-        InvokeRepeating("EvaluateSituation", 5, 0.5f);
+        StartCoroutine(EvaluateSituation());
 
         switch (unitType)
         {
             case EnemyTypes.Minion:
                 selectedAction = "Punch";
                 animSelector = Random.Range(0, 2);
-                m_Animator.SetInteger("AnimSelector", animSelector);
+                //m_Animation.SetInteger("AnimSelector", animSelector);
                 break;
 
             case EnemyTypes.Brute:
@@ -97,7 +100,6 @@ public class EnemyUnitControl : MonoBehaviour
                 break;
 
             case EnemyTypes.Bob:
-                m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
                 selectedAction = "Explode";
                 break;
 
@@ -105,13 +107,12 @@ public class EnemyUnitControl : MonoBehaviour
                 break;
         }
     }
-
-    // Use this for initialization
+    
 	void Start () 
     {
         performingAction = false;
         actionTarget = null;
-        m_Animator.speed = moveSpeed;
+        StartCoroutine(VisionCheck());
 
         if (projectile != null)
         {
@@ -131,28 +132,40 @@ public class EnemyUnitControl : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
-        if (agent.velocity.magnitude > 0.5)
+        if (agent.velocity.magnitude > 0.5 && unitType != EnemyTypes.Evoker && !performingAction)
         {
-            m_Animator.SetBool("Moving", true);
+            m_Animation.CrossFade("Run");
         }
 
-        else
-            m_Animator.SetBool("Moving", false);
-
-        // If the unit has a target, select the appropriate action
-        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+        else if (!performingAction)
         {
-            performingAction = true;
-            StartCoroutine(selectedAction);
+            m_Animation.CrossFade("Idle");
         }
 
-        else if (actionTarget != null && !actionTarget.activeInHierarchy)
-        {
-            actionTarget = null;
-        }
+        
+    }
 
-        if (actionTarget == null && targetLocation != null)
-            Move(targetLocation.transform.position);
+    IEnumerator EvaluateSituation()
+    {
+        while (true)
+        {
+            // If the unit has a target, select the appropriate action
+            if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+            {
+                performingAction = true;
+                StartCoroutine(selectedAction);
+            }
+
+            else if (actionTarget != null && !actionTarget.activeInHierarchy)
+            {
+                actionTarget = null;
+            }
+
+            if (actionTarget == null && targetLocation != null)
+                Move(targetLocation.transform.position);
+
+            yield return new WaitForSeconds(0.5f);
+        }
     }
 
     #region Unit Actions
@@ -162,7 +175,7 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
-            m_Animator.SetTrigger("Action");
+            m_Animation.CrossFade("Attack");
             enemyAttack.Punch(actionTarget);
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
@@ -180,7 +193,7 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
-            m_Animator.SetTrigger("Action");
+            m_Animation.CrossFade("Attack");
             enemyAttack.Slam(actionTarget, validTargets);
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;         
@@ -218,8 +231,8 @@ public class EnemyUnitControl : MonoBehaviour
     IEnumerator Shoot()
     {
         Stop();
-        
-        m_Animator.SetTrigger("Action");
+
+        m_Animation.CrossFade("Attack");
         /*
         projectile.gameObject.SetActive(true);
         m_AudioSource.clip = unitAudio[1];
@@ -229,11 +242,6 @@ public class EnemyUnitControl : MonoBehaviour
         yield return new WaitForSeconds(timeBetweenAttacks);
         performingAction = false;
          
-    }
-
-    void EvaluateSituation()
-    {
-        
     }
 
     public void LaunchProjectile()
@@ -254,10 +262,11 @@ public class EnemyUnitControl : MonoBehaviour
     {
         float oldAttackSpeed = timeBetweenAttacks;                  // Cache old attack speed
         timeBetweenAttacks = timeBetweenAttacks - ((timeBetweenAttacks * slowAmount) / 100);
-        m_Animator.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
+        //m_Animation.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
+        agent.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
         yield return new WaitForSeconds(slowDuration);
         timeBetweenAttacks = oldAttackSpeed;
-        m_Animator.speed = moveSpeed;
+        //m_Animation.speed = moveSpeed;
     }
 
     #endregion
@@ -283,21 +292,45 @@ public class EnemyUnitControl : MonoBehaviour
     #endregion
 
     #region Unit Targeting
-
-    public void VisionCheck()
+    
+    IEnumerator VisionCheck()
     {
-        if (actionTarget == null)
+        while (true)
         {
-            Collider[] targetsInRange = Physics.OverlapSphere(transform.position, sightRange, visionLayer);
-
-            if (targetsInRange.Length > 0)
+            if (actionTarget == null && (targetBuffer == null || targetBuffer.Length <= 0))
             {
-                actionTarget = targetsInRange[0].gameObject;
-                targetCollider = targetsInRange[0];
+                // Find new targets and save them to buffer
+                targetBuffer = Physics.OverlapSphere(transform.position, sightRange, visionLayer);
+                targetBufferIndex = targetBuffer.Length - 1;
+
+
+                // If targets were found, set them
+                if (targetBuffer != null && targetBuffer.Length > 0 && (targetBufferIndex != targetBuffer.Length -1))
+                {
+                    SetActionTarget();
+                }
+
             }
+
+            else if (actionTarget == null && (targetBuffer != null && targetBuffer.Length > 0))
+            {
+                SetActionTarget();
+            }
+
+            yield return new WaitForSeconds(1f);
         }
     }
 
+    void SetActionTarget()
+    {
+        actionTarget = targetBuffer[targetBufferIndex].gameObject;
+        targetCollider = targetBuffer[targetBufferIndex];
+
+        // If the shrink target is less than 0 don't shrink
+        if (targetBufferIndex - 1 >= 0)
+            System.Array.Resize(ref targetBuffer, targetBufferIndex - 1);
+        
+    }
     #endregion
 
     #region Designer Readability Methods

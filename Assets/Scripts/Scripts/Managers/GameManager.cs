@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using UnityEngine.SceneManagement;
 
 /*
  * USAGE
@@ -41,7 +41,7 @@ public static class GameManager
 
     static void SwitchScene(string sceneName)
     {
-        Application.LoadLevel(sceneName);
+        SceneManager.LoadScene(sceneName);
     }
 
     #endregion
@@ -89,13 +89,11 @@ public static class GameManager
             if (playerLoadout[i] != null)
             {
                 PlayerUnitControl param = playerLoadout[i].GetComponent<PlayerUnitControl>();     // Cache the character controller to be added
-                GameObject playerChar = playerLoadout[i];
 
                 b[i].onClick.RemoveAllListeners();                                                          // Remove all previous listeners
                 b[i].onClick.AddListener(delegate { IM.SetTarget(param); });                                // Add a new listener with the cached controller
                 HpBarManager hpData = b[i].GetComponent<HpBarManager>();
                 param.hpBar = hpData;
-                //b[i].onClick.AddListener(delegate { IM.FocusCamera(playerChar); });
             }
         }
     }

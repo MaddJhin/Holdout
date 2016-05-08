@@ -45,6 +45,7 @@ public class RefactoredBarricade : MonoBehaviour
     float baseSelfHealCache;
     public int retreatPointIndexCache;              // Tracks the currently available retreatPoint
 
+    Collider[] enemyBuffer;
     #endregion
 
     // Use this for initialization
@@ -60,8 +61,8 @@ public class RefactoredBarricade : MonoBehaviour
 
     void Awake()
     {
-        InvokeRepeating("CheckForEnemies", checkAfter, sightCheckDelay);
-        InvokeRepeating("CheckForRetreat", checkAfter, 0.35f);
+        StartCoroutine(CheckForEnemies());
+        StartCoroutine(CheckForRetreat());
         InvokeRepeating("HealSelf", checkAfter, healRateSeconds);
     }
 
@@ -80,16 +81,28 @@ public class RefactoredBarricade : MonoBehaviour
     #region Retreat Methods
 
     // See if conditions for a retreat are satisfied
-    void CheckForRetreat()
+    IEnumerator CheckForRetreat()
     {
-        if (stats.currentHealth < 1 && residentList.Count > 0 && gameObject.activeInHierarchy)
+        while (true)
         {
-            for (int i = 0; i < residentList.Count; i++)
+            // If destroyed, and units are present; retreat & deactivate
+            if (stats != null && stats.currentHealth < 1)
             {
-                StartCoroutine(residentList[i].RetreatFrom(this));
+                for (int i = 0; i < residentList.Count; i++)
+                {
+                    StartCoroutine(residentList[i].RetreatFrom(this));
+                }
+
+                gameObject.SetActive(false);
             }
 
-            gameObject.SetActive(false);
+            // Otherwise, if destroyed deactivate barricade 
+            else if ((stats != null && stats.currentHealth < 1) && gameObject.activeInHierarchy)
+            {
+                gameObject.SetActive(false);
+            }
+
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -115,26 +128,43 @@ public class RefactoredBarricade : MonoBehaviour
 
     #region Sight Checking Algorithm
 
-    void CheckForEnemies()
+    IEnumerator CheckForEnemies()
     {
-        if (residentList.Count > 0)
+        while (true)
         {
-            Collider[] targetsInRange = Physics.OverlapSphere(transform.position, sightRadius, enemyMask);
-
-            // If there are enemies in range, ping residents to perform a sight check
-            if (targetsInRange.Length > 0)
+            if (residentList.Count > 0 && (enemyBuffer == null || enemyBuffer.Length <= 0))
             {
-                for (int i = 0; i < residentList.Count; i++)
-                {
-                    if (residentList[i].unitType == UnitTypes.Trooper ||
-                        residentList[i].unitType == UnitTypes.Marksman)
-                        StartCoroutine(residentList[i].CheckForTarget(targetsInRange));
+                enemyBuffer = Physics.OverlapSphere(transform.position, sightRadius, enemyMask);
 
-                    else if (residentList[i].unitType == UnitTypes.Mechanic)
-                        StartCoroutine(residentList[i].Slow(targetsInRange));
+                // If there are enemies in range, ping residents to perform a sight check
+                if (enemyBuffer.Length > 0)
+                {
+                    StartCoroutine(AssignTargetsToResidents());
                 }
             }
+
+            else if (residentList.Count > 0 && enemyBuffer.Length > 0)
+            {
+                StartCoroutine(AssignTargetsToResidents());
+            }
+
+            yield return new WaitForSeconds(sightCheckDelay);
         }
+    }
+
+    IEnumerator AssignTargetsToResidents()
+    {
+        for (int i = 0; i < residentList.Count; i++)
+        {
+            if (residentList[i].unitType == UnitTypes.Trooper ||
+                residentList[i].unitType == UnitTypes.Marksman)
+                StartCoroutine(residentList[i].CheckForTarget(enemyBuffer));
+
+            else if (residentList[i].unitType == UnitTypes.Mechanic)
+                StartCoroutine(residentList[i].Slow(enemyBuffer));
+        }
+
+        yield return null;
     }
 
     #endregion

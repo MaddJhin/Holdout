@@ -66,7 +66,7 @@ public class PlayerUnitControl : MonoBehaviour
     bool targetInRange;								// Tracks when target enters and leaves range
     float originalStoppingDistance;					// Used to store preset agent stopping distance
     NavMeshObstacle obstacle;						// Used to indicate other units to avoid this one
-    public Animator m_Animator;
+    public Animation m_Animation;
     ParticleSystem[] m_ParticleSystem;
     Rigidbody m_RigidBody;
     bool performingAction;
@@ -97,7 +97,7 @@ public class PlayerUnitControl : MonoBehaviour
         playerAction = GetComponent<RefactoredPlayerAction>();
         stats = GetComponent<UnitStats>();
         obstacle = GetComponent<NavMeshObstacle>();
-        m_Animator = GetComponentInChildren<Animator>();
+        m_Animation = GetComponentInChildren<Animation>();
         m_RigidBody = GetComponent<Rigidbody>();
         m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
         gunshot = GetComponent<AudioSource>();
@@ -105,7 +105,7 @@ public class PlayerUnitControl : MonoBehaviour
         m_AudioSource = GetComponent<AudioSource>();
 
         InvokeRepeating("SelfHeal", 10, 1);
-        InvokeRepeating("EvaluateSituation", 5, 0.5f);
+        
 
         // Determine which action should be repeated
         switch(unitType)
@@ -113,13 +113,11 @@ public class PlayerUnitControl : MonoBehaviour
             case UnitTypes.Medic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
                 selectedAction = "ActivateHeal";
-                InvokeRepeating("DeactivateSupportAbilities", 5, 1);
                 break;
 
             case UnitTypes.Mechanic:
                 m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
                 selectedAction = "BeginFortify";
-                InvokeRepeating("DeactivateSupportAbilities", 5, 1);
                 break;
             
             case UnitTypes.Trooper:
@@ -164,24 +162,21 @@ public class PlayerUnitControl : MonoBehaviour
         playerAction.attackRange = attackRange;
         playerAction.damagePerHit = damagePerHit;
         playerAction.healPerHit = healPerTick;
-        m_Animator.speed = moveSpeed;
+        agent.speed = moveSpeed;
         residentListCache = new List<PlayerUnitControl>();
-	}
+        StartCoroutine(EvaluateSituation());
+    }
 	
 	// Update is called once per frame
 	void Update () 
     {
-        //if (Vector3.Distance(transform.position, currentBarricade.transform.position) == 1f)
-            //currentBarricade.door.RequestOpen();
-
         if (agent.velocity.magnitude > 0.5)
-            m_Animator.SetBool("Moving", true);
+        {
+            m_Animation.CrossFade("Run");
+        }
 
-        else
-            m_Animator.SetBool("Moving", false);
-
-        // If the unit has a target, select the appropriate action
-        
+        else if (!performingAction)
+            m_Animation.CrossFade("Idle");       
 	}
 
     #region Unit Actions
@@ -193,8 +188,6 @@ public class PlayerUnitControl : MonoBehaviour
     IEnumerator Shoot()
     {
         //Shoot at target if in range of Barricade
-        m_Animator.SetTrigger("Acting");
-
         line.enabled = true;
         gunshot.PlayOneShot(gunshot.clip);
         StartCoroutine(ShootFX());
@@ -209,6 +202,7 @@ public class PlayerUnitControl : MonoBehaviour
     {
         light.enabled = true;
         yield return new WaitForSeconds(0.2f);
+        m_AudioSource.Play();
         light.enabled = false;
     }
 
@@ -219,7 +213,7 @@ public class PlayerUnitControl : MonoBehaviour
 
         if (Vector3.Distance(actionTarget.transform.position, transform.position) <= attackRange)
         {
-            m_Animator.SetTrigger("Action");
+            m_Animation.CrossFade("Attack");
             Stop();
             m_AudioSource.Play();
             playerAction.Attack(actionTarget.GetComponent<UnitStats>());
@@ -246,7 +240,7 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             // Cache the new resident list
-            m_Animator.SetBool("Acting", true);
+            m_Animation.CrossFade("Attack");
 
             if (!m_AudioSource.isPlaying)
                 m_AudioSource.Play();
@@ -257,7 +251,6 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             yield return new WaitForSeconds(timeBetweenAttacks);
-            performingAction = false;
         }
 
         else
@@ -270,16 +263,17 @@ public class PlayerUnitControl : MonoBehaviour
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
-                m_ParticleSystem[i].Pause();
+                m_ParticleSystem[i].Stop();
             }
 
-            m_Animator.SetBool("Acting", false);
-            m_AudioSource.Stop();
+            m_Animation.CrossFade("Idle");
 
             for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
                 currentBarricade.residentList[i].healthRegenRate = 0;
             }
+
+            performingAction = false;
         }
 
         else
@@ -288,8 +282,6 @@ public class PlayerUnitControl : MonoBehaviour
 
     IEnumerator BeginFortify()
     {
-        moving = m_Animator.GetBool("Moving");
-
         if (currentBarricade != null && agent.hasPath == false && agent.velocity.magnitude < 0.5)
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
@@ -297,15 +289,18 @@ public class PlayerUnitControl : MonoBehaviour
                 m_ParticleSystem[i].Play();
             }
 
-            m_Animator.SetBool("Acting", true);
+            m_Animation.CrossFade("Attack");
 
             if (!m_AudioSource.isPlaying)
                 m_AudioSource.Play();
+
             currentBarricade.fortified = true;
             currentBarricade.selfHealAmount = repairPerTick;
         }
         
-        performingAction = false;
+        else
+            performingAction = false;
+
         yield return null;
     }
 
@@ -315,13 +310,15 @@ public class PlayerUnitControl : MonoBehaviour
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
-                m_ParticleSystem[i].Play();
+                m_ParticleSystem[i].Stop();
             }
 
-            m_Animator.SetBool("Acting", false);
+            m_Animation.CrossFade("Idle");
             m_AudioSource.Stop();
             currentBarricade.fortified = false;
         }
+
+        performingAction = false;
 
         yield return null;
     }
@@ -341,41 +338,34 @@ public class PlayerUnitControl : MonoBehaviour
         stats.Heal(healthRegenRate);
     }
 
-    void EvaluateSituation()
+    IEnumerator EvaluateSituation()
     {
-        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+        while (true)
         {
-            if (unitType == UnitTypes.Marksman)
+            if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
             {
-                line.SetPosition(0, shootPoint.position);
-                line.SetPosition(1, actionTarget.transform.position);
-                line.enabled = true;
+                if (unitType == UnitTypes.Marksman)
+                {
+                    line.SetPosition(0, shootPoint.position);
+                    line.SetPosition(1, actionTarget.transform.position);
+                    line.enabled = true;
+                }
+
+                performingAction = true;
+                StartCoroutine(selectedAction);
             }
 
-            performingAction = true;
-            StartCoroutine(selectedAction);
-        }
-
-        else if (actionTarget != null && !actionTarget.activeInHierarchy)
-        {
-            actionTarget = null;
-
-            if (unitType == UnitTypes.Marksman)
+            else if (actionTarget != null && !actionTarget.activeInHierarchy)
             {
-                line.enabled = false;
+                actionTarget = null;
+
+                if (unitType == UnitTypes.Marksman)
+                {
+                    line.enabled = false;
+                }
             }
-        }
-    }
 
-    void DeactivateSupportAbilities()
-    {
-        if (stats.currentHealth <= 0 || currentBarricade == null)
-        {
-            if (unitType == UnitTypes.Medic)
-                StartCoroutine(DeactivateHeal());
-
-            else if (unitType == UnitTypes.Mechanic)
-                StartCoroutine(EndFortify());
+            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -406,7 +396,7 @@ public class PlayerUnitControl : MonoBehaviour
     public void Move(Vector3 targetPos)
     {
         targetInRange = false;
-        m_Animator.SetBool("Moving", true);
+        m_Animation.CrossFade("Run");
         obstacle.enabled = false;
         agent.enabled = true;
         agent.SetDestination(targetPos);
@@ -418,7 +408,7 @@ public class PlayerUnitControl : MonoBehaviour
         if (agent.enabled)
         {
             agent.Stop();
-            m_Animator.SetBool("Moving", false);
+            m_Animation.CrossFade("Idle");
         }
     }
 
@@ -433,7 +423,9 @@ public class PlayerUnitControl : MonoBehaviour
     {
         if (Vector3.Distance(gameObject.transform.position, currentBarricade.transform.position) >= currentBarricade.sightRadius &&
             currentBarricade != null)
+        {
             agent.SetDestination(currentWaypoint.transform.position);
+        }
 
         else
             return;
@@ -470,15 +462,6 @@ public class PlayerUnitControl : MonoBehaviour
         // Attack Range Indicator
         Gizmos.color = attackRangeIndicator;
         Gizmos.DrawWireSphere(transform.position, attackRange);
-    }
-
-    #endregion
-
-    #region Animation
-
-    void UpdateAnimator()
-    {
-
     }
 
     #endregion

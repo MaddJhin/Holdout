@@ -89,7 +89,6 @@ public class NewSpawnerRefactored : MonoBehaviour
                 {
                     yield return StartCoroutine(SpawnWave(waves));
                 }
-                break;
 
             default:
                 break;
@@ -137,8 +136,6 @@ public class NewSpawnerRefactored : MonoBehaviour
                             yield return StartCoroutine(SpawnUnits(currWave));
                         }
 
-                        break;
-
                     default:
                         break;
                 }
@@ -171,8 +168,6 @@ public class NewSpawnerRefactored : MonoBehaviour
                     {
                         yield return StartCoroutine(SpawnUnits(currWave));
                     }
-
-                    break;
 
                 default:
                     break;

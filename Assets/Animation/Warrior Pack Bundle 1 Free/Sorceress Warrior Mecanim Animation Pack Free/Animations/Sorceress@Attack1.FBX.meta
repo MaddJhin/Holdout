@@ -129,7 +129,7 @@ ModelImporter:
     4300002: Mesh_Karate
     4300004: Mesh_Ninja
     4300006: Mesh_Sorceress
-    7400000: Attack1
+    7400000: Attack
     9500000: //RootNode
     13700000: Mesh_Berserker
     13700002: Mesh_Karate
@@ -163,7 +163,7 @@ ModelImporter:
     extraExposedTransformPaths: []
     clipAnimations:
     - serializedVersion: 16
-      name: Attack1
+      name: Attack
       takeName: Take 001
       firstFrame: 0
       lastFrame: 40

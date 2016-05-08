@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class InputManager : MonoBehaviour {
 
 	public Camera thirdPersonCam; 				// Holds the main camera used in third person view
-	public Camera tacticalCam;					// Hold the secondary ortographic camera for tactical view
 	public PlayerUnitControl setTargetOn;
     public float lerpSpeed = 1;
 
@@ -51,7 +50,6 @@ public class InputManager : MonoBehaviour {
         {
             // If this instance is the first in the scene, it becomes the singleton
             _instance = this;
-            DontDestroyOnLoad(this);
         }
 
         else
@@ -69,12 +67,10 @@ public class InputManager : MonoBehaviour {
     {
 		menuManager = MenuManager.instance;
 		thirdPersonCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-		tacticalCam = GameObject.FindGameObjectWithTag("TacticalCamera").GetComponent<Camera>();
 		frontWaypointButton = GameObject.FindGameObjectWithTag("FrontWaypointButton").GetComponent<Button>();
 		rearWaypointButton = GameObject.FindGameObjectWithTag("RearWaypointButton").GetComponent<Button>();
 
 		thirdPersonCam.enabled = true;
-		tacticalCam.enabled = false;
 		thirdPerson = true;
 		activeCam = thirdPersonCam;
         startTime = Time.time;
@@ -121,12 +117,11 @@ public class InputManager : MonoBehaviour {
 				}
 			}
         }
+
 		else if (!thirdPerson)
 		{
 			Vector3 location = new Vector3 (hit.point.x, thirdPersonCam.transform.parent.position.y, hit.point.z);
 			thirdPersonCam.transform.parent.position = location;
-
-			ChangePerspective();
 		}
 	}
 
@@ -193,20 +188,6 @@ public class InputManager : MonoBehaviour {
             setTargetOn.agent.ResetPath();
             setTargetOn.agent.SetDestination(target.transform.position);
         }
-	}
-
-	public void ChangePerspective (){
-		thirdPersonCam.enabled = !thirdPersonCam.enabled;
-		tacticalCam.enabled = !tacticalCam.enabled;
-		thirdPerson = !thirdPerson;
-		if (thirdPerson)
-		{
-			activeCam = thirdPersonCam;
-		}
-		else
-		{
-			activeCam = tacticalCam;
-		}
 	}
 
 	void SetWaypointButtons (RefactoredBarricade barricade)
