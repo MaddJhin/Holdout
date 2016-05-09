@@ -170,13 +170,15 @@ public class PlayerUnitControl : MonoBehaviour
 	// Update is called once per frame
 	void Update () 
     {
-        if (agent.velocity.magnitude > 0.5)
+        if (agent.velocity.magnitude > 0.5 && !performingAction)
         {
             m_Animation.CrossFade("Run");
         }
 
         else if (!performingAction)
-            m_Animation.CrossFade("Idle");       
+        {
+            m_Animation.CrossFade("Idle");
+        }  
 	}
 
     #region Unit Actions
@@ -213,8 +215,8 @@ public class PlayerUnitControl : MonoBehaviour
 
         if (Vector3.Distance(actionTarget.transform.position, transform.position) <= attackRange)
         {
-            m_Animation.CrossFade("Attack");
             Stop();
+            m_Animation.CrossFade("Attack");
             m_AudioSource.Play();
             playerAction.Attack(actionTarget.GetComponent<UnitStats>());
             yield return new WaitForSeconds(timeBetweenAttacks);
@@ -344,6 +346,7 @@ public class PlayerUnitControl : MonoBehaviour
         {
             if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
             {
+                
                 if (unitType == UnitTypes.Marksman)
                 {
                     line.SetPosition(0, shootPoint.position);
@@ -375,13 +378,16 @@ public class PlayerUnitControl : MonoBehaviour
 
     public IEnumerator CheckForTarget(Collider[] targets)
     {
-        for (int i = 0; i < priorityList.Count; i++)
+        if (actionTarget == null)
         {
-            for (int j = 0; j < targets.Length; j++)
+            for (int i = 0; i < priorityList.Count; i++)
             {
-                if (targets[j].tag == priorityList[i])
+                for (int j = 0; j < targets.Length; j++)
                 {
-                    actionTarget = targets[j].gameObject;
+                    if (targets[j].tag == priorityList[i] && targets[j].gameObject.activeInHierarchy)
+                    {
+                        actionTarget = targets[j].gameObject;
+                    }
                 }
             }
         }
@@ -421,10 +427,16 @@ public class PlayerUnitControl : MonoBehaviour
      */
     private void TetherCheck()
     {
-        if (Vector3.Distance(gameObject.transform.position, currentBarricade.transform.position) >= currentBarricade.sightRadius &&
-            currentBarricade != null)
+        if (currentBarricade)
         {
-            agent.SetDestination(currentWaypoint.transform.position);
+            if (Vector3.Distance(gameObject.transform.position, currentBarricade.transform.position) >= currentBarricade.sightRadius &&
+                currentBarricade != null)
+            {
+                agent.SetDestination(currentWaypoint.transform.position);
+            }
+
+            else
+                return;
         }
 
         else
