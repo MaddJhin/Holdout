@@ -88,8 +88,10 @@ public class RefactoredBarricade : MonoBehaviour
             // If destroyed, and units are present; retreat & deactivate
             if (stats != null && stats.currentHealth < 1)
             {
+                
                 for (int i = 0; i < residentList.Count; i++)
                 {
+                    Debug.Log("Activating Retreat");
                     StartCoroutine(residentList[i].RetreatFrom(this));
                 }
 
@@ -108,6 +110,7 @@ public class RefactoredBarricade : MonoBehaviour
 
     public void GetRetreatPoints(RefactoredBarricade retreatTarget)
     {
+        Debug.Log("Getting Retreat points");
         for (int i = 0; i < retreatTarget.backWaypoints.Count; i++)
         {
             retreatPoints.Add(retreatTarget.backWaypoints[i]);
