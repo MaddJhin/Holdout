@@ -346,7 +346,6 @@ public class PlayerUnitControl : MonoBehaviour
         {
             if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
             {
-                
                 if (unitType == UnitTypes.Marksman)
                 {
                     line.SetPosition(0, shootPoint.position);
@@ -446,14 +445,16 @@ public class PlayerUnitControl : MonoBehaviour
     public IEnumerator RetreatFrom(RefactoredBarricade retreatFromBarricade)
     {
         int i = 0;
-
+        Debug.Log("Retreat Received");
         // As long as there are retreatpoints, check for occupied
-        while (i < currentBarricade.retreatPoints.Count)
+        while (i < retreatFromBarricade.retreatPoints.Count)
         {
-            if (!currentBarricade.retreatPoints[i].occupied)
+            Debug.Log("Falling Back");
+            if (!retreatFromBarricade.retreatPoints[i].occupied)
             {
-                agent.SetDestination(currentBarricade.retreatPoints[i].transform.position);
-                currentBarricade = currentBarricade.retreatPoints[i].belongsTo;
+                Debug.Log("Retreating");
+                agent.SetDestination(retreatFromBarricade.retreatPoints[i].transform.position);
+                currentBarricade = retreatFromBarricade.retreatPoints[i].belongsTo;
                 currentBarricade.retreatPoints[i].resident = gameObject;
                 break;
             }
