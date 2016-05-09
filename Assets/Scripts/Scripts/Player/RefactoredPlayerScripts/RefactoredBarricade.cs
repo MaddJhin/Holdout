@@ -132,18 +132,10 @@ public class RefactoredBarricade : MonoBehaviour
     {
         while (true)
         {
-            if (residentList.Count > 0 && (enemyBuffer == null || enemyBuffer.Length <= 0))
-            {
-                enemyBuffer = Physics.OverlapSphere(transform.position, sightRadius, enemyMask);
+            enemyBuffer = Physics.OverlapSphere(transform.position, sightRadius, enemyMask);
 
-                // If there are enemies in range, ping residents to perform a sight check
-                if (enemyBuffer.Length > 0)
-                {
-                    StartCoroutine(AssignTargetsToResidents());
-                }
-            }
-
-            else if (residentList.Count > 0 && enemyBuffer.Length > 0)
+            // If there are enemies in range, ping residents to perform a sight check
+            if (enemyBuffer.Length > 0)
             {
                 StartCoroutine(AssignTargetsToResidents());
             }
