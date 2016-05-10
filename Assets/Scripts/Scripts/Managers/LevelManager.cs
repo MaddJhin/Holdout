@@ -32,6 +32,7 @@ public class LevelManager : MonoBehaviour
     private GameObject playerLoadoutPanel;
     private Sprite[] playerUnitIcons;
     private Transform temp;
+    private bool isPaused;
 
     private InputManager IM;
     private List<NewSpawnerRefactored> enemySpawnerCache = new List<NewSpawnerRefactored>();
@@ -271,4 +272,39 @@ public class LevelManager : MonoBehaviour
             barricades[i].GetRetreatPoints(barricades[i].retreatBarricade);
         }
     }
+
+    #region Menu Methods
+
+    public void PauseGame()
+    {
+        if (!isPaused)
+        {
+            isPaused = true;
+            StartCoroutine(PauseDelay());
+        }
+    }
+
+    public void ResumeGame()
+    {
+        Time.timeScale = 1f;
+        isPaused = false;
+    }
+
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
+    }
+
+    public void QuitToMenu()
+    {
+        SceneManager.LoadScene(0, LoadSceneMode.Single);
+    }
+
+    IEnumerator PauseDelay()
+    {
+        yield return new WaitForSeconds(0.6f);
+        Time.timeScale = 0f;
+    }
+
+    #endregion
 }
