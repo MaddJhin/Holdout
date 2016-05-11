@@ -18,7 +18,7 @@ public class PlayerUnitControl : MonoBehaviour
     public float sightRange;
     public bool stunImmunity = false;
     public UnitTypes unitType;
-    public float moveSpeed = 1f;
+    public float moveSpeed;
 
     [HideInInspector]
     public HpBarManager hpBar;
