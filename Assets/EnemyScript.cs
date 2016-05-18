@@ -1,6 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public enum EnemyTypes
+{
+    Minion,
+    Brute,
+    Evoker,
+    Bob
+}
+
 public class EnemyScript : MonoBehaviour {
 
     #region Unit Stats                      
@@ -10,6 +18,9 @@ public class EnemyScript : MonoBehaviour {
 
     public float movespeed = 3f;                                // Unit's movement speed
     public float health = 100f;                                 // Unit's health value
+    public float attackDamage = 10f;                            // Damage dealt when attacking
+    public float attackRange = 5f;                              // Range of attacks
+    public EnemyTypes unitType;                                  // What type of unit this is
 
     #endregion
 
@@ -42,51 +53,83 @@ public class EnemyScript : MonoBehaviour {
     Vector3 dir;                                        // Vector the unit moves along
     float distThisFrame;                                // How far the unit moves in a frame
     Quaternion targetRotation;                          // How much the unit wants to rotate
+    bool beginAttacking;
+    bool beginPathing;
+    string selectedAction;
 
     #endregion
+
+    void Awake()
+    {
+        switch (unitType)
+        {
+            case EnemyTypes.Minion:
+                selectedAction = "Punch";
+                break;
+
+            case EnemyTypes.Brute:
+                selectedAction = "Slam";
+                break;
+
+            case EnemyTypes.Evoker:
+                selectedAction = "Shoot";
+                break;
+
+            case EnemyTypes.Bob:
+                selectedAction = "Explode";
+                break;
+
+            default:
+                break;
+        }
+    }
 
     void Start ()
     {
         navPath = GameObject.Find("Path");                      // Get the level's navigation path
+        GetNextPathNode();
+        StartCoroutine(MoveToTarget());
+        beginPathing = true;
 	}
 	
 	void Update ()
-    {
-        // Check if we need to get a new node
-	    if (targetPathNode == null)
+    {       
+        /** State Switching Checks **/
+        // If we have a node, check if it belongs to a Barricade       
+        if (targetPathNode != null && targetPathNode.barricade != null)
         {
+            beginAttacking = true;
+            beginPathing = false;
+        }
+
+        /*
+        // If there is nothing to attack, go back to pathing
+        if (targetPlayerCache = null)
+        {
+            ("Beginning Move");
+            beginPathing = true;
+            beginAttacking = false;
             GetNextPathNode();
         }
 
-        // If we have a node, check if it belongs to a Barricade
-        /*
-        if (targetPathNode != null && targetPathNode.barricade != null)
-        {
-            targetBarricadeCache = targetPathNode.barricade;                    // Cache the Barricade the unit is approaching
-            targetPlayerCache = FindPlayerTarget(targetBarricadeCache);         // Find Player unit at the Barricade 
-            targetLocation = targetPlayerCache.transform;                       // Set the target location to the player unit            
-        }*/
-
-        /*  Move unit towards it's target location  */
+        /**  Move unit towards it's target location  **/
         dir = targetLocation.position - this.transform.position;                // The vector to move along to reach target location
-        distThisFrame = movespeed * Time.deltaTime;                             // How far the unit moves in a frame
+        distThisFrame = movespeed * Time.deltaTime;                             // How far the unit moves in a frame        
 
-        // Check if the unit is at the next node
-        if (dir.magnitude <= distThisFrame)
+        /** Perform the appropriate state action **/
+        if (beginPathing)
         {
-            targetPathNode = null;
+            Pathfinding();
         }
 
-        // Otherwise, move towards the next node
-        else
+        else if (beginAttacking)
         {
-            transform.Translate(dir.normalized * distThisFrame, Space.World);                                       // Move along the vector
-            targetRotation = Quaternion.LookRotation(dir);                                                          // Where to look at
-            this.transform.rotation = Quaternion.Lerp(this.transform.rotation, targetRotation, Time.deltaTime);     // Turn to face location
+            StartCoroutine(Combat());
         }
-	}
+    }
 
     #region Navigation & Target Selection Methods
+
     void GetNextPathNode()
     {
         targetPathNode = navPath.gameObject.transform.GetChild(pathNodeIndex).GetComponent<PathNode>();
@@ -100,21 +143,99 @@ public class EnemyScript : MonoBehaviour {
     */
     GameObject FindPlayerTarget(RefactoredBarricade barricadeInput)
     {
-        // Tracks how many players are in front of the Barricade
-        // Starts at -1 to account for base 0 counting
-        int frontPlayerCount = -1;                                           
-        
-        // Count the number of players at the front waypoints
-        for (int i = 0; i < barricadeInput.frontWaypoints.Count; i++)
-        {
-            // If a player is found, increment the playerCount
-            if (barricadeInput.frontWaypoints[i])
+        // If there are players in front of the Barricade, attack them
+        if (barricadeInput.frontWaypoints.Count > 0)
+        {             
+            // Tracks how many players are in front of the Barricade
+            // Starts at -1 to account for base 0 counting
+            int frontPlayerCount = -1;
+
+            // Count the number of players at the front waypoints
+            for (int i = 0; i < barricadeInput.frontWaypoints.Count; i++)
             {
-                frontPlayerCount++;
+                // If a player is found, increment the playerCount
+                if (barricadeInput.frontWaypoints[i])
+                {
+                    frontPlayerCount++;
+                }
             }
+
+            return barricadeInput.frontWaypoints[Random.Range(0, frontPlayerCount)].resident;
         }
 
-        return barricadeInput.frontWaypoints[Random.Range(0, frontPlayerCount)].resident;
+        // Otherwise, attack the Barricade
+        else
+            return barricadeInput.gameObject;
     }
+
+    /*  Function: Move unit towards selected location
+        Parameters: None
+        Returns: None
+    */
+    IEnumerator MoveToTarget()
+    {
+        while (true)
+        {
+            transform.Translate(dir.normalized * distThisFrame, Space.World);                                       // Move along the vector
+            targetRotation = Quaternion.LookRotation(dir);                                                          // Where to look at
+            this.transform.rotation = Quaternion.Lerp(this.transform.rotation, targetRotation, Time.deltaTime);     // Turn to face location
+
+            yield return null;
+        }
+    }
+
+    /*  Function: Find new path nodes as required
+        Paramters: None
+        Returns: None
+    */
+    void Pathfinding()
+    {
+        // Check if we need to get a new node
+        if (targetPathNode == null)
+        {
+            GetNextPathNode();
+        }
+
+        // Check if the unit is at the next node
+        if (dir.magnitude <= distThisFrame)
+        {
+            targetPathNode = null;
+        }
+    }
+
+    /*  Function: Attack targets
+
+    */
+    IEnumerator Combat()
+    {
+        if (targetPlayerCache == null)
+        {
+            targetPlayerCache = FindPlayerTarget(targetBarricadeCache);
+            targetBarricadeCache = targetPathNode.barricade;                    // Cache the Barricade the unit is 
+            targetLocation = targetPlayerCache.transform;                       // Set the target location to the player unit
+        }
+
+        if (dir.magnitude < attackRange)
+        {
+            StopCoroutine(MoveToTarget());
+        }
+
+        yield return null;
+    }
+
+    #endregion
+
+    #region Enemy Actions
+
+    #endregion
+
+    #region Designer Readability Methods
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(transform.position, attackRange);
+    }
+
     #endregion
 }

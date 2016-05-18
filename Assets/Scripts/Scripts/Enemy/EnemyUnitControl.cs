@@ -1,13 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum EnemyTypes
-{
-    Minion,
-    Brute,
-    Evoker,
-    Bob
-}
 
 public class EnemyUnitControl : MonoBehaviour
 {
