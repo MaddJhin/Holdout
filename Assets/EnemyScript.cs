@@ -20,7 +20,17 @@ public class EnemyScript : MonoBehaviour {
     public float health = 100f;                                 // Unit's health value
     public float attackDamage = 10f;                            // Damage dealt when attacking
     public float attackRange = 5f;                              // Range of attacks
-    public EnemyTypes unitType;                                  // What type of unit this is
+    public float attackCooldown = 2f;
+
+    [Tooltip("Duration of attack effects. E.G: Brute Stun")]
+    public float attackEffectDuration = 1f;                     // Duration of any effects resulting from the attack
+
+    [Tooltip("Area of Effect for abilities like the Brute Slam/Bob Explosion")]
+    public float attackAreaOfEffect = 3f;                       // Area that the attack affects
+    
+    [Tooltip("Layer that the enemy unit attempts to attack")]
+    public LayerMask attackTargetLayer;                         // The layer which the enemy unit attempts to attack
+    public EnemyTypes unitType;                                 // What type of unit this is
 
     #endregion
 
@@ -30,6 +40,7 @@ public class EnemyScript : MonoBehaviour {
         and make decisions regarding movement               */
 
     GameObject navPath;                                         // The navigation path for the level
+    PathNode[] pathNodeCollection;                              // Collection of all path nodes
     PathNode targetPathNode;                                    // The next node on the path
     Transform targetLocation;                                   // The next location the unit is going to
     int pathNodeIndex = 0;                                      // Index for traversing navigation nodes
@@ -42,6 +53,7 @@ public class EnemyScript : MonoBehaviour {
 
     RefactoredBarricade targetBarricadeCache;                   // Caches Barricade the unit is interacting with
     GameObject targetPlayerCache;                        // Caches target player the unit is attacking
+    UnitStats targetHealthCache;
 
     #endregion
 
@@ -53,78 +65,57 @@ public class EnemyScript : MonoBehaviour {
     Vector3 dir;                                        // Vector the unit moves along
     float distThisFrame;                                // How far the unit moves in a frame
     Quaternion targetRotation;                          // How much the unit wants to rotate
-    bool beginAttacking;
-    bool beginPathing;
-    string selectedAction;
+
+    // Flags
+    bool beginAttacking;                                // Indicate that an attack state should begin
+    bool attacking;                                     // Indicate that the unit is currently in it's attack state
+    bool beginPathing;                                  // Indicate the pathing state should begin
+    bool moving;
+
+    #endregion
+
+    #region Component References
+
+    EnemyAttack m_EnemyAttack;
 
     #endregion
 
     void Awake()
     {
-        switch (unitType)
-        {
-            case EnemyTypes.Minion:
-                selectedAction = "Punch";
-                break;
-
-            case EnemyTypes.Brute:
-                selectedAction = "Slam";
-                break;
-
-            case EnemyTypes.Evoker:
-                selectedAction = "Shoot";
-                break;
-
-            case EnemyTypes.Bob:
-                selectedAction = "Explode";
-                break;
-
-            default:
-                break;
-        }
+        m_EnemyAttack = GetComponent<EnemyAttack>();
+        navPath = GameObject.Find("Path");                                      // Get the level's navigation path
+        pathNodeCollection = navPath.GetComponentsInChildren<PathNode>();
     }
 
     void Start ()
     {
-        navPath = GameObject.Find("Path");                      // Get the level's navigation path
         GetNextPathNode();
-        StartCoroutine(MoveToTarget());
+        StartCoroutine("MoveToTarget");
         beginPathing = true;
 	}
 	
 	void Update ()
-    {       
-        /** State Switching Checks **/
-        // If we have a node, check if it belongs to a Barricade       
-        if (targetPathNode != null && targetPathNode.barricade != null)
+    {
+        if (targetLocation != null)
+            dir = targetLocation.position - this.transform.position;                // The vector to move along to reach target location
+
+        distThisFrame = movespeed * Time.deltaTime;                             // How far the unit moves in a frame
+        
+        if (targetPathNode != null && targetPathNode.barricade != null && !attacking)
         {
+            attacking = true;
             beginAttacking = true;
             beginPathing = false;
+            targetBarricadeCache = targetPathNode.barricade;                    // Cache the Barricade the unit is
+            StartCoroutine("Combat");
         }
 
-        /*
-        // If there is nothing to attack, go back to pathing
-        if (targetPlayerCache = null)
+        else if (beginPathing)
         {
-            ("Beginning Move");
-            beginPathing = true;
-            beginAttacking = false;
-            GetNextPathNode();
-        }
+            if (!moving)
+                StartCoroutine("MoveToTarget");
 
-        /**  Move unit towards it's target location  **/
-        dir = targetLocation.position - this.transform.position;                // The vector to move along to reach target location
-        distThisFrame = movespeed * Time.deltaTime;                             // How far the unit moves in a frame        
-
-        /** Perform the appropriate state action **/
-        if (beginPathing)
-        {
             Pathfinding();
-        }
-
-        else if (beginAttacking)
-        {
-            StartCoroutine(Combat());
         }
     }
 
@@ -132,7 +123,8 @@ public class EnemyScript : MonoBehaviour {
 
     void GetNextPathNode()
     {
-        targetPathNode = navPath.gameObject.transform.GetChild(pathNodeIndex).GetComponent<PathNode>();
+        Debug.Log("Next node is: " + pathNodeIndex);
+        targetPathNode = pathNodeCollection[pathNodeIndex];
         targetLocation = targetPathNode.transform;
         pathNodeIndex++;
     }
@@ -142,30 +134,26 @@ public class EnemyScript : MonoBehaviour {
         Returns: The player found
     */
     GameObject FindPlayerTarget(RefactoredBarricade barricadeInput)
-    {
-        // If there are players in front of the Barricade, attack them
-        if (barricadeInput.frontWaypoints.Count > 0)
-        {             
-            // Tracks how many players are in front of the Barricade
-            // Starts at -1 to account for base 0 counting
-            int frontPlayerCount = -1;
+    {           
+        // Tracks how many players are in front of the Barricade
+        // Starts at -1 to account for base 0 counting
+        int frontPlayerCount = -1;
 
-            // Count the number of players at the front waypoints
-            for (int i = 0; i < barricadeInput.frontWaypoints.Count; i++)
+        // Count the number of players at the front waypoints
+        for (int i = 0; i < barricadeInput.frontWaypoints.Count; i++)
+        {
+            // If a player is found, increment the playerCount
+            if (barricadeInput.frontWaypoints[i].occupied)
             {
-                // If a player is found, increment the playerCount
-                if (barricadeInput.frontWaypoints[i])
-                {
-                    frontPlayerCount++;
-                }
+                frontPlayerCount++;
             }
-
-            return barricadeInput.frontWaypoints[Random.Range(0, frontPlayerCount)].resident;
         }
 
-        // Otherwise, attack the Barricade
+        if (frontPlayerCount >= 0)
+            return barricadeInput.frontWaypoints[Random.Range(0, frontPlayerCount)].resident;
+
         else
-            return barricadeInput.gameObject;
+            return null;   
     }
 
     /*  Function: Move unit towards selected location
@@ -174,6 +162,8 @@ public class EnemyScript : MonoBehaviour {
     */
     IEnumerator MoveToTarget()
     {
+        moving = true;
+
         while (true)
         {
             transform.Translate(dir.normalized * distThisFrame, Space.World);                                       // Move along the vector
@@ -190,6 +180,8 @@ public class EnemyScript : MonoBehaviour {
     */
     void Pathfinding()
     {
+        Debug.Log("Pathing");
+
         // Check if we need to get a new node
         if (targetPathNode == null)
         {
@@ -197,35 +189,96 @@ public class EnemyScript : MonoBehaviour {
         }
 
         // Check if the unit is at the next node
-        if (dir.magnitude <= distThisFrame)
+        if (dir.magnitude <= 1)
         {
             targetPathNode = null;
         }
+        
     }
 
-    /*  Function: Attack targets
-
+    /*  Function: Select targets, and perform the appropriate attack
+        Parameters: None
+        Returns: None
     */
     IEnumerator Combat()
     {
-        if (targetPlayerCache == null)
+        while (true)
         {
-            targetPlayerCache = FindPlayerTarget(targetBarricadeCache);
-            targetBarricadeCache = targetPathNode.barricade;                    // Cache the Barricade the unit is 
-            targetLocation = targetPlayerCache.transform;                       // Set the target location to the player unit
-        }
+            // If the current target has no HP, find a new one
+            if ((targetHealthCache != null && targetHealthCache.currentHealth <= 0) || targetPlayerCache == null)
+            {
+                // If a player is found at the Barricade, cache it
+                // Otherwise, cache the Barricade
+                if (targetPlayerCache = FindPlayerTarget(targetBarricadeCache))
+                {
+                    targetHealthCache = targetPlayerCache.GetComponent<UnitStats>();
+                    targetLocation = targetPlayerCache.transform;                       // Set the target location to the player unit
+                }
 
-        if (dir.magnitude < attackRange)
-        {
-            StopCoroutine(MoveToTarget());
-        }
+                else
+                {
+                    targetPlayerCache = targetBarricadeCache.gameObject;
+                    targetHealthCache = targetBarricadeCache.GetComponent<UnitStats>();
+                    targetLocation = targetBarricadeCache.transform;
 
-        yield return null;
+                    // If the Barricade has no HP, stop combat
+                    if (targetHealthCache.currentHealth <= 0)
+                    {
+                        attacking = false;
+                        targetPlayerCache = null;
+                        targetLocation = null;
+                        targetBarricadeCache = null;
+                        targetPathNode = null;
+                        beginPathing = true;
+
+                        yield break;
+                    }
+                }
+            }
+            
+            if (dir.magnitude < attackRange)
+            {
+                // Skips attack cooldown on first attack
+                if (!beginAttacking)
+                    yield return new WaitForSeconds(attackCooldown);
+
+                else
+                    beginAttacking = false;
+
+                StopCoroutine("MoveToTarget");
+                moving = false;
+
+                switch (unitType)
+                {
+                    case EnemyTypes.Minion:
+                        m_EnemyAttack.Punch(targetPlayerCache, attackDamage);
+                        break;
+
+                    case EnemyTypes.Brute:
+                        m_EnemyAttack.Slam(targetPlayerCache, attackTargetLayer, attackDamage, attackEffectDuration, attackAreaOfEffect);
+                        break;
+
+                    case EnemyTypes.Evoker:
+                        m_EnemyAttack.Shoot(targetPlayerCache, attackDamage);
+                        break;
+
+                    case EnemyTypes.Bob:
+                        m_EnemyAttack.Explode(targetPlayerCache, attackTargetLayer, attackDamage, attackAreaOfEffect);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+
+            else if (!moving)
+            {
+                //StartCoroutine("MoveToTarget");
+            }
+
+            yield return null;
+        }
     }
-
-    #endregion
-
-    #region Enemy Actions
 
     #endregion
 
@@ -233,8 +286,8 @@ public class EnemyScript : MonoBehaviour {
 
     void OnDrawGizmosSelected()
     {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, attackRange);
+        //Gizmos.color = Color.red;
+        //Gizmos.DrawWireSphere(transform.position, distThisFrame);
     }
 
     #endregion
