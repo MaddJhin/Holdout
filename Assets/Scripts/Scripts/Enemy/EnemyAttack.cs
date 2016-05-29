@@ -54,7 +54,6 @@ public class EnemyAttack : MonoBehaviour
 	public void Explode(GameObject target, int attackMask, float damagePerHit, float attackRadius)
 	{		
 		AreaOfEffect aoe = new AreaOfEffect();
-        m_Animation.CrossFade("Attack");
         aoe.AreaExplode(target.transform.position, attackRadius, damagePerHit, gameObject, attackMask);
 	}
 }

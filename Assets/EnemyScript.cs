@@ -17,7 +17,6 @@ public class EnemyScript : MonoBehaviour {
     /* Contains numerical information that describes the unit */ 
 
     public float movespeed = 3f;                                // Unit's movement speed
-    public float health = 100f;                                 // Unit's health value
     public float attackDamage = 10f;                            // Damage dealt when attacking
     public float attackRange = 5f;                              // Range of attacks
     public float attackCooldown = 2f;
@@ -31,6 +30,14 @@ public class EnemyScript : MonoBehaviour {
     [Tooltip("Layer that the enemy unit attempts to attack")]
     public LayerMask attackTargetLayer;                         // The layer which the enemy unit attempts to attack
     public EnemyTypes unitType;                                 // What type of unit this is
+
+    [Header("Audio Attributes")]
+    [Tooltip("Spawn audio must always be first in array")]
+    public AudioClip[] unitAudio;
+
+    [Header("Projectile Attributes")]
+    public Projectile projectile;
+    public float projectileSpeed;
 
     #endregion
 
@@ -61,10 +68,10 @@ public class EnemyScript : MonoBehaviour {
 
     /*  Miscellaneous variables used by the script when
         performing a variety of logical actions */
-
     Vector3 dir;                                        // Vector the unit moves along
     float distThisFrame;                                // How far the unit moves in a frame
     Quaternion targetRotation;                          // How much the unit wants to rotate
+    Vector3 projectileTargetPos;                        // Target position of projectiles
 
     // Flags
     bool beginAttacking;                                // Indicate that an attack state should begin
@@ -77,36 +84,63 @@ public class EnemyScript : MonoBehaviour {
     #region Component References
 
     EnemyAttack m_EnemyAttack;
+    Animation m_Animation;
+    AudioSource m_AudioSource;
+    ParticleSystem m_ParticleSystem;
+    UnitStats stats;
 
     #endregion
 
     void Awake()
     {
         m_EnemyAttack = GetComponent<EnemyAttack>();
+        m_Animation = GetComponentInChildren<Animation>();
+        m_AudioSource = GetComponent<AudioSource>();
+        m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
+        stats = GetComponent<UnitStats>();
+    
         navPath = GameObject.Find("Path");                                      // Get the level's navigation path
         pathNodeCollection = navPath.GetComponentsInChildren<PathNode>();
     }
 
     void Start ()
     {
+        // Make sure the projectile is not initially visible
+        if (projectile != null)
+        {
+            projectile.gameObject.SetActive(false);
+        }
+
         GetNextPathNode();
         StartCoroutine("MoveToTarget");
         beginPathing = true;
 	}
-	
-	void Update ()
+
+    void OnEnable()
     {
+        if (unitAudio[0] != null && m_AudioSource != null)
+        {
+            m_AudioSource.clip = unitAudio[0];
+            m_AudioSource.Play();
+        }
+    }
+
+    void Update ()
+    {
+        /** MOVEMENT VALUES **/
         if (targetLocation != null)
             dir = targetLocation.position - this.transform.position;                // The vector to move along to reach target location
 
-        distThisFrame = movespeed * Time.deltaTime;                             // How far the unit moves in a frame
+        distThisFrame = movespeed * Time.deltaTime;                                 // How far the unit moves in a frame
         
+        /** STATE SWITCHING LOGIC **/
         if (targetPathNode != null && targetPathNode.barricade != null && !attacking)
         {
+            Debug.Log("Found Barricade");
             attacking = true;
             beginAttacking = true;
             beginPathing = false;
-            targetBarricadeCache = targetPathNode.barricade;                    // Cache the Barricade the unit is
+            targetBarricadeCache = targetPathNode.barricade;                        // Cache the Barricade the unit is
             StartCoroutine("Combat");
         }
 
@@ -163,6 +197,7 @@ public class EnemyScript : MonoBehaviour {
     IEnumerator MoveToTarget()
     {
         moving = true;
+        m_Animation.CrossFade("Run");
 
         while (true)
         {
@@ -180,8 +215,6 @@ public class EnemyScript : MonoBehaviour {
     */
     void Pathfinding()
     {
-        Debug.Log("Pathing");
-
         // Check if we need to get a new node
         if (targetPathNode == null)
         {
@@ -189,12 +222,14 @@ public class EnemyScript : MonoBehaviour {
         }
 
         // Check if the unit is at the next node
-        if (dir.magnitude <= 1)
+        else if (dir.magnitude <= 1)
         {
             targetPathNode = null;
         }
         
     }
+
+    #endregion
 
     /*  Function: Select targets, and perform the appropriate attack
         Parameters: None
@@ -235,7 +270,7 @@ public class EnemyScript : MonoBehaviour {
                     }
                 }
             }
-            
+
             if (dir.magnitude < attackRange)
             {
                 // Skips attack cooldown on first attack
@@ -263,7 +298,12 @@ public class EnemyScript : MonoBehaviour {
                         break;
 
                     case EnemyTypes.Bob:
+                        m_ParticleSystem.Play(true);
+                        m_ParticleSystem.transform.parent = null;
+                        AudioSource.PlayClipAtPoint(unitAudio[1], transform.position);
+                        stats.KillUnit();
                         m_EnemyAttack.Explode(targetPlayerCache, attackTargetLayer, attackDamage, attackAreaOfEffect);
+                        m_ParticleSystem.Play(true);
                         break;
 
                     default:
@@ -277,6 +317,22 @@ public class EnemyScript : MonoBehaviour {
             }
 
             yield return null;
+        }
+    }
+
+    #region Projectile Control Methods
+
+    public void LaunchProjectile()
+    {
+        projectile.FireProjectile(targetPlayerCache.transform.position, projectileSpeed, transform.position);
+    }
+
+    void resetProjectile()
+    {
+        if (projectile.transform.position == projectileTargetPos)
+        {
+            projectile.gameObject.SetActive(false);
+            projectile.transform.position = transform.position;
         }
     }
 
