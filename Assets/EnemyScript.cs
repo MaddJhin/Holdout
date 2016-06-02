@@ -59,9 +59,10 @@ public class EnemyScript : MonoBehaviour {
     /*  Caches of object and component references */
 
     RefactoredBarricade targetBarricadeCache;                   // Caches Barricade the unit is interacting with
-    GameObject targetPlayerCache;                        // Caches target player the unit is attacking
+    GameObject targetPlayerCache;                               // Caches target player the unit is attacking
     UnitStats targetHealthCache;
-
+    Vector3 destinationCache;                                   // Cache destination with affecting destination object's transform
+    
     #endregion
 
     #region Internal Variables
@@ -129,14 +130,15 @@ public class EnemyScript : MonoBehaviour {
     {
         /** MOVEMENT VALUES **/
         if (targetLocation != null)
-            dir = targetLocation.position - this.transform.position;                // The vector to move along to reach target location
+        {           
+            dir = destinationCache - this.transform.position;                // The vector to move along to reach target location
+        }
 
         distThisFrame = movespeed * Time.deltaTime;                                 // How far the unit moves in a frame
         
         /** STATE SWITCHING LOGIC **/
         if (targetPathNode != null && targetPathNode.barricade != null && !attacking)
         {
-            Debug.Log("Found Barricade");
             attacking = true;
             beginAttacking = true;
             beginPathing = false;
@@ -157,9 +159,9 @@ public class EnemyScript : MonoBehaviour {
 
     void GetNextPathNode()
     {
-        Debug.Log("Next node is: " + pathNodeIndex);
         targetPathNode = pathNodeCollection[pathNodeIndex];
         targetLocation = targetPathNode.transform;
+        destinationCache = targetLocation.position;
         pathNodeIndex++;
     }
 
@@ -242,19 +244,24 @@ public class EnemyScript : MonoBehaviour {
             // If the current target has no HP, find a new one
             if ((targetHealthCache != null && targetHealthCache.currentHealth <= 0) || targetPlayerCache == null)
             {
+                if (targetHealthCache != null && targetHealthCache.currentHealth <= 0)
+                {
+                    targetPlayerCache = null;
+                }
+
                 // If a player is found at the Barricade, cache it
                 // Otherwise, cache the Barricade
                 if (targetPlayerCache = FindPlayerTarget(targetBarricadeCache))
                 {
                     targetHealthCache = targetPlayerCache.GetComponent<UnitStats>();
-                    targetLocation = targetPlayerCache.transform;                       // Set the target location to the player unit
+                    destinationCache = GetNewOffset(attackRange, targetPathNode.transform.position);
                 }
 
                 else
                 {
                     targetPlayerCache = targetBarricadeCache.gameObject;
                     targetHealthCache = targetBarricadeCache.GetComponent<UnitStats>();
-                    targetLocation = targetBarricadeCache.transform;
+                    destinationCache = GetNewOffset(attackRange, targetPathNode.transform.position);
 
                     // If the Barricade has no HP, stop combat
                     if (targetHealthCache.currentHealth <= 0)
@@ -318,6 +325,14 @@ public class EnemyScript : MonoBehaviour {
 
             yield return null;
         }
+    }
+
+    Vector3 GetNewOffset(float offsetRadius, Vector3 offsetFrom)
+    {
+
+        Vector3 offsetVector = Random.insideUnitCircle * offsetRadius;
+        Vector3 returnOffset = offsetFrom + offsetVector;
+        return returnOffset;
     }
 
     #region Projectile Control Methods
