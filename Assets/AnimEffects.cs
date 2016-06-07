@@ -4,13 +4,13 @@ using System.Collections;
 public class AnimEffects : MonoBehaviour
 {
     public GameObject particleObj;
-    public EnemyUnitControl unitControl;
+    public EnemyScript unitControl;
     private ParticleSystem actionFX;                 // Stores the instance of the explosion Particle System
     private AudioSource actionAudio;
 
     void Start()
     {
-        unitControl = GetComponentInParent<EnemyUnitControl>();
+        unitControl = GetComponentInParent<EnemyScript>();
 
         if (particleObj)
             actionFX = particleObj.GetComponent<ParticleSystem>();
