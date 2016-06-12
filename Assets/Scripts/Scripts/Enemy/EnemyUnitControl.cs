@@ -1,13 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum EnemyTypes
-{
-    Minion,
-    Brute,
-    Evoker,
-    Bob
-}
 
 public class EnemyUnitControl : MonoBehaviour
 {
@@ -80,18 +73,15 @@ public class EnemyUnitControl : MonoBehaviour
         m_AudioSource = GetComponent<AudioSource>();
         baseAttackSpeedCache = timeBetweenAttacks;
 
-        StartCoroutine(EvaluateSituation());
+        
 
         switch (unitType)
         {
             case EnemyTypes.Minion:
                 selectedAction = "Punch";
-                animSelector = Random.Range(0, 2);
-                //m_Animation.SetInteger("AnimSelector", animSelector);
                 break;
 
             case EnemyTypes.Brute:
-                m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
                 selectedAction = "Slam";
                 break;
 
@@ -113,6 +103,7 @@ public class EnemyUnitControl : MonoBehaviour
         performingAction = false;
         actionTarget = null;
         StartCoroutine(VisionCheck());
+        StartCoroutine(EvaluateSituation());
 
         if (projectile != null)
         {
@@ -140,9 +131,7 @@ public class EnemyUnitControl : MonoBehaviour
         else if (!performingAction)
         {
             m_Animation.CrossFade("Idle");
-        }
-
-        
+        }      
     }
 
     IEnumerator EvaluateSituation()
@@ -162,7 +151,9 @@ public class EnemyUnitControl : MonoBehaviour
             }
 
             if (actionTarget == null && targetLocation != null)
+            {
                 Move(targetLocation.transform.position);
+            }
 
             yield return new WaitForSeconds(0.5f);
         }
@@ -176,7 +167,7 @@ public class EnemyUnitControl : MonoBehaviour
         {
             Stop();
             m_Animation.CrossFade("Attack");
-            enemyAttack.Punch(actionTarget);
+            //enemyAttack.Punch(actionTarget);
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
         }
@@ -194,7 +185,7 @@ public class EnemyUnitControl : MonoBehaviour
         {
             Stop();
             m_Animation.CrossFade("Attack");
-            enemyAttack.Slam(actionTarget, validTargets);
+            //enemyAttack.Slam(actionTarget, validTargets);
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;         
         }
@@ -214,7 +205,7 @@ public class EnemyUnitControl : MonoBehaviour
             m_ParticleSystem.Play(true);
             m_ParticleSystem.transform.parent = null;
             AudioSource.PlayClipAtPoint(unitAudio[1], transform.position);
-            enemyAttack.Explode(actionTarget, validTargets);
+            //enemyAttack.Explode(actionTarget, validTargets);
             stats.KillUnit();
             m_ParticleSystem.Play(true);
             yield return new WaitForSeconds(timeBetweenAttacks);

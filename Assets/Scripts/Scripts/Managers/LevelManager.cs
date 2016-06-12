@@ -32,6 +32,7 @@ public class LevelManager : MonoBehaviour
     private GameObject playerLoadoutPanel;
     private Sprite[] playerUnitIcons;
     private Transform temp;
+    private bool isPaused;
 
     private InputManager IM;
     private List<NewSpawnerRefactored> enemySpawnerCache = new List<NewSpawnerRefactored>();
@@ -97,9 +98,11 @@ public class LevelManager : MonoBehaviour
             if (GameManager.loadoutIndex[i] == -1)
             {
                 GameManager.playerLoadout[i] = null;
+                playerButton[i].gameObject.SetActive(false);
                 continue;
             }
 
+            playerButton[i].gameObject.SetActive(true);
             int unitIndex = GameManager.loadoutIndex[i];
             string unitToSpawn = GameManager.unitToSpawn[unitIndex];
 
@@ -123,6 +126,7 @@ public class LevelManager : MonoBehaviour
                     break;
 
                 default:
+                    playerButton[i].sprite = null;
                     break;
             }
             
@@ -132,17 +136,18 @@ public class LevelManager : MonoBehaviour
         }
         
         Debug.Log("Logging Loadout Analytics");
-        if (GameManager.playerLoadout[0] != null)
+        
+        if (GameManager.playerLoadout != null)
         {
             Analytics.CustomEvent("LevelLoadout", new Dictionary<string, object>
             {
-                {"Slot One", GameManager.playerLoadout[0].name},
-                {"Slot Two", GameManager.playerLoadout[1].name},
-                {"Slot Three", GameManager.playerLoadout[2].name},
-                {"Slot Four", GameManager.playerLoadout[3].name},
-                {"Slot Five", GameManager.playerLoadout[4].name},
-                {"Slot Six", GameManager.playerLoadout[5].name},
-                {"Slot Seven", GameManager.playerLoadout[6].name},
+                {"Slot One", GameManager.playerLoadout[0]},
+                {"Slot Two", GameManager.playerLoadout[1]},
+                {"Slot Three", GameManager.playerLoadout[2]},
+                {"Slot Four", GameManager.playerLoadout[3]},
+                {"Slot Five", GameManager.playerLoadout[4]},
+                {"Slot Six", GameManager.playerLoadout[5]},
+                {"Slot Seven", GameManager.playerLoadout[6]},
             });
         }
     }
@@ -181,13 +186,13 @@ public class LevelManager : MonoBehaviour
 
         for (int i = 0; i < GameManager.playerLoadout.Length; i++)
         {
-            if (GameManager.playerLoadout[i].activeInHierarchy == false)
+            if (GameManager.playerLoadout[i] != null && GameManager.playerLoadout[i].activeInHierarchy == false)
             {
                 GameManager.loadoutIndex[i] = -1;
                 Destroy(GameManager.playerLoadout[i]);
             }
 
-            else
+            else if (GameManager.playerLoadout[i] != null)
             {
                 Debug.Log("Logging Survivor Analytics");
                 Analytics.CustomEvent("UnitSurived", new Dictionary<string, object>
@@ -271,4 +276,39 @@ public class LevelManager : MonoBehaviour
             barricades[i].GetRetreatPoints(barricades[i].retreatBarricade);
         }
     }
+
+    #region Menu Methods
+
+    public void PauseGame()
+    {
+        if (!isPaused)
+        {
+            isPaused = true;
+            StartCoroutine(PauseDelay());
+        }
+    }
+
+    public void ResumeGame()
+    {
+        Time.timeScale = 1f;
+        isPaused = false;
+    }
+
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
+    }
+
+    public void QuitToMenu()
+    {
+        SceneManager.LoadScene(0, LoadSceneMode.Single);
+    }
+
+    IEnumerator PauseDelay()
+    {
+        yield return new WaitForSeconds(0.6f);
+        Time.timeScale = 0f;
+    }
+
+    #endregion
 }

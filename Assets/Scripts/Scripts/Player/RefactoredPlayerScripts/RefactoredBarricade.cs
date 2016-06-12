@@ -48,6 +48,15 @@ public class RefactoredBarricade : MonoBehaviour
     Collider[] enemyBuffer;
     #endregion
 
+    void OnDisable()
+    {
+        for (int i = 0; i < residentList.Count; i++)
+        {
+            if (residentList[i].isActiveAndEnabled)
+                residentList[i].BeginRetreat();
+        }
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -62,7 +71,6 @@ public class RefactoredBarricade : MonoBehaviour
     void Awake()
     {
         StartCoroutine(CheckForEnemies());
-        StartCoroutine(CheckForRetreat());
         InvokeRepeating("HealSelf", checkAfter, healRateSeconds);
     }
 
@@ -75,34 +83,6 @@ public class RefactoredBarricade : MonoBehaviour
 
             else
                 stats.Heal(baseSelfHealCache);
-        }
-    }
-
-    #region Retreat Methods
-
-    // See if conditions for a retreat are satisfied
-    IEnumerator CheckForRetreat()
-    {
-        while (true)
-        {
-            // If destroyed, and units are present; retreat & deactivate
-            if (stats != null && stats.currentHealth < 1)
-            {
-                for (int i = 0; i < residentList.Count; i++)
-                {
-                    StartCoroutine(residentList[i].RetreatFrom(this));
-                }
-
-                gameObject.SetActive(false);
-            }
-
-            // Otherwise, if destroyed deactivate barricade 
-            else if ((stats != null && stats.currentHealth < 1) && gameObject.activeInHierarchy)
-            {
-                gameObject.SetActive(false);
-            }
-
-            yield return new WaitForSeconds(0.5f);
         }
     }
 
@@ -124,26 +104,16 @@ public class RefactoredBarricade : MonoBehaviour
         }
     }
 
-    #endregion
-
     #region Sight Checking Algorithm
 
     IEnumerator CheckForEnemies()
     {
         while (true)
         {
-            if (residentList.Count > 0 && (enemyBuffer == null || enemyBuffer.Length <= 0))
-            {
-                enemyBuffer = Physics.OverlapSphere(transform.position, sightRadius, enemyMask);
+            enemyBuffer = Physics.OverlapSphere(transform.position, sightRadius, enemyMask);
 
-                // If there are enemies in range, ping residents to perform a sight check
-                if (enemyBuffer.Length > 0)
-                {
-                    StartCoroutine(AssignTargetsToResidents());
-                }
-            }
-
-            else if (residentList.Count > 0 && enemyBuffer.Length > 0)
+            // If there are enemies in range, ping residents to perform a sight check
+            if (enemyBuffer.Length > 0)
             {
                 StartCoroutine(AssignTargetsToResidents());
             }
