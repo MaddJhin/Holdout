@@ -56,7 +56,7 @@ public class UnitStats : MonoBehaviour
 
 	void Update () 
     {
-        if (currentHealth <= 0 && gameObject.tag != "Barricade")
+        if (currentHealth <= 0)
         {
             KillUnit();
         }

@@ -21,38 +21,39 @@ using System.Collections;
  * Authors: Francisco Carrera, Andrew Tully
  */
 
-public class EnemyAttack : MonoBehaviour {
+public class EnemyAttack : MonoBehaviour
+{
+    Animation m_Animation;
 
-    [HideInInspector]
-	public float damage;
+    void Awake()
+    {
+        m_Animation = GetComponentInChildren<Animation>();
+    }
 
-    [HideInInspector]
-	public float stunDuration = 1f;
-
-    [HideInInspector]
-	public float attackRadius;
-
-	public void Punch(GameObject target)
+    public void Punch(GameObject target, float damagePerHit)
 	{
 		UnitStats targetHealth = target.GetComponent<UnitStats>();
-		targetHealth.TakeDamage(damage);
+        m_Animation.CrossFade("Attack");
+        targetHealth.TakeDamage(damagePerHit);
 	}
 
     public void Shoot(GameObject target, float damagePerHit)
     {
         UnitStats targetHealth = target.GetComponent<UnitStats>();
+        m_Animation.CrossFade("Attack");
         targetHealth.TakeDamage(damagePerHit);
     }
 
-	public void Slam(GameObject target, int attackMask)
+	public void Slam(GameObject target, int attackMask, float damagePerHit, float stunDuration, float attackRadius)
 	{		
 		AreaOfEffect aoe = new AreaOfEffect();
-		aoe.AreaStun(target.transform.position, attackRadius, damage, stunDuration, gameObject, attackMask);	
+        m_Animation.CrossFade("Attack");
+        aoe.AreaStun(target.transform.position, attackRadius, damagePerHit, stunDuration, gameObject, attackMask);	
 	}
 	
-	public void Explode(GameObject target, int attackMask)
+	public void Explode(GameObject target, int attackMask, float damagePerHit, float attackRadius)
 	{		
 		AreaOfEffect aoe = new AreaOfEffect();
-		aoe.AreaExplode(target.transform.position, attackRadius, damage, gameObject, attackMask);
+        aoe.AreaExplode(target.transform.position, attackRadius, damagePerHit, gameObject, attackMask);
 	}
 }
