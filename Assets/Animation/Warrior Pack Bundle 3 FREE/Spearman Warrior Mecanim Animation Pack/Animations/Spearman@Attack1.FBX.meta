@@ -156,7 +156,7 @@ ModelImporter:
     4300016: SwordR
     4300018: SwordL
     4300020: Spear
-    7400000: Attack1
+    7400000: Attack
     9500000: //RootNode
     13700000: Mesh_Berserker
     13700002: Mesh_Karate
@@ -191,7 +191,7 @@ ModelImporter:
     extraExposedTransformPaths: []
     clipAnimations:
     - serializedVersion: 16
-      name: Attack1
+      name: Attack
       takeName: Take 001
       firstFrame: 0
       lastFrame: 35

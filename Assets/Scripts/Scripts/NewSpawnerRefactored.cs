@@ -48,7 +48,12 @@ public class NewSpawnerRefactored : MonoBehaviour
     [Tooltip("Randomises the order of waves")]
     public bool randomiseWaves;
 
+    [Tooltip("Dictates time between spawner activations")]
+    public float spawnerCooldown;
+
     public List<SpawnerWave> waves;
+
+    private bool canSpawn = true;  // Determines whether or not a wave can be spawned
 
     public void AddWave()
     {
@@ -62,6 +67,7 @@ public class NewSpawnerRefactored : MonoBehaviour
 
     public IEnumerator SpawnLoop()
     {
+        canSpawn = false;
         switch (spawnerType)
         {
             case WaveTypes.Single:
@@ -83,14 +89,13 @@ public class NewSpawnerRefactored : MonoBehaviour
                 {
                     yield return StartCoroutine(SpawnWave(waves));
                 }
-                break;
 
             default:
                 break;
         }
 
-        gameObject.SetActive(false);
-        yield return null;
+        yield return new WaitForSeconds(spawnerCooldown);
+        canSpawn = true;
     }
 
     IEnumerator SpawnWave(List<SpawnerWave> wavesToSpawn)
@@ -131,8 +136,6 @@ public class NewSpawnerRefactored : MonoBehaviour
                             yield return StartCoroutine(SpawnUnits(currWave));
                         }
 
-                        break;
-
                     default:
                         break;
                 }
@@ -166,8 +169,6 @@ public class NewSpawnerRefactored : MonoBehaviour
                         yield return StartCoroutine(SpawnUnits(currWave));
                     }
 
-                    break;
-
                 default:
                     break;
             }
@@ -192,14 +193,12 @@ public class NewSpawnerRefactored : MonoBehaviour
 
                 else
                 {
-                    UnitSight tempSight;
-                    if (tempSight = obj.GetComponent<UnitSight>())
-                        tempSight.defaultTarget = spawnSet.defaultTarget;
-
                     obj.transform.position = transform.position;
                     obj.transform.rotation = transform.rotation;
                     obj.SetActive(true);
                 }
+
+                yield return new WaitForSeconds(0.2f);
             }
         }
 
@@ -220,6 +219,7 @@ public class NewSpawnerRefactored : MonoBehaviour
 
     public void BeginSpawnLoop()
     {
-        StartCoroutine(SpawnLoop());
+        if (canSpawn)
+            StartCoroutine(SpawnLoop());
     }
 }

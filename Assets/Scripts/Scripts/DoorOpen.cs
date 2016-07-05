@@ -32,7 +32,7 @@ public class DoorOpen : MonoBehaviour
 
     void Update()
     {
-        CheckTrigger();
+        //CheckTrigger();
     }
 
     void CheckTrigger()
@@ -59,11 +59,13 @@ public class DoorOpen : MonoBehaviour
         }
     }
 
+    public void RequestOpen()
+    {
+        StartCoroutine(OpenDoor());
+    }
+
     IEnumerator OpenDoor()
     {
-        Debug.Log("Opening Door");
-        float step = speed * Time.deltaTime;
-
         open = true;
         startMarker = transform.position;
         destination = new Vector3(startMarker.x, startMarker.y + 3, startMarker.z);
@@ -74,7 +76,6 @@ public class DoorOpen : MonoBehaviour
 
     IEnumerator CloseDoor()
     {
-        Debug.Log("Closing Door");
         open = false;
         startMarker = transform.position;
         transform.localPosition = Vector3.Lerp(startMarker, originalPosition, speed);

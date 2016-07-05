@@ -5,8 +5,19 @@ public class CameraScroll : MonoBehaviour {
 
 	public Transform cameraTarget; 				// Hold the object the camera view targets
 	public float speed = 10.0F;					// Scroll Speed
+
+    // Clamp Fields
+    [Header("Camera Movement Constraints")]
+    public float MIN_X;
+    public float MAX_X;
+    public float MIN_Y;
+    public float MAX_Y;
+    public float MIN_Z;
+    public float MAX_Z;
 	
 	private Camera cam;							// Holds current cam reference
+    float vertical;
+    float side;
 	
 	void Awake(){
 		cam = GetComponent<Camera>();
@@ -16,10 +27,22 @@ public class CameraScroll : MonoBehaviour {
 		// If the camera is disabled, do nothing
 		if (!cam.enabled)return;
 
-		//Get the Input for the scrolling movement
-		float vertical = Input.GetAxis("Vertical") * speed;
-		float side = Input.GetAxis("Horizontal") * speed;
+        //Get the Input for the scrolling movement
 
+#if UNITY_ANDROID
+        if (Input.touchCount > 0)
+        {
+            side = Input.touches[0].deltaPosition.x * speed;
+            vertical = Input.touches[0].deltaPosition.y * speed;
+        }
+
+#endif
+
+#if UNITY_EDITOR
+        vertical = Input.GetAxis("Vertical") * speed;
+        side = Input.GetAxis("Horizontal") * speed;
+#endif
+ 
 		// Adjust for framerate differences
 		vertical *= Time.deltaTime;
 		side *= Time.deltaTime;
@@ -27,5 +50,10 @@ public class CameraScroll : MonoBehaviour {
 		// Move camera based on world space to ignore camera rotation
 		cameraTarget.Translate(Vector3.forward * vertical, Space.World);
 		cameraTarget.Translate(Vector3.right * side, Space.World);
-	}
+        cameraTarget.transform.position = new Vector3(
+                                                       Mathf.Clamp(cameraTarget.transform.position.x, MIN_X, MAX_X),
+                                                       Mathf.Clamp(cameraTarget.transform.position.y, MIN_Y, MAX_Y),
+                                                       Mathf.Clamp(cameraTarget.transform.position.z, MIN_Z, MAX_Z));
+        
+    }
 }

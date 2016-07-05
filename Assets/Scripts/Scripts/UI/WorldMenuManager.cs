@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using System.Collections;
 
 /* USES:
@@ -64,7 +65,7 @@ public class WorldMenuManager : MonoBehaviour
             if (i == (GameManager.loadoutIndex.Length - 1))
             {
                 Debug.Log("Load level Called");
-                Application.LoadLevel(lvlIndex);
+                SceneManager.LoadScene(lvlIndex);
                 Debug.Log("New level loaded");
             }
         }

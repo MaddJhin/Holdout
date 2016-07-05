@@ -7,7 +7,6 @@ using UnityEngine.UI;
 public class InputManager : MonoBehaviour {
 
 	public Camera thirdPersonCam; 				// Holds the main camera used in third person view
-	public Camera tacticalCam;					// Hold the secondary ortographic camera for tactical view
 	public PlayerUnitControl setTargetOn;
     public float lerpSpeed = 1;
 
@@ -51,7 +50,6 @@ public class InputManager : MonoBehaviour {
         {
             // If this instance is the first in the scene, it becomes the singleton
             _instance = this;
-            DontDestroyOnLoad(this);
         }
 
         else
@@ -69,12 +67,10 @@ public class InputManager : MonoBehaviour {
     {
 		menuManager = MenuManager.instance;
 		thirdPersonCam = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
-		tacticalCam = GameObject.FindGameObjectWithTag("TacticalCamera").GetComponent<Camera>();
 		frontWaypointButton = GameObject.FindGameObjectWithTag("FrontWaypointButton").GetComponent<Button>();
 		rearWaypointButton = GameObject.FindGameObjectWithTag("RearWaypointButton").GetComponent<Button>();
 
 		thirdPersonCam.enabled = true;
-		tacticalCam.enabled = false;
 		thirdPerson = true;
 		activeCam = thirdPersonCam;
         startTime = Time.time;
@@ -87,7 +83,6 @@ public class InputManager : MonoBehaviour {
         {
             if (Input.GetTouch(i).phase == TouchPhase.Began)
             {
-                Debug.Log("Tap Count" + Input.GetTouch(i).tapCount);
                 touchCountCache = Input.GetTouch(i).tapCount;
             }
         }
@@ -122,12 +117,11 @@ public class InputManager : MonoBehaviour {
 				}
 			}
         }
+
 		else if (!thirdPerson)
 		{
 			Vector3 location = new Vector3 (hit.point.x, thirdPersonCam.transform.parent.position.y, hit.point.z);
 			thirdPersonCam.transform.parent.position = location;
-
-			ChangePerspective();
 		}
 	}
 
@@ -149,17 +143,14 @@ public class InputManager : MonoBehaviour {
         // Create new color from cache, change alpha, and apply
         if (rendCache != null)
         {
-            Debug.Log("Renderer found");
             for (int i = 0; i < rendCache.Length; i++)
             {
                 if (rendCache[i].material.HasProperty("_OutlineColor"))
                 {
-                    Debug.Log("Outline Renderer Found");
                     targetRend = rendCache[i];
 
                     if (colorCache != rendCache[i].material.GetColor("_OutlineColor"))
                     {
-                        Debug.Log("Received outline colour");
                         colorCache = rendCache[i].material.GetColor("_OutlineColor");
                         newColorCache = colorCache;
                         newColorCache.a = (255F);
@@ -167,14 +158,9 @@ public class InputManager : MonoBehaviour {
 
                     rendCache[i].material.SetColor("_OutlineColor", newColorCache);
                 }
-
-                else
-                    Debug.Log("Cannot change alpha - Incorrect renderer");
             }
         }
-
-        else
-            Debug.Log("Could not change alpha - No Renderer found");
+        
          
     }
 
@@ -195,6 +181,8 @@ public class InputManager : MonoBehaviour {
 		setTargetOn.currentWaypoint = target;
         setTargetOn.currentBarricade = barricade;
 		target.occupied = true;
+        target.resident = setTargetOn.gameObject;
+        setTargetOn.currentWaypoint = target;
         barricade.residentList.Add(setTargetOn);
 
         if (setTargetOn.agent.enabled)
@@ -202,20 +190,6 @@ public class InputManager : MonoBehaviour {
             setTargetOn.agent.ResetPath();
             setTargetOn.agent.SetDestination(target.transform.position);
         }
-	}
-
-	public void ChangePerspective (){
-		thirdPersonCam.enabled = !thirdPersonCam.enabled;
-		tacticalCam.enabled = !tacticalCam.enabled;
-		thirdPerson = !thirdPerson;
-		if (thirdPerson)
-		{
-			activeCam = thirdPersonCam;
-		}
-		else
-		{
-			activeCam = tacticalCam;
-		}
 	}
 
 	void SetWaypointButtons (RefactoredBarricade barricade)

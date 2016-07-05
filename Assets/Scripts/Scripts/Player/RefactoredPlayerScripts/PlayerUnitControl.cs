@@ -18,7 +18,10 @@ public class PlayerUnitControl : MonoBehaviour
     public float sightRange;
     public bool stunImmunity = false;
     public UnitTypes unitType;
-    public float moveSpeed = 1f;
+    public float moveSpeed;
+
+    [HideInInspector]
+    public HpBarManager hpBar;
 
     //[Tooltip("How far the unit can go before returning to it's waypoint")]
     //public float barricadeMaxThether;
@@ -54,6 +57,7 @@ public class PlayerUnitControl : MonoBehaviour
     public RefactoredBarricade currentBarricade;                     // The current Barricade that the unit is stationed at
     public BarricadeWaypoint currentWaypoint;              // The current Waypoint that the unit is occupying
     public GameObject actionTarget;						// Target to shoot
+    RefactoredBarricade retreatFromBarricade;
 
     UnitStats stats;								// Unit stat scripts for health assignment
     float timer;                                    // A timer between actions.
@@ -63,7 +67,7 @@ public class PlayerUnitControl : MonoBehaviour
     bool targetInRange;								// Tracks when target enters and leaves range
     float originalStoppingDistance;					// Used to store preset agent stopping distance
     NavMeshObstacle obstacle;						// Used to indicate other units to avoid this one
-    public Animator m_Animator;
+    public Animation m_Animation;
     ParticleSystem[] m_ParticleSystem;
     Rigidbody m_RigidBody;
     bool performingAction;
@@ -75,6 +79,7 @@ public class PlayerUnitControl : MonoBehaviour
     bool moving;
     Renderer[] rendCache;
     Color colorCache;
+    AudioSource m_AudioSource;
 
     #endregion
 
@@ -86,6 +91,11 @@ public class PlayerUnitControl : MonoBehaviour
 
     #endregion
 
+    void OnDisable()
+    {
+        currentWaypoint.resident = null;
+    }
+
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
@@ -93,13 +103,15 @@ public class PlayerUnitControl : MonoBehaviour
         playerAction = GetComponent<RefactoredPlayerAction>();
         stats = GetComponent<UnitStats>();
         obstacle = GetComponent<NavMeshObstacle>();
-        m_Animator = GetComponentInChildren<Animator>();
+        m_Animation = GetComponentInChildren<Animation>();
         m_RigidBody = GetComponent<Rigidbody>();
         m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();
         gunshot = GetComponent<AudioSource>();
         rendCache = GetComponentsInChildren<Renderer>();
+        m_AudioSource = GetComponent<AudioSource>();
 
         InvokeRepeating("SelfHeal", 10, 1);
+        
 
         // Determine which action should be repeated
         switch(unitType)
@@ -156,50 +168,22 @@ public class PlayerUnitControl : MonoBehaviour
         playerAction.attackRange = attackRange;
         playerAction.damagePerHit = damagePerHit;
         playerAction.healPerHit = healPerTick;
-        m_Animator.speed = moveSpeed;
+        agent.speed = moveSpeed;
         residentListCache = new List<PlayerUnitControl>();
-	}
+        StartCoroutine(EvaluateSituation());
+    }
 	
 	// Update is called once per frame
 	void Update () 
     {
-        if (stats.currentHealth <= 0 || currentBarricade == null)
+        if (agent.velocity.magnitude > 0.5 && !performingAction)
         {
-            if (unitType == UnitTypes.Medic)
-                StartCoroutine(DeactivateHeal());
-
-            else if (unitType == UnitTypes.Mechanic)
-                StartCoroutine(EndFortify());
+            m_Animation.CrossFade("Run");
         }
 
-        if (agent.velocity.magnitude > 0.5)
-            m_Animator.SetBool("Moving", true);
-
-        else
-            m_Animator.SetBool("Moving", false);
-
-        // If the unit has a target, select the appropriate action
-        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+        else if (!performingAction)
         {
-            if (unitType == UnitTypes.Marksman)
-            {               
-                line.SetPosition(0, shootPoint.position);
-                line.SetPosition(1, actionTarget.transform.position);
-                line.enabled = true;
-            }
-
-            performingAction = true;
-            StartCoroutine(selectedAction);
-        }
-
-        else if (actionTarget != null && !actionTarget.activeInHierarchy)
-        {
-            actionTarget = null;
-
-            if (unitType == UnitTypes.Marksman)
-            {
-                line.enabled = false;
-            }
+            m_Animation.CrossFade("Idle");
         }
 	}
 
@@ -212,8 +196,6 @@ public class PlayerUnitControl : MonoBehaviour
     IEnumerator Shoot()
     {
         //Shoot at target if in range of Barricade
-        m_Animator.SetTrigger("Acting");
-
         line.enabled = true;
         gunshot.PlayOneShot(gunshot.clip);
         StartCoroutine(ShootFX());
@@ -228,6 +210,7 @@ public class PlayerUnitControl : MonoBehaviour
     {
         light.enabled = true;
         yield return new WaitForSeconds(0.2f);
+        m_AudioSource.Play();
         light.enabled = false;
     }
 
@@ -238,8 +221,9 @@ public class PlayerUnitControl : MonoBehaviour
 
         if (Vector3.Distance(actionTarget.transform.position, transform.position) <= attackRange)
         {
-            m_Animator.SetTrigger("Action");
             Stop();
+            m_Animation.CrossFade("Attack");
+            m_AudioSource.Play();
             playerAction.Attack(actionTarget.GetComponent<UnitStats>());
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
@@ -264,7 +248,10 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             // Cache the new resident list
-            m_Animator.SetBool("Acting", true);
+            m_Animation.CrossFade("Attack");
+
+            if (!m_AudioSource.isPlaying)
+                m_AudioSource.Play();
 
             for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
@@ -272,7 +259,6 @@ public class PlayerUnitControl : MonoBehaviour
             }
 
             yield return new WaitForSeconds(timeBetweenAttacks);
-            performingAction = false;
         }
 
         else
@@ -281,40 +267,48 @@ public class PlayerUnitControl : MonoBehaviour
 
     public IEnumerator DeactivateHeal()
     {
-        if (currentBarricade.residentList.Count > 0)
+        if (currentBarricade != null && currentBarricade.residentList.Count > 0)
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
-                m_ParticleSystem[i].Pause();
+                m_ParticleSystem[i].Stop();
             }
 
-            m_Animator.SetBool("Acting", false);
+            m_Animation.CrossFade("Idle");
+
             for (int i = 0; i < currentBarricade.residentList.Count; i++)
             {
                 currentBarricade.residentList[i].healthRegenRate = 0;
             }
+
+            performingAction = false;
         }
 
-        yield return null;
+        else
+            yield return null;
     }
 
     IEnumerator BeginFortify()
     {
-        moving = m_Animator.GetBool("Moving");
-
-        if (currentBarricade != null && agent.hasPath == false && agent.velocity.magnitude > 0.5)
+        if (currentBarricade != null && agent.hasPath == false && agent.velocity.magnitude < 0.5)
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
                 m_ParticleSystem[i].Play();
             }
 
-            m_Animator.SetBool("Acting", true);
+            m_Animation.CrossFade("Attack");
+
+            if (!m_AudioSource.isPlaying)
+                m_AudioSource.Play();
+
             currentBarricade.fortified = true;
             currentBarricade.selfHealAmount = repairPerTick;
         }
         
-        performingAction = false;
+        else
+            performingAction = false;
+
         yield return null;
     }
 
@@ -324,12 +318,15 @@ public class PlayerUnitControl : MonoBehaviour
         {
             for (int i = 0; i < m_ParticleSystem.Length; i++)
             {
-                m_ParticleSystem[i].Play();
+                m_ParticleSystem[i].Stop();
             }
 
-            m_Animator.SetBool("Acting", false);
+            m_Animation.CrossFade("Idle");
+            m_AudioSource.Stop();
             currentBarricade.fortified = false;
         }
+
+        performingAction = false;
 
         yield return null;
     }
@@ -349,19 +346,53 @@ public class PlayerUnitControl : MonoBehaviour
         stats.Heal(healthRegenRate);
     }
 
+    IEnumerator EvaluateSituation()
+    {
+        while (true)
+        {
+            if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+            {
+                if (unitType == UnitTypes.Marksman)
+                {
+                    line.SetPosition(0, shootPoint.position);
+                    line.SetPosition(1, actionTarget.transform.position);
+                    line.enabled = true;
+                }
+
+                performingAction = true;
+                StartCoroutine(selectedAction);
+            }
+
+            else if (actionTarget != null && !actionTarget.activeInHierarchy)
+            {
+                actionTarget = null;
+
+                if (unitType == UnitTypes.Marksman)
+                {
+                    line.enabled = false;
+                }
+            }
+
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
+
     #endregion
 
     #region Unit Targeting
 
     public IEnumerator CheckForTarget(Collider[] targets)
     {
-        for (int i = 0; i < priorityList.Count; i++)
+        if (actionTarget == null)
         {
-            for (int j = 0; j < targets.Length; j++)
+            for (int i = 0; i < priorityList.Count; i++)
             {
-                if (targets[j].tag == priorityList[i])
+                for (int j = 0; j < targets.Length; j++)
                 {
-                    actionTarget = targets[j].gameObject;
+                    if (targets[j].tag == priorityList[i] && targets[j].gameObject.activeInHierarchy)
+                    {
+                        actionTarget = targets[j].gameObject;
+                    }
                 }
             }
         }
@@ -376,7 +407,7 @@ public class PlayerUnitControl : MonoBehaviour
     public void Move(Vector3 targetPos)
     {
         targetInRange = false;
-        m_Animator.SetBool("Moving", true);
+        m_Animation.CrossFade("Run");
         obstacle.enabled = false;
         agent.enabled = true;
         agent.SetDestination(targetPos);
@@ -388,7 +419,7 @@ public class PlayerUnitControl : MonoBehaviour
         if (agent.enabled)
         {
             agent.Stop();
-            m_Animator.SetBool("Moving", false);
+            m_Animation.CrossFade("Idle");
         }
     }
 
@@ -401,13 +432,49 @@ public class PlayerUnitControl : MonoBehaviour
      */
     private void TetherCheck()
     {
-        if (Vector3.Distance(gameObject.transform.position, currentBarricade.transform.position) >= currentBarricade.sightRadius &&
-            currentBarricade != null)
-            agent.SetDestination(currentWaypoint.transform.position);
+        if (currentBarricade)
+        {
+            if (Vector3.Distance(gameObject.transform.position, currentBarricade.transform.position) >= currentBarricade.sightRadius &&
+                currentBarricade != null)
+            {
+                agent.SetDestination(currentWaypoint.transform.position);
+            }
+
+            else
+                return;
+        }
 
         else
             return;
     }
+
+    public void BeginRetreat()
+    {
+        retreatFromBarricade = currentBarricade;
+        StartCoroutine(RetreatFrom());
+    }
+
+    IEnumerator RetreatFrom()
+    {
+        int i = 0;
+        // As long as there are retreatpoints, check for occupied
+        while (i < retreatFromBarricade.retreatPoints.Count)
+        {
+            if (!retreatFromBarricade.retreatPoints[i].occupied)
+            {
+                agent.SetDestination(retreatFromBarricade.retreatPoints[i].transform.position);
+                currentBarricade = retreatFromBarricade.retreatPoints[i].belongsTo;
+                currentBarricade.retreatPoints[i].resident = gameObject;
+                break;
+            }
+
+            i++;
+        }
+
+
+        yield return null;
+    }
+
     #endregion
 
     #region Designer Readability Methods
@@ -417,15 +484,6 @@ public class PlayerUnitControl : MonoBehaviour
         // Attack Range Indicator
         Gizmos.color = attackRangeIndicator;
         Gizmos.DrawWireSphere(transform.position, attackRange);
-    }
-
-    #endregion
-
-    #region Animation
-
-    void UpdateAnimator()
-    {
-
     }
 
     #endregion

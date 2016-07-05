@@ -1,13 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum EnemyTypes
-{
-    Minion,
-    Brute,
-    Evoker,
-    Bob
-}
 
 public class EnemyUnitControl : MonoBehaviour
 {
@@ -20,6 +13,7 @@ public class EnemyUnitControl : MonoBehaviour
     public GameObject targetLocation;
     public bool slowed = false;
     public float moveSpeed = 1f;
+    public LayerMask visionLayer;
 
     [Header("Attack Attributes")]
     public float damagePerHit;
@@ -28,6 +22,10 @@ public class EnemyUnitControl : MonoBehaviour
     public float projectileSpeed;
     public LayerMask validTargets;
 
+    [Header("Audio Attributes")]
+    [Tooltip("Spawn audio must always be first in array")]
+    public AudioClip[] unitAudio;
+
     #endregion
 
     #region Object & Component References
@@ -35,15 +33,18 @@ public class EnemyUnitControl : MonoBehaviour
     // Component References
     NavMeshAgent agent;
     NavMeshObstacle obstacle;
-    Animator m_Animator;
+    Animation m_Animation;
     EnemyAttack enemyAttack;
     UnitStats stats;
-    ParticleSystem m_ParticleSystem;
+    public ParticleSystem m_ParticleSystem;
     Vector3 projectileTargetPos;
+    AudioSource m_AudioSource;
 
     // Object References
     GameObject actionTarget;
     Collider targetCollider;
+
+    [Header("Projectile Attributes")]
     public Projectile projectile;
 
     #endregion
@@ -52,9 +53,13 @@ public class EnemyUnitControl : MonoBehaviour
 
     string selectedAction;
     bool performingAction;
-    LayerMask playerLayer;
+    
     float baseAttackSpeedCache;
     int animSelector;
+
+    Collider[] targetBuffer;
+    int targetBufferIndex;
+    Collider[] tempBuffer;
 
     #endregion
 
@@ -62,23 +67,21 @@ public class EnemyUnitControl : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         obstacle = GetComponent<NavMeshObstacle>();
-        m_Animator = GetComponentInChildren<Animator>();
+        m_Animation = GetComponentInChildren<Animation>();
         enemyAttack = GetComponent<EnemyAttack>();
         stats = GetComponent<UnitStats>();
+        m_AudioSource = GetComponent<AudioSource>();
         baseAttackSpeedCache = timeBetweenAttacks;
 
-        InvokeRepeating("VisionCheck", 2f, 0.5f);
+        
 
-        switch(unitType)
+        switch (unitType)
         {
             case EnemyTypes.Minion:
                 selectedAction = "Punch";
-                animSelector = Random.Range(0, 2);
-                m_Animator.SetInteger("AnimSelector", animSelector);
                 break;
 
             case EnemyTypes.Brute:
-                m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
                 selectedAction = "Slam";
                 break;
 
@@ -87,7 +90,6 @@ public class EnemyUnitControl : MonoBehaviour
                 break;
 
             case EnemyTypes.Bob:
-                m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
                 selectedAction = "Explode";
                 break;
 
@@ -95,60 +97,77 @@ public class EnemyUnitControl : MonoBehaviour
                 break;
         }
     }
-
-    // Use this for initialization
+    
 	void Start () 
     {
         performingAction = false;
         actionTarget = null;
-        m_Animator.speed = moveSpeed;
-        playerLayer = LayerMask.GetMask("Player");
-        targetLocation = GameObject.Find("Evac Shuttle");
+        StartCoroutine(VisionCheck());
+        StartCoroutine(EvaluateSituation());
 
         if (projectile != null)
         {
             projectile.gameObject.SetActive(false);
         }
 	}
+
+    void OnEnable()
+    {
+        if (unitAudio[0] != null && m_AudioSource != null)
+        {
+            m_AudioSource.clip = unitAudio[0];
+            m_AudioSource.Play();
+        }
+    }
 	
 	// Update is called once per frame
 	void Update () 
     {
-        if (agent.velocity.magnitude > 0.5)
+        if (agent.velocity.magnitude > 0.5 && unitType != EnemyTypes.Evoker && !performingAction)
         {
-            m_Animator.SetBool("Moving", true);
+            m_Animation.CrossFade("Run");
         }
 
-        else
-            m_Animator.SetBool("Moving", false);
-
-        // If the unit has a target, select the appropriate action
-        if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+        else if (!performingAction)
         {
-            performingAction = true;
-            StartCoroutine(selectedAction);
-        }
+            m_Animation.CrossFade("Idle");
+        }      
+    }
 
-        else if (actionTarget != null && !actionTarget.activeInHierarchy)
+    IEnumerator EvaluateSituation()
+    {
+        while (true)
         {
-            actionTarget = null;
-        }
+            // If the unit has a target, select the appropriate action
+            if (actionTarget != null && actionTarget.activeInHierarchy && !performingAction && selectedAction != null)
+            {
+                performingAction = true;
+                StartCoroutine(selectedAction);
+            }
 
-        else if (actionTarget == null)
-            Move(targetLocation.transform.position);
-	}
+            else if (actionTarget != null && !actionTarget.activeInHierarchy)
+            {
+                actionTarget = null;
+            }
+
+            if (actionTarget == null && targetLocation != null)
+            {
+                Move(targetLocation.transform.position);
+            }
+
+            yield return new WaitForSeconds(0.5f);
+        }
+    }
 
     #region Unit Actions
 
     IEnumerator Punch()
     {
-        Debug.Log("Beginning Punch");
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
-            Debug.Log("Punch in Range");
             Stop();
-            m_Animator.SetTrigger("Action");
-            enemyAttack.Punch(actionTarget);
+            m_Animation.CrossFade("Attack");
+            //enemyAttack.Punch(actionTarget);
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
         }
@@ -165,11 +184,9 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
-            m_Animator.SetTrigger("Action");
-            enemyAttack.Slam(actionTarget, validTargets);
-            Debug.Log("Waiting for " + stats.attackSpeed + " seconds");
+            m_Animation.CrossFade("Attack");
+            //enemyAttack.Slam(actionTarget, validTargets);
             yield return new WaitForSeconds(timeBetweenAttacks);
-            Debug.Log("Finished Waiting");
             performingAction = false;         
         }
 
@@ -185,7 +202,10 @@ public class EnemyUnitControl : MonoBehaviour
         if (Vector3.Distance(targetCollider.ClosestPointOnBounds(transform.position), transform.position) <= attackRange)
         {
             Stop();
-            enemyAttack.Explode(actionTarget, validTargets);
+            m_ParticleSystem.Play(true);
+            m_ParticleSystem.transform.parent = null;
+            AudioSource.PlayClipAtPoint(unitAudio[1], transform.position);
+            //enemyAttack.Explode(actionTarget, validTargets);
             stats.KillUnit();
             m_ParticleSystem.Play(true);
             yield return new WaitForSeconds(timeBetweenAttacks);
@@ -201,15 +221,23 @@ public class EnemyUnitControl : MonoBehaviour
 
     IEnumerator Shoot()
     {
-        Debug.Log("Damage set to: " + damagePerHit);
         Stop();
-        m_Animator.SetTrigger("Action");
+
+        m_Animation.CrossFade("Attack");
+        /*
         projectile.gameObject.SetActive(true);
-        projectile.FireProjectile(actionTarget.transform.position, projectileSpeed, transform.position);
+        m_AudioSource.clip = unitAudio[1];
+        m_AudioSource.Play();
+        projectile.FireProjectile(actionTarget.transform.position, projectileSpeed, transform.position); */
         enemyAttack.Shoot(actionTarget, damagePerHit);
         yield return new WaitForSeconds(timeBetweenAttacks);
         performingAction = false;
          
+    }
+
+    public void LaunchProjectile()
+    {
+        projectile.FireProjectile(actionTarget.transform.position, projectileSpeed, transform.position);
     }
 
     void resetProjectile()
@@ -225,10 +253,11 @@ public class EnemyUnitControl : MonoBehaviour
     {
         float oldAttackSpeed = timeBetweenAttacks;                  // Cache old attack speed
         timeBetweenAttacks = timeBetweenAttacks - ((timeBetweenAttacks * slowAmount) / 100);
-        m_Animator.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
+        //m_Animation.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
+        agent.speed = moveSpeed - ((moveSpeed * slowAmount) / 100);
         yield return new WaitForSeconds(slowDuration);
         timeBetweenAttacks = oldAttackSpeed;
-        m_Animator.speed = moveSpeed;
+        //m_Animation.speed = moveSpeed;
     }
 
     #endregion
@@ -254,21 +283,45 @@ public class EnemyUnitControl : MonoBehaviour
     #endregion
 
     #region Unit Targeting
-
-    public void VisionCheck()
+    
+    IEnumerator VisionCheck()
     {
-        if (actionTarget == null)
+        while (true)
         {
-            Collider[] targetsInRange = Physics.OverlapSphere(transform.position, sightRange, playerLayer);
-
-            if (targetsInRange.Length > 0)
+            if (actionTarget == null && (targetBuffer == null || targetBuffer.Length <= 0))
             {
-                actionTarget = targetsInRange[0].gameObject;
-                targetCollider = targetsInRange[0];
+                // Find new targets and save them to buffer
+                targetBuffer = Physics.OverlapSphere(transform.position, sightRange, visionLayer);
+                targetBufferIndex = targetBuffer.Length - 1;
+
+
+                // If targets were found, set them
+                if (targetBuffer != null && targetBuffer.Length > 0 && (targetBufferIndex != targetBuffer.Length -1))
+                {
+                    SetActionTarget();
+                }
+
             }
+
+            else if (actionTarget == null && (targetBuffer != null && targetBuffer.Length > 0))
+            {
+                SetActionTarget();
+            }
+
+            yield return new WaitForSeconds(1f);
         }
     }
 
+    void SetActionTarget()
+    {
+        actionTarget = targetBuffer[targetBufferIndex].gameObject;
+        targetCollider = targetBuffer[targetBufferIndex];
+
+        // If the shrink target is less than 0 don't shrink
+        if (targetBufferIndex - 1 >= 0)
+            System.Array.Resize(ref targetBuffer, targetBufferIndex - 1);
+        
+    }
     #endregion
 
     #region Designer Readability Methods
