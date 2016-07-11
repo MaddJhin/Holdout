@@ -46,7 +46,7 @@ public class EnemyScript : MonoBehaviour {
     /*  Contains data which the unit uses to traverse levels
         and make decisions regarding movement               */
 
-    GameObject navPath;                                         // The navigation path for the level
+    public GameObject navPath;                                  // The navigation path for the level
     PathNode[] pathNodeCollection;                              // Collection of all path nodes
     PathNode targetPathNode;                                    // The next node on the path
     Transform targetLocation;                                   // The next location the unit is going to
@@ -100,7 +100,6 @@ public class EnemyScript : MonoBehaviour {
         m_ParticleSystem = GetComponentInChildren<ParticleSystem>();
         stats = GetComponent<UnitStats>();
     
-        navPath = GameObject.Find("Path");                                      // Get the level's navigation path
         pathNodeCollection = navPath.GetComponentsInChildren<PathNode>();
     }
 

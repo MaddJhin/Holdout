@@ -51,6 +51,9 @@ public class NewSpawnerRefactored : MonoBehaviour
     [Tooltip("Dictates time between spawner activations")]
     public float spawnerCooldown;
 
+    [Tooltip("The path assigned to units spawned from here")]
+    public GameObject navigationPath;
+
     public List<SpawnerWave> waves;
 
     private bool canSpawn = true;  // Determines whether or not a wave can be spawned
@@ -193,6 +196,7 @@ public class NewSpawnerRefactored : MonoBehaviour
 
                 else
                 {
+                    obj.GetComponent<EnemyScript>().navPath = navigationPath;
                     obj.transform.position = transform.position;
                     obj.transform.rotation = transform.rotation;
                     obj.SetActive(true);
