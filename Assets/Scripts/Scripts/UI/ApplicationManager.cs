@@ -4,6 +4,12 @@ using System.Collections;
 
 public class ApplicationManager : MonoBehaviour {
 	
+    void Start()
+    {
+        if (!Application.isEditor)
+            GameManager.Load();
+    }
+
     // Load Mission Select Screen
     public void PlayGame()
     {
