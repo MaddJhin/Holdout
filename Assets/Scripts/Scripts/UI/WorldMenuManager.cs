@@ -24,6 +24,7 @@ public class WorldMenuManager : MonoBehaviour
 {
 
     public Menu planetMenu;
+    public Menu LoadoutMenu;
     public Button launchButton;
 
     private Menu currentMenu;
@@ -44,12 +45,25 @@ public class WorldMenuManager : MonoBehaviour
         // Set new menu and set IsOpen to true
         currentMenu = menu;
         currentMenu.IsOpen = true;
+        
+    }
+
+    public void MenuToShow(Menu menu)
+    {
+        currentMenu = menu;
     }
 
     public void SetLevelToLoad(int parameter)
     {
-        launchButton.onClick.RemoveAllListeners();
-        launchButton.onClick.AddListener(delegate { LoadLevel(parameter); });
+        if (GameManager.unlockedLevels[parameter] == true)
+        {
+            launchButton.onClick.RemoveAllListeners();
+            launchButton.onClick.AddListener(delegate { LoadLevel(parameter); });
+            ShowMenu(LoadoutMenu);
+        }
+
+        else
+            Debug.Log("Level Locked");
     }
 
     void LoadLevel(int lvlIndex)
