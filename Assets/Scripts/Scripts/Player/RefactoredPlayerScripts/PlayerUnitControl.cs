@@ -93,7 +93,8 @@ public class PlayerUnitControl : MonoBehaviour
 
     void OnDisable()
     {
-        currentWaypoint.resident = null;
+        if (currentWaypoint != null)
+            currentWaypoint.resident = null;
     }
 
     void Awake()

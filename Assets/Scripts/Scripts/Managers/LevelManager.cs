@@ -187,21 +187,30 @@ public class LevelManager : MonoBehaviour
         {
             if (GameManager.playerLoadout[i] != null && GameManager.playerLoadout[i].activeInHierarchy == false)
             {
-                GameManager.loadoutIndex[i] = -1;
-                Destroy(GameManager.playerLoadout[i]);
-            }
-
-            else if (GameManager.playerLoadout[i] != null)
-            {
-                Analytics.CustomEvent("UnitSurived", new Dictionary<string, object>
-                  {
-                    {"Scene ID", SceneManager.GetActiveScene().buildIndex},
-                    {"Survivor", GameManager.playerLoadout[i].name}
-                  });
+                GameManager.playerLoadout[i].SetActive(true);
             }
         }
-        
-        Analytics.CustomEvent("MissionComplete", new Dictionary<string, object>
+
+            /*
+            for (int i = 0; i < GameManager.playerLoadout.Length; i++)
+            {
+                if (GameManager.playerLoadout[i] != null && GameManager.playerLoadout[i].activeInHierarchy == false)
+                {
+                    GameManager.loadoutIndex[i] = -1;
+                    Destroy(GameManager.playerLoadout[i]);
+                }
+
+                else if (GameManager.playerLoadout[i] != null)
+                {
+                    Analytics.CustomEvent("UnitSurived", new Dictionary<string, object>
+                      {
+                        {"Scene ID", SceneManager.GetActiveScene().buildIndex},
+                        {"Survivor", GameManager.playerLoadout[i].name}
+                      });
+                }
+            }*/
+
+            Analytics.CustomEvent("MissionComplete", new Dictionary<string, object>
           {
             {"Scene ID", SceneManager.GetActiveScene().buildIndex},
             {"Mission Complete", true},
