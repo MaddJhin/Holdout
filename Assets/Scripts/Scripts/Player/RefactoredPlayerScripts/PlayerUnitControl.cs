@@ -57,6 +57,7 @@ public class PlayerUnitControl : MonoBehaviour
     public RefactoredBarricade currentBarricade;                     // The current Barricade that the unit is stationed at
     public BarricadeWaypoint currentWaypoint;              // The current Waypoint that the unit is occupying
     public GameObject actionTarget;						// Target to shoot
+    RefactoredBarricade retreatFromBarricade;
 
     UnitStats stats;								// Unit stat scripts for health assignment
     float timer;                                    // A timer between actions.
@@ -89,6 +90,11 @@ public class PlayerUnitControl : MonoBehaviour
     Color attackRangeIndicator = Color.red;
 
     #endregion
+
+    void OnDisable()
+    {
+        currentWaypoint.resident = null;
+    }
 
     void Awake()
     {
@@ -178,7 +184,7 @@ public class PlayerUnitControl : MonoBehaviour
         else if (!performingAction)
         {
             m_Animation.CrossFade("Idle");
-        }  
+        }
 	}
 
     #region Unit Actions
@@ -442,17 +448,20 @@ public class PlayerUnitControl : MonoBehaviour
             return;
     }
 
-    public IEnumerator RetreatFrom(RefactoredBarricade retreatFromBarricade)
+    public void BeginRetreat()
+    {
+        retreatFromBarricade = currentBarricade;
+        StartCoroutine(RetreatFrom());
+    }
+
+    IEnumerator RetreatFrom()
     {
         int i = 0;
-        Debug.Log("Retreat Received");
         // As long as there are retreatpoints, check for occupied
         while (i < retreatFromBarricade.retreatPoints.Count)
         {
-            Debug.Log("Falling Back");
             if (!retreatFromBarricade.retreatPoints[i].occupied)
             {
-                Debug.Log("Retreating");
                 agent.SetDestination(retreatFromBarricade.retreatPoints[i].transform.position);
                 currentBarricade = retreatFromBarricade.retreatPoints[i].belongsTo;
                 currentBarricade.retreatPoints[i].resident = gameObject;

@@ -48,6 +48,15 @@ public class RefactoredBarricade : MonoBehaviour
     Collider[] enemyBuffer;
     #endregion
 
+    void OnDisable()
+    {
+        for (int i = 0; i < residentList.Count; i++)
+        {
+            if (residentList[i].isActiveAndEnabled)
+                residentList[i].BeginRetreat();
+        }
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -62,7 +71,6 @@ public class RefactoredBarricade : MonoBehaviour
     void Awake()
     {
         StartCoroutine(CheckForEnemies());
-        StartCoroutine(CheckForRetreat());
         InvokeRepeating("HealSelf", checkAfter, healRateSeconds);
     }
 
@@ -78,39 +86,8 @@ public class RefactoredBarricade : MonoBehaviour
         }
     }
 
-    #region Retreat Methods
-
-    // See if conditions for a retreat are satisfied
-    IEnumerator CheckForRetreat()
-    {
-        while (true)
-        {
-            // If destroyed, and units are present; retreat & deactivate
-            if (stats != null && stats.currentHealth < 1)
-            {
-                
-                for (int i = 0; i < residentList.Count; i++)
-                {
-                    Debug.Log("Activating Retreat");
-                    StartCoroutine(residentList[i].RetreatFrom(this));
-                }
-
-                gameObject.SetActive(false);
-            }
-
-            // Otherwise, if destroyed deactivate barricade 
-            else if ((stats != null && stats.currentHealth < 1) && gameObject.activeInHierarchy)
-            {
-                gameObject.SetActive(false);
-            }
-
-            yield return new WaitForSeconds(0.5f);
-        }
-    }
-
     public void GetRetreatPoints(RefactoredBarricade retreatTarget)
     {
-        Debug.Log("Getting Retreat points");
         for (int i = 0; i < retreatTarget.backWaypoints.Count; i++)
         {
             retreatPoints.Add(retreatTarget.backWaypoints[i]);
@@ -126,8 +103,6 @@ public class RefactoredBarricade : MonoBehaviour
             retreatPoints.Add(retreatTarget.retreatPoints[i]);
         }
     }
-
-    #endregion
 
     #region Sight Checking Algorithm
 

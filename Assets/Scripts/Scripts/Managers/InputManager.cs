@@ -181,6 +181,8 @@ public class InputManager : MonoBehaviour {
 		setTargetOn.currentWaypoint = target;
         setTargetOn.currentBarricade = barricade;
 		target.occupied = true;
+        target.resident = setTargetOn.gameObject;
+        setTargetOn.currentWaypoint = target;
         barricade.residentList.Add(setTargetOn);
 
         if (setTargetOn.agent.enabled)
