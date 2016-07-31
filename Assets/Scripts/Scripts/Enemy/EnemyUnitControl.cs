@@ -1,13 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public enum EnemyTypes
-{
-    Minion,
-    Brute,
-    Evoker,
-    Bob
-}
 
 public class EnemyUnitControl : MonoBehaviour
 {
@@ -174,7 +167,7 @@ public class EnemyUnitControl : MonoBehaviour
         {
             Stop();
             m_Animation.CrossFade("Attack");
-            enemyAttack.Punch(actionTarget);
+            //enemyAttack.Punch(actionTarget);
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;
         }
@@ -192,7 +185,7 @@ public class EnemyUnitControl : MonoBehaviour
         {
             Stop();
             m_Animation.CrossFade("Attack");
-            enemyAttack.Slam(actionTarget, validTargets);
+            //enemyAttack.Slam(actionTarget, validTargets);
             yield return new WaitForSeconds(timeBetweenAttacks);
             performingAction = false;         
         }
@@ -212,7 +205,7 @@ public class EnemyUnitControl : MonoBehaviour
             m_ParticleSystem.Play(true);
             m_ParticleSystem.transform.parent = null;
             AudioSource.PlayClipAtPoint(unitAudio[1], transform.position);
-            enemyAttack.Explode(actionTarget, validTargets);
+            //enemyAttack.Explode(actionTarget, validTargets);
             stats.KillUnit();
             m_ParticleSystem.Play(true);
             yield return new WaitForSeconds(timeBetweenAttacks);

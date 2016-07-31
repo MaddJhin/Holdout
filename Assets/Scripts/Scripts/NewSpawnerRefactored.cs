@@ -193,16 +193,12 @@ public class NewSpawnerRefactored : MonoBehaviour
 
                 else
                 {
-                    EnemyUnitControl control;
-                    if (control = obj.GetComponent<EnemyUnitControl>())
-                    {
-                        control.targetLocation = GameObject.Find(spawnSet.defaultTarget);
-                    }
-
                     obj.transform.position = transform.position;
                     obj.transform.rotation = transform.rotation;
                     obj.SetActive(true);
                 }
+
+                yield return new WaitForSeconds(0.2f);
             }
         }
 

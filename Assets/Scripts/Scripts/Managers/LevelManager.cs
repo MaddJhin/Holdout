@@ -105,7 +105,7 @@ public class LevelManager : MonoBehaviour
             playerButton[i].gameObject.SetActive(true);
             int unitIndex = GameManager.loadoutIndex[i];
             string unitToSpawn = GameManager.unitToSpawn[unitIndex];
-            Debug.Log("Spawning " + unitToSpawn + " at iteration " + i);
+
             // Assign Unit Icons to Buttons
             switch (GameManager.unitToSpawn[unitIndex])
             {
