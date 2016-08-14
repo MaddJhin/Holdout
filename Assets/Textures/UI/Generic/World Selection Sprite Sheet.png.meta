@@ -1,0 +1,281 @@
+fileFormatVersion: 2
+guid: 8de0481812e074746b4c069e21fcf58d
+timeCreated: 1466651669
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: Soldier_Select_Panel
+    21300002: Selected_Soldiers_Panel
+    21300004: Marksman_Select
+    21300006: Mechanic_Select
+    21300008: Medic_Select
+    21300010: Trooper_Select
+    21300012: Trooper_Icon
+    21300014: Mechanic_Icon
+    21300016: World Selection Sprite Sheet_1
+    21300018: Medic_Icon
+    21300020: World_Select_Background
+    21300022: Planet_One_Button
+    21300024: Planet_Two_Button
+    21300026: Planet_Three_Background
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -1
+  maxTextureSize: 2048
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 100
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: Soldier_Select_Panel
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 2749
+        width: 964
+        height: 189
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -329.36667, y: 65.650635}
+        - {x: -329.36667, y: -64.349365}
+        - {x: 329.63333, y: -64.349365}
+        - {x: 329.63333, y: 65.650635}
+    - name: Selected_Soldiers_Panel
+      rect:
+        serializedVersion: 2
+        x: 1185
+        y: 2769
+        width: 961
+        height: 189
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -328.04004, y: 65.303955}
+        - {x: -328.04004, y: -64.696045}
+        - {x: 329.95996, y: -64.696045}
+        - {x: 329.95996, y: 65.303955}
+    - name: Marksman_Select
+      rect:
+        serializedVersion: 2
+        x: 1172
+        y: 2520
+        width: 238
+        height: 117
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -81.41467, y: 40.819946}
+        - {x: -81.41467, y: -40.180054}
+        - {x: 81.58533, y: -40.180054}
+        - {x: 81.58533, y: 40.819946}
+    - name: Mechanic_Select
+      rect:
+        serializedVersion: 2
+        x: 1496
+        y: 2514
+        width: 256
+        height: 117
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -87.73065, y: 40.724}
+        - {x: -87.73065, y: -40.276}
+        - {x: 88.26935, y: -40.276}
+        - {x: 88.26935, y: 40.724}
+    - name: Medic_Select
+      rect:
+        serializedVersion: 2
+        x: 1878
+        y: 2506
+        width: 256
+        height: 117
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -87.45203, y: 41.262695}
+        - {x: -87.45203, y: -39.737305}
+        - {x: 87.54797, y: -39.737305}
+        - {x: 87.54797, y: 41.262695}
+    - name: Trooper_Select
+      rect:
+        serializedVersion: 2
+        x: 2230
+        y: 2502
+        width: 238
+        height: 117
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -81.15332, y: 40.031982}
+        - {x: -81.15332, y: -39.968018}
+        - {x: 81.84668, y: -39.968018}
+        - {x: 81.84668, y: 40.031982}
+    - name: Trooper_Icon
+      rect:
+        serializedVersion: 2
+        x: 67
+        y: 2522
+        width: 128
+        height: 115
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -43.761333, y: 40.685303}
+        - {x: -43.761333, y: -39.314697}
+        - {x: 45.238667, y: -39.314697}
+        - {x: 45.238667, y: 40.685303}
+    - name: Mechanic_Icon
+      rect:
+        serializedVersion: 2
+        x: 585
+        y: 2524
+        width: 128
+        height: 115
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -43.640015, y: 39.55066}
+        - {x: -43.640015, y: -39.44934}
+        - {x: 44.359985, y: -39.44934}
+        - {x: 44.359985, y: 39.55066}
+    - name: World Selection Sprite Sheet_1
+      rect:
+        serializedVersion: 2
+        x: 847
+        y: 2527
+        width: 128
+        height: 115
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -43.78131, y: 39.598633}
+        - {x: -43.78131, y: -39.401367}
+        - {x: 44.21869, y: -39.401367}
+        - {x: 44.21869, y: 39.598633}
+    - name: Medic_Icon
+      rect:
+        serializedVersion: 2
+        x: 318
+        y: 2525
+        width: 128
+        height: 115
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -43.912003, y: 40.733276}
+        - {x: -43.912003, y: -39.266724}
+        - {x: 44.087997, y: -39.266724}
+        - {x: 44.087997, y: 40.733276}
+    - name: World_Select_Background
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 1751
+        width: 962
+        height: 642
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -328.56, y: 219.84937}
+        - {x: -328.56, y: -219.15063}
+        - {x: 329.44, y: -219.15063}
+        - {x: 329.44, y: 219.84937}
+    - name: Planet_One_Button
+      rect:
+        serializedVersion: 2
+        x: 346
+        y: 1289
+        width: 594
+        height: 249
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -202.79733, y: 86.45734}
+        - {x: -202.79733, y: -84.54266}
+        - {x: 203.20267, y: -84.54266}
+        - {x: 203.20267, y: 86.45734}
+    - name: Planet_Two_Button
+      rect:
+        serializedVersion: 2
+        x: 1137
+        y: 1294
+        width: 594
+        height: 249
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -202.80798, y: 85.87067}
+        - {x: -202.80798, y: -85.12933}
+        - {x: 203.19202, y: -85.12933}
+        - {x: 203.19202, y: 85.87067}
+    - name: Planet_Three_Background
+      rect:
+        serializedVersion: 2
+        x: 1937
+        y: 1285
+        width: 594
+        height: 249
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -202.67468, y: 85.726685}
+        - {x: -202.67468, y: -85.273315}
+        - {x: 203.32532, y: -85.273315}
+        - {x: 203.32532, y: 85.726685}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
