@@ -34,7 +34,23 @@ public static class GameManager
         };
 
     [HideInInspector]
-    public static int[] unlockedLevels;
+    // Tracks unlocked levels
+    // Size of 11, as there are 11 scenes in the game
+    // First three elements are unlocked by default; main menu, level select, and first level
+    public static bool[] unlockedLevels =
+        {
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+        };
 
     // Following region handles the tracking of objectives and transition conditions
     #region Objectives & Transitions
@@ -112,7 +128,8 @@ public static class GameManager
         PlayerData saveData = new PlayerData();
 
         // Record data in container
-
+        saveData.savedLoadout = playerLoadout;
+        saveData.savedAvailableLevels = unlockedLevels;
 
         bf.Serialize(file, saveData);
         file.Close();
@@ -124,8 +141,11 @@ public static class GameManager
         {
             BinaryFormatter bf = new BinaryFormatter();
             FileStream file = File.Open(Application.persistentDataPath + "/gameInfo.dat", FileMode.Open);
-
             PlayerData loadData = (PlayerData)bf.Deserialize(file);
+            file.Close();
+
+            playerLoadout = loadData.savedLoadout;
+            unlockedLevels = loadData.savedAvailableLevels;
         }
     }
 
@@ -137,7 +157,8 @@ public static class GameManager
 class PlayerData
 {
     // Save loadout
-    GameObject[] savedLoadout = new GameObject[7];
+    public GameObject[] savedLoadout = new GameObject[7];
 
     // Save unlocked levels
+    public bool[] savedAvailableLevels = new bool[11];
 }

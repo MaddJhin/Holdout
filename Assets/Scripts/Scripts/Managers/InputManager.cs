@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class InputManager : MonoBehaviour {
 
@@ -250,5 +251,31 @@ public class InputManager : MonoBehaviour {
                                              target.transform.position.z);
 
         thirdPersonCam.transform.parent.position = Vector3.Lerp(currentLocation, targetlocation, 1f);
+    }
+
+    public void LevelCompleted()
+    {
+        // Stop Spawning
+        // Pop up completed message
+        // Update completed level in save file
+        // Deactivate all enemies
+        // Promp player to continue?
+
+        // Unlock next level in the build order
+        GameManager.unlockedLevels[SceneManager.GetActiveScene().buildIndex + 1] = true;
+
+        for (int i = 0; i < GameManager.playerLoadout.Length; i++)
+        {
+            if (GameManager.playerLoadout[i] != null && GameManager.playerLoadout[i].activeInHierarchy == false)
+            {
+                GameManager.loadoutIndex[i] = -1;
+                Destroy(GameManager.playerLoadout[i]);
+            }
+        }
+
+        if (!Application.isEditor)
+            GameManager.Save();
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1, LoadSceneMode.Single);
     }
 }

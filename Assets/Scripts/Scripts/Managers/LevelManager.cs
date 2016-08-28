@@ -171,15 +171,14 @@ public class LevelManager : MonoBehaviour
 
     void LevelCompleted()
     {
-        Debug.Log("Level Complete");
         // Stop Spawning
         // Pop up completed message
         // Update completed level in save file
         // Deactivate all enemies
         // Promp player to continue?
 
-        levelPerformance = CalculateLevelPerformance();
-        Debug.Log(levelPerformance);
+        // Unlock next level in the build order
+        GameManager.unlockedLevels[SceneManager.GetActiveScene().buildIndex + 1] = true;
 
         if (UICanvas != null && nextLevel < 2)
             UICanvas.SetActive(false);
@@ -194,7 +193,6 @@ public class LevelManager : MonoBehaviour
 
             else if (GameManager.playerLoadout[i] != null)
             {
-                Debug.Log("Logging Survivor Analytics");
                 Analytics.CustomEvent("UnitSurived", new Dictionary<string, object>
                   {
                     {"Scene ID", SceneManager.GetActiveScene().buildIndex},
@@ -202,8 +200,7 @@ public class LevelManager : MonoBehaviour
                   });
             }
         }
-
-        Debug.Log("Logging Completion Analytics");
+        
         Analytics.CustomEvent("MissionComplete", new Dictionary<string, object>
           {
             {"Scene ID", SceneManager.GetActiveScene().buildIndex},
@@ -211,6 +208,9 @@ public class LevelManager : MonoBehaviour
             {"Remaining Barricades", barricades.Length},
             {"Mission Result", levelPerformance}
           });
+
+        if (!Application.isEditor)
+            GameManager.Save();
 
         SceneManager.LoadScene(nextLevel, LoadSceneMode.Single);
     }
