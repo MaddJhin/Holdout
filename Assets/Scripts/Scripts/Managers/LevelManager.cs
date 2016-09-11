@@ -70,7 +70,7 @@ public class LevelManager : MonoBehaviour
         // Grab each portrait button from the panel
         for (int i = 0; i < playerLoadoutPanel.transform.childCount; i++)
         {
-            temp = playerLoadoutPanel.transform.GetChild(i);
+            temp = playerLoadoutPanel.transform.GetChild(i).GetChild(0).GetChild(0);
             playerButton[i] = temp.GetComponent<Image>();
         }
     }
