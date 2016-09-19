@@ -253,7 +253,7 @@ public class EnemyScript : MonoBehaviour {
                 if (targetPlayerCache = FindPlayerTarget(targetBarricadeCache))
                 {
                     targetHealthCache = targetPlayerCache.GetComponent<UnitStats>();
-                    destinationCache = GetNewOffset(attackRange, targetPathNode.transform.position);
+					destinationCache = GetNewOffset(attackRange, targetPlayerCache.transform.position);
                 }
 
                 else
