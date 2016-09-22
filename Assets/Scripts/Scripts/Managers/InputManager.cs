@@ -138,8 +138,18 @@ public class InputManager : MonoBehaviour {
 
         if (touchCountCache > 1)
             FocusCamera(player.gameObject);
-      
-        rendCache = player.gameObject.GetComponentsInChildren<Renderer>();
+
+        Debug.Log("Set Target To: " + player);
+        try
+        {
+            rendCache = player.gameObject.GetComponentsInChildren<Renderer>();
+        }
+
+        catch
+        {
+            Debug.Log("Renderer: " + rendCache);
+        }
+        
         
         // Create new color from cache, change alpha, and apply
         if (rendCache != null)
@@ -264,6 +274,7 @@ public class InputManager : MonoBehaviour {
         // Unlock next level in the build order
         GameManager.unlockedLevels[SceneManager.GetActiveScene().buildIndex + 1] = true;
 
+        /*
         for (int i = 0; i < GameManager.playerLoadout.Length; i++)
         {
             if (GameManager.playerLoadout[i] != null && GameManager.playerLoadout[i].activeInHierarchy == false)
@@ -271,7 +282,7 @@ public class InputManager : MonoBehaviour {
                 GameManager.loadoutIndex[i] = -1;
                 Destroy(GameManager.playerLoadout[i]);
             }
-        }
+        }*/
 
         if (!Application.isEditor)
             GameManager.Save();
