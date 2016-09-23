@@ -253,7 +253,7 @@ public class EnemyScript : MonoBehaviour {
                 if (targetPlayerCache = FindPlayerTarget(targetBarricadeCache))
                 {
                     targetHealthCache = targetPlayerCache.GetComponent<UnitStats>();
-                    destinationCache = GetNewOffset(attackRange, targetPathNode.transform.position);
+					destinationCache = GetNewOffset(attackRange, targetPlayerCache.transform.position);
                 }
 
                 else
@@ -329,8 +329,10 @@ public class EnemyScript : MonoBehaviour {
     Vector3 GetNewOffset(float offsetRadius, Vector3 offsetFrom)
     {
 
-        Vector3 offsetVector = Random.insideUnitCircle * offsetRadius;
-        Vector3 returnOffset = offsetFrom + offsetVector;
+        Vector3 offsetVector = Random.insideUnitCircle * offsetRadius;       
+        Vector3 totalOffset = offsetFrom + offsetVector;
+        Vector3 returnOffset = new Vector3(totalOffset.x, 0f, totalOffset.z);
+
         return returnOffset;
     }
 

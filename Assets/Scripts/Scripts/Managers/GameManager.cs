@@ -52,6 +52,21 @@ public static class GameManager
         false
         };
 
+    public static bool[] defaultLevelState =
+        {
+        true,
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+        };
+
     // Following region handles the tracking of objectives and transition conditions
     #region Objectives & Transitions
 
@@ -106,7 +121,9 @@ public static class GameManager
             {
                 PlayerUnitControl param = playerLoadout[i].GetComponent<PlayerUnitControl>();     // Cache the character controller to be added
 
-                b[i].onClick.RemoveAllListeners();                                                          // Remove all previous listeners
+                Debug.Log("Unit Active: " + playerLoadout[i].activeInHierarchy);
+                Debug.Log("UI PARAM: " + param);
+
                 b[i].onClick.AddListener(delegate { IM.SetTarget(param); });                                // Add a new listener with the cached controller
                 HpBarManager hpData = b[i].GetComponent<HpBarManager>();
                 param.hpBar = hpData;
@@ -118,6 +135,11 @@ public static class GameManager
 
     // Handles save & load logic
     #region Data Management
+
+    public static void NewGame()
+    {
+        unlockedLevels = defaultLevelState;
+    }
 
     public static void Save()
     {
