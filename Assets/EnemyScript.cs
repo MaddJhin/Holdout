@@ -236,95 +236,99 @@ public class EnemyScript : MonoBehaviour {
         Parameters: None
         Returns: None
     */
-    IEnumerator Combat()
-    {
-        while (true)
-        {
-            // If the current target has no HP, find a new one
-            if ((targetHealthCache != null && targetHealthCache.currentHealth <= 0) || targetPlayerCache == null)
-            {
-                if (targetHealthCache != null && targetHealthCache.currentHealth <= 0)
-                {
-                    targetPlayerCache = null;
-                }
+	IEnumerator Combat()
+	{
+		while (true)
+		{
+			// If the current target has no HP, find a new one
+			if ((targetHealthCache != null && targetHealthCache.currentHealth <= 0) || targetPlayerCache == null || !targetPlayerCache.gameObject.activeInHierarchy)
+			{
+				if (targetHealthCache != null && targetHealthCache.currentHealth <= 0)
+				{
+					targetPlayerCache = null;
+				}
 
-                // If a player is found at the Barricade, cache it
-                // Otherwise, cache the Barricade
-                if (targetPlayerCache = FindPlayerTarget(targetBarricadeCache))
-                {
-                    targetHealthCache = targetPlayerCache.GetComponent<UnitStats>();
+				targetPlayerCache = FindPlayerTarget(targetBarricadeCache);
+
+				// If a player is found at the Barricade, cache it
+				// Otherwise, cache the Barricade
+				if (targetPlayerCache != null)
+				{
+					targetHealthCache = targetPlayerCache.GetComponent<UnitStats>();
 					destinationCache = GetNewOffset(attackRange, targetPlayerCache.transform.position);
-                }
+					transform.LookAt(targetPlayerCache.transform);
+				}
 
-                else
-                {
-                    targetPlayerCache = targetBarricadeCache.gameObject;
-                    targetHealthCache = targetBarricadeCache.GetComponent<UnitStats>();
-                    destinationCache = GetNewOffset(attackRange, targetPathNode.transform.position);
+				else
+				{
+					targetPlayerCache = targetBarricadeCache.gameObject;
+					targetHealthCache = targetBarricadeCache.GetComponent<UnitStats>();
+					destinationCache = GetNewOffset(attackRange, targetPathNode.transform.position);
 
-                    // If the Barricade has no HP, stop combat
-                    if (targetHealthCache.currentHealth <= 0)
-                    {
-                        attacking = false;
-                        targetPlayerCache = null;
-                        targetLocation = null;
-                        targetBarricadeCache = null;
-                        targetPathNode = null;
-                        beginPathing = true;
+					// If the Barricade has no HP, stop combat
+					if (targetHealthCache.currentHealth <= 0)
+					{
+						attacking = false;
+						targetPlayerCache = null;
+						targetLocation = null;
+						targetBarricadeCache = null;
+						targetPathNode = null;
+						beginPathing = true;
 
-                        yield break;
-                    }
-                }
-            }
+						yield break;
+					}
+				}
+			}
 
-            if (dir.magnitude < attackRange)
-            {
-                // Skips attack cooldown on first attack
-                if (!beginAttacking)
-                    yield return new WaitForSeconds(attackCooldown);
+			if (dir.magnitude < attackRange)
+			{
+				// Skips attack cooldown on first attack
+				if (!beginAttacking)
+					yield return new WaitForSeconds(attackCooldown);
 
-                else
-                    beginAttacking = false;
+				else
+					beginAttacking = false;
 
-                StopCoroutine("MoveToTarget");
-                moving = false;
+				StopCoroutine("MoveToTarget");
+				moving = false;
 
-                switch (unitType)
-                {
-                    case EnemyTypes.Minion:
-                        m_EnemyAttack.Punch(targetPlayerCache, attackDamage);
-                        break;
+				switch (unitType)
+				{
+				case EnemyTypes.Minion:
+					m_EnemyAttack.Punch(targetPlayerCache, attackDamage);
+					break;
 
-                    case EnemyTypes.Brute:
-                        m_EnemyAttack.Slam(targetPlayerCache, attackTargetLayer, attackDamage, attackEffectDuration, attackAreaOfEffect);
-                        break;
+				case EnemyTypes.Brute:
+					m_EnemyAttack.Slam(targetPlayerCache, attackTargetLayer, attackDamage, attackEffectDuration, attackAreaOfEffect);
+					break;
 
-                    case EnemyTypes.Evoker:
-                        m_EnemyAttack.Shoot(targetPlayerCache, attackDamage);
-                        break;
+				case EnemyTypes.Evoker:
+					m_EnemyAttack.Shoot(targetPlayerCache, attackDamage);
+					break;
 
-                    case EnemyTypes.Bob:
-                        m_ParticleSystem.Play(true);
-                        m_ParticleSystem.transform.parent = null;
-                        AudioSource.PlayClipAtPoint(unitAudio[1], transform.position);
-                        stats.KillUnit();
-                        m_EnemyAttack.Explode(targetPlayerCache, attackTargetLayer, attackDamage, attackAreaOfEffect);
-                        m_ParticleSystem.Play(true);
-                        break;
+				case EnemyTypes.Bob:
+					m_ParticleSystem.Play(true);
+					m_ParticleSystem.transform.parent = null;
+					AudioSource.PlayClipAtPoint(unitAudio[1], transform.position);
+					stats.KillUnit();
+					m_EnemyAttack.Explode(targetPlayerCache, attackTargetLayer, attackDamage, attackAreaOfEffect);
+					m_ParticleSystem.Play(true);
+					break;
 
-                    default:
-                        break;
-                }
-            }
+				default:
+					break;
+				}
+			}
 
-            else if (!moving)
-            {
-                //StartCoroutine("MoveToTarget");
-            }
+			else if (!moving)
+			{
+				StartCoroutine("MoveToTarget");
+			}
 
-            yield return null;
-        }
-    }
+			yield return null;
+		}
+	}
+
 
     Vector3 GetNewOffset(float offsetRadius, Vector3 offsetFrom)
     {

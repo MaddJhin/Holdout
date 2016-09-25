@@ -94,22 +94,30 @@ public static class GameManager
      * Parameters: None
      * Returns: None
      */
-    public static void SpawnPlayerUnits(RefactoredBarricade evacShuttle)
-    {
-        for (int i = 0; i < playerLoadout.Length; i++)
-        {
-            if (playerLoadout[i] != null)
-            {
-                playerLoadout[i].transform.position = evacShuttle.frontWaypoints[i].transform.position;
-                playerLoadout[i].SetActive(true);
-            }        
-        }
-    }
+	/* Function: Spawns all units in the loadout into the scene and assigns them to the Evac Shuttle
+	* Parameters: None
+	* Returns: None
+	*/
+	public static void SpawnPlayerUnits(RefactoredBarricade evacShuttle)
+	{
+		for (int i = 0; i < playerLoadout.Length; i++)
+		{
+			if (playerLoadout[i] != null)
+			{
+				// Spawn the unit at the waypoints
+				playerLoadout[i].transform.position = evacShuttle.frontWaypoints[i].transform.position;
 
-    /* Function: Gives each element of the control UI a reference to it's relevant unit
-     * Parameters: None
-     * Returns: None
-     */
+				// Assign to Evac Shuttle
+				evacShuttle.residentList.Add(playerLoadout[i].GetComponent<PlayerUnitControl>());
+
+				// Assign units to waypoints
+				evacShuttle.frontWaypoints[i].resident = playerLoadout[i];
+				evacShuttle.frontWaypoints[i].occupied = true;
+
+				playerLoadout[i].SetActive(true);
+			}        
+		}
+	}
     public static void AssignLoadoutUI(GameObject UI_playerPanel, InputManager IM)
     {
         Button[] b = UI_playerPanel.GetComponentsInChildren<Button>();                                       // Gets each button in the canvas
