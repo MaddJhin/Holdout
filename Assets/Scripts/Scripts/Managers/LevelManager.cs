@@ -189,26 +189,12 @@ public class LevelManager : MonoBehaviour
             {
                 GameManager.playerLoadout[i].SetActive(true);
             }
-        }
 
-            /*
-            for (int i = 0; i < GameManager.playerLoadout.Length; i++)
+            if (GameManager.playerLoadout[i].activeInHierarchy)
             {
-                if (GameManager.playerLoadout[i] != null && GameManager.playerLoadout[i].activeInHierarchy == false)
-                {
-                    GameManager.loadoutIndex[i] = -1;
-                    Destroy(GameManager.playerLoadout[i]);
-                }
-
-                else if (GameManager.playerLoadout[i] != null)
-                {
-                    Analytics.CustomEvent("UnitSurived", new Dictionary<string, object>
-                      {
-                        {"Scene ID", SceneManager.GetActiveScene().buildIndex},
-                        {"Survivor", GameManager.playerLoadout[i].name}
-                      });
-                }
-            }*/
+                GameManager.playerLoadout[i].GetComponent<UnitStats>().isInvulnerable = true;
+            }
+        }
 
             Analytics.CustomEvent("MissionComplete", new Dictionary<string, object>
           {
@@ -221,7 +207,7 @@ public class LevelManager : MonoBehaviour
         if (!Application.isEditor)
             GameManager.Save();
 
-        SceneManager.LoadScene(nextLevel, LoadSceneMode.Single);
+        LoadLevel(nextLevel);
     }
 
     void LevelFailed()
@@ -242,9 +228,14 @@ public class LevelManager : MonoBehaviour
                 {"Mission Result", levelPerformance}
             });
 
-            SceneManager.LoadScene(0, LoadSceneMode.Single);
+            LoadLevel(0);
         }
         
+    }
+
+    public void LoadLevel(int levelToLoad)
+    {
+        SceneManager.LoadScene(levelToLoad, LoadSceneMode.Single);
     }
 
     public void SpawnMilitia()

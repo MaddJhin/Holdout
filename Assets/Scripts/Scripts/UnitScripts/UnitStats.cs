@@ -21,6 +21,7 @@ public class UnitStats : MonoBehaviour
     // Unit attributes
     public float maxHealth;
     public float currentHealth;
+    public bool isInvulnerable;
     public Image worldSpaceHealthBar;
 
     [HideInInspector]
@@ -43,6 +44,7 @@ public class UnitStats : MonoBehaviour
     void Awake()
     {
         currentHealth = maxHealth;
+        isInvulnerable = false;
     }
 
     void Start()
@@ -58,7 +60,8 @@ public class UnitStats : MonoBehaviour
     {
         if (currentHealth <= 0)
         {
-            KillUnit();
+            if (!isInvulnerable)
+                KillUnit();
         }
 
         if (currentHealth > maxHealth)
