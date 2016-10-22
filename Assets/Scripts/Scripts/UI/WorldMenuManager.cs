@@ -59,7 +59,6 @@ public class WorldMenuManager : MonoBehaviour
         {
             launchButton.onClick.RemoveAllListeners();
             launchButton.onClick.AddListener(delegate { LoadLevel(parameter); });
-            ShowMenu(LoadoutMenu);
         }
 
         else
