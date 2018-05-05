@@ -61,12 +61,12 @@ public class PlayerUnitControl : MonoBehaviour
 
     UnitStats stats;								// Unit stat scripts for health assignment
     float timer;                                    // A timer between actions.
-    public NavMeshAgent agent;								// Nav Agent for moving character
+    public UnityEngine.AI.NavMeshAgent agent;								// Nav Agent for moving character
     PlayerMovement playerControl;					// Sets attack target based on priority
     RefactoredPlayerAction playerAction;						// Script containg player attacks
     bool targetInRange;								// Tracks when target enters and leaves range
     float originalStoppingDistance;					// Used to store preset agent stopping distance
-    NavMeshObstacle obstacle;						// Used to indicate other units to avoid this one
+    UnityEngine.AI.NavMeshObstacle obstacle;						// Used to indicate other units to avoid this one
     public Animation m_Animation;
     ParticleSystem[] m_ParticleSystem;
     Rigidbody m_RigidBody;
@@ -99,11 +99,11 @@ public class PlayerUnitControl : MonoBehaviour
 
     void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
+        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
         playerControl = GetComponent<PlayerMovement>();
         playerAction = GetComponent<RefactoredPlayerAction>();
         stats = GetComponent<UnitStats>();
-        obstacle = GetComponent<NavMeshObstacle>();
+        obstacle = GetComponent<UnityEngine.AI.NavMeshObstacle>();
         m_Animation = GetComponentInChildren<Animation>();
         m_RigidBody = GetComponent<Rigidbody>();
         m_ParticleSystem = GetComponentsInChildren<ParticleSystem>();

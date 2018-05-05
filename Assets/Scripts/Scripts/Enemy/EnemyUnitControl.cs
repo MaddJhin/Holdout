@@ -31,8 +31,8 @@ public class EnemyUnitControl : MonoBehaviour
     #region Object & Component References
 
     // Component References
-    NavMeshAgent agent;
-    NavMeshObstacle obstacle;
+    UnityEngine.AI.NavMeshAgent agent;
+    UnityEngine.AI.NavMeshObstacle obstacle;
     Animation m_Animation;
     EnemyAttack enemyAttack;
     UnitStats stats;
@@ -65,8 +65,8 @@ public class EnemyUnitControl : MonoBehaviour
 
     void Awake()
     {
-        agent = GetComponent<NavMeshAgent>();
-        obstacle = GetComponent<NavMeshObstacle>();
+        agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
+        obstacle = GetComponent<UnityEngine.AI.NavMeshObstacle>();
         m_Animation = GetComponentInChildren<Animation>();
         enemyAttack = GetComponent<EnemyAttack>();
         stats = GetComponent<UnitStats>();

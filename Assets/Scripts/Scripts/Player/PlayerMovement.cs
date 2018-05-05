@@ -38,7 +38,7 @@ public class PlayerMovement : MonoBehaviour {
     [HideInInspector]
 	public float sightDistance = 10;
 
-	NavMeshAgent agent;
+	UnityEngine.AI.NavMeshAgent agent;
 	PlayerAction actionControl;
 	Animator m_Animator;
 	float m_TurnAmount;
@@ -55,7 +55,7 @@ public class PlayerMovement : MonoBehaviour {
 	
 	// Use this for initialization
 	void Start () {
-		agent = GetComponentInChildren<NavMeshAgent>();
+		agent = GetComponentInChildren<UnityEngine.AI.NavMeshAgent>();
 		m_Animator = GetComponent<Animator>();
 		actionControl = GetComponent<PlayerAction>();
 		targetBarricade = this.transform;
